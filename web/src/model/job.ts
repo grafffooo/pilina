@@ -31,6 +31,8 @@ export function missingPartFields(p: PartRow): Set<'length' | 'width' | 'qty'> {
 export function projectToJob(
   project: Project,
   materials: Material[] = [],
+  /** Library offcuts to use first (see `offcutStock`). */
+  offcuts: StockSpec[] = [],
   timeBudgetMs = 600,
 ): Job | null {
   const names = new Map(materials.map((m) => [m.id, m.name]));
@@ -60,7 +62,7 @@ export function projectToJob(
   if (parts.length === 0 || stock.length === 0) return null;
   return {
     parts,
-    stock,
+    stock: project.useOffcuts ? [...offcuts, ...stock] : stock,
     kerf: Math.max(0, project.kerf || 0),
     trim: Math.max(0, project.trim || 0),
     options: { timeBudgetMs, seed: 1234567 },

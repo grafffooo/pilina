@@ -5,6 +5,7 @@ import { useNow } from '../ui/hooks';
 import {
   CheckIcon,
   LogoIcon,
+  OffcutsIcon,
   PlusIcon,
   PriceIcon,
   SearchIcon,
@@ -48,6 +49,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const savedAt = useStore((s) => s.savedAt);
   const view = useStore((s) => s.view);
   const materialCount = useStore((s) => s.materials.length);
+  const offcutCount = useStore((s) => s.offcuts.filter((o) => o.status === 'available').length);
   const currency = useStore((s) => s.settings.currency);
   const [query, setQuery] = useState('');
   const now = useNow();
@@ -93,6 +95,20 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       >
         <PlusIcon size={16} />
         New project
+      </button>
+
+      <button
+        type="button"
+        className={styles.libraryLink}
+        aria-current={view === 'offcuts' || view === 'labels' ? 'page' : undefined}
+        onClick={() => {
+          useStore.getState().setView('offcuts');
+          onNavigate?.();
+        }}
+      >
+        <OffcutsIcon />
+        <span>Offcut library</span>
+        <span className={styles.count}>{offcutCount}</span>
       </button>
 
       <button

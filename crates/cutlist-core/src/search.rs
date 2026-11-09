@@ -26,6 +26,13 @@ pub(crate) struct Ctx<'a> {
     pub trim: f64,
 }
 
+impl Ctx<'_> {
+    /// Edge trim for a stock row. Library offcuts already have sawn edges, so they aren't trimmed.
+    pub fn trim_for(&self, stock: &Stock<'_>) -> f64 {
+        if stock.spec.offcut { 0.0 } else { self.trim }
+    }
+}
+
 #[derive(Clone)]
 pub(crate) struct PassSheet {
     pub built: Built,
@@ -60,8 +67,9 @@ fn pack_sheet_candidates(
     eligible: &[usize],
     mode: EvalMode,
 ) -> Vec<Candidate> {
-    let usable_w = stock.spec.width - 2.0 * ctx.trim;
-    let usable_h = stock.spec.length - 2.0 * ctx.trim;
+    let trim = ctx.trim_for(stock);
+    let usable_w = stock.spec.width - 2.0 * trim;
+    let usable_h = stock.spec.length - 2.0 * trim;
     if usable_w <= 0.0 || usable_h <= 0.0 {
         return Vec::new();
     }
@@ -207,7 +215,7 @@ impl Pass {
             &cand.frame_groups,
             &mut self.next_instance,
             ctx.kerf,
-            ctx.trim,
+            ctx.trim_for(&ctx.stocks[si]),
             cand.transposed,
         );
         for (fi, &g) in cand.frame_groups.iter().enumerate() {

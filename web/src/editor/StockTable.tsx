@@ -1,6 +1,14 @@
 import { stockIsComplete } from '../model/job';
 import { emptyStock, type Project } from '../model/project';
-import { addStock, duplicateStock, removeStock, updateStock, useStore } from '../store/store';
+import { matchingOffcuts } from '../model/offcut';
+import {
+  addStock,
+  duplicateStock,
+  removeStock,
+  updateProject,
+  updateStock,
+  useStore,
+} from '../store/store';
 import { MoreIcon, StarIcon } from '../ui/icons';
 import { NumberInput } from '../ui/NumberInput';
 import { Menu } from '../ui/Popover';
@@ -135,6 +143,38 @@ export function StockTable({ project }: { project: Project }) {
           </tbody>
         </table>
       </div>
+      <OffcutsFooter project={project} />
     </section>
+  );
+}
+
+function OffcutsFooter({ project }: { project: Project }) {
+  const offcuts = useStore((s) => s.offcuts);
+  const matching = matchingOffcuts(project, offcuts).length;
+  return (
+    <div className={styles.offcutFooter}>
+      <input
+        id="use-offcuts"
+        type="checkbox"
+        className={styles.checkbox}
+        checked={project.useOffcuts}
+        onChange={(e) => updateProject({ useOffcuts: e.target.checked })}
+      />
+      <label htmlFor="use-offcuts" className={styles.offcutText}>
+        <span className={styles.offcutTitle}>Use matching library offcuts first</span>
+        <span className={styles.cardMeta}>
+          {matching === 0
+            ? 'No offcuts in these materials are in the library yet.'
+            : `${matching} ${matching === 1 ? 'offcut' : 'offcuts'} in these materials ${matching === 1 ? 'is' : 'are'} available.`}
+        </span>
+      </label>
+      <button
+        type="button"
+        className={styles.addRow}
+        onClick={() => useStore.getState().setView('offcuts')}
+      >
+        Open library
+      </button>
+    </div>
   );
 }

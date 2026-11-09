@@ -2,7 +2,9 @@
 import { create } from 'zustand';
 import * as storage from '../db/db';
 import type { CostBreakdown, Job, Plan } from '../engine/types';
+import type { CutRecord } from '../model/cutRecord';
 import { emptyHistory, record, redo, undo, type History } from '../model/history';
+import { newOffcut, type Offcut } from '../model/offcut';
 import {
   DEFAULT_SETTINGS,
   linkLegacyStockLabels,
@@ -34,8 +36,8 @@ export interface ResultState {
 
 export type SaveState = 'saved' | 'pending' | 'error';
 
-/** Main area: the open project, or the material and price library. */
-export type MainView = 'project' | 'library';
+/** Main area: the open project, the material and price library, the offcut library or label printing. */
+export type MainView = 'project' | 'library' | 'offcuts' | 'labels';
 
 interface AppState {
   ready: boolean;
@@ -44,6 +46,9 @@ interface AppState {
   materials: Material[];
   edgeBands: EdgeBand[];
   settings: Settings;
+  offcuts: Offcut[];
+  /** Cut mode is open for the current plan. */
+  cutting: boolean;
   /** Cost of the current plan; `null` until priced. */
   cost: CostBreakdown | null;
   currentId: string | null;
@@ -67,6 +72,13 @@ interface AppState {
   setView(view: MainView): void;
   /** Edits the shared library (not part of a project's undo history). */
   editLibrary(fn: (lib: Library) => Library): void;
+  /** Adds offcuts, numbering them OC-0001, OC-0002, … in order. */
+  addOffcuts(items: (Partial<Offcut> & { length: number; width: number })[]): Offcut[];
+  updateOffcuts(ids: string[], patch: Partial<Offcut>): void;
+  removeOffcut(id: string): void;
+  setCutting(on: boolean): void;
+  /** Records a sheet as cut (for statistics); never blocks the workshop if saving fails. */
+  recordCut(record: CutRecord): void;
 }
 
 export interface Library {
@@ -80,6 +92,8 @@ const SAVE_DELAY_MS = 400;
 
 const dirty = new Set<string>();
 let libraryDirty = false;
+const offcutsChanged = new Set<string>();
+const offcutsRemoved = new Set<string>();
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 
 function readLast(): string | null {
@@ -112,20 +126,39 @@ export const useStore = create<AppState>()((set, get) => {
     clearTimeout(saveTimer);
     const ids = [...dirty];
     const lib = libraryDirty;
+    const changed = [...offcutsChanged];
+    const removed = [...offcutsRemoved];
     dirty.clear();
     libraryDirty = false;
-    const { projects, materials, edgeBands, settings } = get();
+    offcutsChanged.clear();
+    offcutsRemoved.clear();
+    const { projects, materials, edgeBands, settings, offcuts } = get();
     try {
       for (const id of ids) {
         const p = projects.find((x) => x.id === id);
         if (p) await storage.saveProject(p);
       }
       if (lib) await storage.saveLibrary(materials, edgeBands, settings);
-      if (dirty.size === 0 && !libraryDirty) set({ saveState: 'saved', savedAt: Date.now() });
+      if (changed.length || removed.length) {
+        await storage.saveOffcuts(
+          offcuts.filter((o) => changed.includes(o.id)),
+          removed,
+        );
+      }
+      if (
+        dirty.size === 0 &&
+        !libraryDirty &&
+        offcutsChanged.size === 0 &&
+        offcutsRemoved.size === 0
+      ) {
+        set({ saveState: 'saved', savedAt: Date.now() });
+      }
     } catch (e) {
       console.error('Saving failed', e);
       ids.forEach((id) => dirty.add(id));
       libraryDirty ||= lib;
+      changed.forEach((id) => offcutsChanged.add(id));
+      removed.forEach((id) => offcutsRemoved.add(id));
       set({ saveState: 'error' });
     }
   }
@@ -133,7 +166,9 @@ export const useStore = create<AppState>()((set, get) => {
   if (typeof window !== 'undefined') {
     // Don't lose the last keystrokes when the tab is closed or hidden.
     const flushNow = () => {
-      if (dirty.size > 0 || libraryDirty) void flush();
+      if (dirty.size > 0 || libraryDirty || offcutsChanged.size > 0 || offcutsRemoved.size > 0) {
+        void flush();
+      }
     };
     window.addEventListener('pagehide', flushNow);
     document.addEventListener('visibilitychange', () => {
@@ -147,6 +182,12 @@ export const useStore = create<AppState>()((set, get) => {
 
   let initOnce: Promise<void> | undefined;
 
+  function scheduleOffcutSave() {
+    set({ saveState: 'pending' });
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => void flush(), SAVE_DELAY_MS);
+  }
+
   function scheduleLibrarySave() {
     libraryDirty = true;
     set({ saveState: 'pending' });
@@ -155,7 +196,11 @@ export const useStore = create<AppState>()((set, get) => {
   }
 
   async function load() {
-    const [raw, library] = await Promise.all([storage.loadRawProjects(), storage.loadLibrary()]);
+    const [raw, library, offcuts] = await Promise.all([
+      storage.loadRawProjects(),
+      storage.loadLibrary(),
+      storage.loadOffcuts(),
+    ]);
     let { materials } = library;
     const { edgeBands, settings } = library;
 
@@ -183,7 +228,7 @@ export const useStore = create<AppState>()((set, get) => {
 
     const last = readLast();
     const current = projects.find((p) => p.id === last) ?? projects[0]!;
-    set({ projects, materials, edgeBands, settings, ready: true, savedAt: Date.now() });
+    set({ projects, materials, edgeBands, settings, offcuts, ready: true, savedAt: Date.now() });
     open(current.id);
   }
 
@@ -195,6 +240,7 @@ export const useStore = create<AppState>()((set, get) => {
       result: emptyResult,
       cost: null,
       view: 'project',
+      cutting: false,
     });
   }
 
@@ -205,6 +251,8 @@ export const useStore = create<AppState>()((set, get) => {
     materials: [],
     edgeBands: [],
     settings: DEFAULT_SETTINGS,
+    offcuts: [],
+    cutting: false,
     cost: null,
     currentId: null,
     history: emptyHistory(),
@@ -322,6 +370,47 @@ export const useStore = create<AppState>()((set, get) => {
 
     setView(view) {
       set({ view });
+    },
+
+    addOffcuts(items) {
+      const { settings } = get();
+      let n = settings.nextOffcutNumber;
+      const created = items.map(({ length, width, ...fields }) =>
+        newOffcut(n++, { length, width }, fields),
+      );
+      set((s) => ({
+        offcuts: [...s.offcuts, ...created],
+        settings: { ...s.settings, nextOffcutNumber: n },
+      }));
+      created.forEach((o) => offcutsChanged.add(o.id));
+      libraryDirty = true;
+      scheduleOffcutSave();
+      return created;
+    },
+
+    updateOffcuts(ids, patch) {
+      set((s) => ({
+        offcuts: s.offcuts.map((o) => (ids.includes(o.id) ? { ...o, ...patch } : o)),
+      }));
+      ids.forEach((id) => offcutsChanged.add(id));
+      scheduleOffcutSave();
+    },
+
+    removeOffcut(id) {
+      set((s) => ({ offcuts: s.offcuts.filter((o) => o.id !== id) }));
+      offcutsChanged.delete(id);
+      offcutsRemoved.add(id);
+      scheduleOffcutSave();
+    },
+
+    setCutting(cutting) {
+      set({ cutting });
+    },
+
+    recordCut(rec) {
+      storage
+        .addCutRecord(rec)
+        .catch((e: unknown) => console.error('Could not save the cut record', e));
     },
 
     editLibrary(fn) {

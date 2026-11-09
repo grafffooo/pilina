@@ -10,6 +10,7 @@ import { ChevronLeftIcon, ChevronRightIcon, MinusIcon, PlusIcon, WarningIcon } f
 import ui from '../ui/ui.module.css';
 import { CostCard } from './CostCard';
 import { ExportPdfButton } from './ExportPdfButton';
+import { StartCuttingButton } from '../cutting/StartCuttingButton';
 import { usePartInfo, type PartInfo } from './partInfo';
 import { SheetDrawing } from './SheetDrawing';
 import styles from './Results.module.css';
@@ -23,6 +24,7 @@ export function Results({ project }: { project: Project }) {
         <h2 id="results-h">Results</h2>
         <span className={styles.spacer} />
         <ExportPdfButton />
+        <StartCuttingButton />
       </div>
       {!plan || !job ? (
         <EmptyResults running={status === 'running'} />

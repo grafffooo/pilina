@@ -2,6 +2,7 @@
 import { useEffect, useMemo } from 'react';
 import { CANCELLED, optimize } from '../engine/client';
 import { jobKey, projectToJob, usedPercent } from '../model/job';
+import { matchingOffcuts, offcutStock } from '../model/offcut';
 import { useCurrentProject, useStore } from '../store/store';
 import { useView } from '../store/view';
 
@@ -15,12 +16,21 @@ export function useOptimizer() {
   const kerf = project?.kerf;
   const trim = project?.trim;
   const materials = useStore((s) => s.materials);
+  const library = useStore((s) => s.offcuts);
+  const useOffcuts = project?.useOffcuts;
 
   // Only the fields that change the cut; renaming a project doesn't re-run the engine.
   const job = useMemo(
-    () => (project ? projectToJob(project, materials) : null),
+    () =>
+      project
+        ? projectToJob(
+            project,
+            materials,
+            offcutStock(matchingOffcuts(project, library), materials),
+          )
+        : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [id, parts, stock, kerf, trim, materials],
+    [id, parts, stock, kerf, trim, materials, library, useOffcuts],
   );
   const key = jobKey(job);
 

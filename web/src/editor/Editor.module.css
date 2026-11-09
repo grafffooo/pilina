@@ -473,3 +473,24 @@
     grid-template-columns: minmax(0, 1fr) 48px 12px 72px 32px;
   }
 }
+
+.offcutFooter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.offcutText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.offcutTitle {
+  font-weight: 600;
+}

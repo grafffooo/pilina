@@ -107,7 +107,9 @@ fn check(job: &Job, plan: &Plan) -> Result<(), String> {
             .iter()
             .find(|s| s.id == sheet.stock_id)
             .ok_or("unknown stock")?;
-        let (t, w, l) = (job.trim, sheet.width, sheet.length);
+        // Library offcuts already have sawn edges and aren't trimmed.
+        let t = if stock.offcut { 0.0 } else { job.trim };
+        let (w, l) = (sheet.width, sheet.length);
         if sheet.qty == 0 {
             return Err(format!("sheet {si} has qty 0"));
         }

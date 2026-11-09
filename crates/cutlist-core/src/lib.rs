@@ -402,6 +402,37 @@ mod tests {
     }
 
     #[test]
+    fn offcuts_are_not_edge_trimmed() {
+        let mut job = skrinky();
+        job.trim = 10.0;
+        job.parts = vec![PartSpec {
+            id: "fits".into(),
+            length: 900.0,
+            width: 320.0,
+            qty: 1,
+            label: String::new(),
+            grain: Grain::None,
+            material: None,
+            edges: Edges::default(),
+        }];
+        // Exactly the part's size: only usable because offcuts skip the trim.
+        job.stock.push(StockSpec {
+            id: "off".into(),
+            length: 900.0,
+            width: 320.0,
+            qty: Some(1),
+            priority: false,
+            offcut: true,
+            material: None,
+            label: String::new(),
+        });
+        let plan = optimize(&job);
+        assert_eq!(plan.sheets[0].stock_id, "off");
+        assert!(plan.sheets[0].cuts.is_empty(), "no trim cuts on an offcut");
+        assert_eq!(plan.sheets[0].placements[0].rect.x, 0.0);
+    }
+
+    #[test]
     fn identical_sheets_are_merged() {
         let mut job = skrinky();
         job.parts = vec![PartSpec {

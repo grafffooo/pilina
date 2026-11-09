@@ -1,6 +1,8 @@
 // IndexedDB storage (local only). Bump the Dexie version and add an upgrade when the schema changes.
 import Dexie, { type EntityTable } from 'dexie';
 import { DEFAULT_SETTINGS, type EdgeBand, type Material, type Settings } from '../model/library';
+import type { CutRecord } from '../model/cutRecord';
+import type { Offcut } from '../model/offcut';
 import type { Project } from '../model/project';
 
 interface SettingsRow extends Settings {
@@ -12,12 +14,16 @@ class CutListDb extends Dexie {
   materials!: EntityTable<Material, 'id'>;
   edgeBands!: EntityTable<EdgeBand, 'id'>;
   settings!: EntityTable<SettingsRow, 'key'>;
+  offcuts!: EntityTable<Offcut, 'id'>;
+  cutRecords!: EntityTable<CutRecord, 'id'>;
 
   constructor(name = 'cutlist') {
     super(name);
     this.version(1).stores({ projects: 'id, updatedAt' });
     // v2: material and edge-band library, app settings.
     this.version(2).stores({ materials: 'id', edgeBands: 'id', settings: 'key' });
+    // v3: offcut library and cut history.
+    this.version(3).stores({ offcuts: 'id, code, status', cutRecords: 'id, at, projectId' });
   }
 }
 
@@ -63,4 +69,19 @@ export async function saveLibrary(
     await db.edgeBands.bulkPut(edgeBands);
     await db.settings.put({ ...settings, key: 'app' });
   });
+}
+
+export async function loadOffcuts(): Promise<Offcut[]> {
+  return db.offcuts.toArray();
+}
+
+export async function saveOffcuts(changed: Offcut[], removedIds: string[]): Promise<void> {
+  await db.transaction('rw', db.offcuts, async () => {
+    if (changed.length) await db.offcuts.bulkPut(changed);
+    if (removedIds.length) await db.offcuts.bulkDelete(removedIds);
+  });
+}
+
+export async function addCutRecord(record: CutRecord): Promise<void> {
+  await db.cutRecords.put(record);
 }

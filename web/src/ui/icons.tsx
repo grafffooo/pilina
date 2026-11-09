@@ -135,3 +135,15 @@ export const DownloadIcon = (p: IconProps) => (
     <path d="M12 3v12M7 10l5 5 5-5M4 21h16" />
   </Icon>
 );
+export const OffcutsIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3" y="4" width="11" height="7" rx="1" />
+    <rect x="3" y="14" width="18" height="6" rx="1" />
+    <rect x="16" y="4" width="5" height="7" rx="1" />
+  </Icon>
+);
+export const PlayIcon = (p: IconProps) => (
+  <Icon fill="currentColor" stroke="none" {...p}>
+    <path d="M7 4v16l13-8z" />
+  </Icon>
+);

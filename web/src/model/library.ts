@@ -1,5 +1,5 @@
 // Materials, edge bands and app settings: shared by all projects, stored on this device.
-import type { PriceInput, StockPrice } from '../engine/types';
+import type { PriceInput, StockPrice, StockSpec } from '../engine/types';
 import { newId, type Project } from './project';
 
 export type PriceUnit = 'sheet' | 'sqm';
@@ -31,6 +31,14 @@ export interface Settings {
   /** Leftovers at least this big count as reusable offcuts (mm). */
   offcutMinLength: number;
   offcutMinWidth: number;
+  /** Number for the next offcut ID (OC-0001, OC-0002, …). */
+  nextOffcutNumber: number;
+  /** Storage places offered when keeping an offcut. */
+  locations: string[];
+  labelFormatId: string;
+  /** First free sticker on the partly used label sheet (1-based). */
+  labelStart: number;
+  labelShow: { material: boolean; location: boolean; source: boolean };
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -38,6 +46,11 @@ export const DEFAULT_SETTINGS: Settings = {
   edgeAllowance: 20,
   offcutMinLength: 300,
   offcutMinWidth: 100,
+  nextOffcutNumber: 1,
+  locations: ['Rack A', 'Rack B', 'Bin 1'],
+  labelFormatId: 'a4-3x8',
+  labelStart: 1,
+  labelShow: { material: true, location: true, source: true },
 };
 
 export const CURRENCIES = ['EUR', 'CZK', 'USD', 'GBP', 'PLN', 'HUF', 'CHF'];
@@ -105,6 +118,7 @@ export function buildPriceInput(
   materials: Material[],
   bands: EdgeBand[],
   settings: Settings,
+  offcutStock: StockSpec[] = [],
 ): PriceInput {
   const mat = new Map(materials.map((m) => [m.id, m]));
   const band = new Map(bands.map((b) => [b.id, b]));
@@ -113,11 +127,18 @@ export function buildPriceInput(
     wastePct: project.pricing.wastePct,
     offcutCredit: project.pricing.offcutCredit,
     offcutRule: { minLength: settings.offcutMinLength, minWidth: settings.offcutMinWidth },
-    stock: project.stock
-      .filter((s) => s.length && s.width)
-      .map((s) =>
-        stockPrice(s.id, s.length!, s.width!, s.materialId ? mat.get(s.materialId) : undefined),
-      ),
+    stock: [
+      ...project.stock
+        .filter((s) => s.length && s.width)
+        .map((s) =>
+          stockPrice(s.id, s.length!, s.width!, s.materialId ? mat.get(s.materialId) : undefined),
+        ),
+      // Library offcuts are free (paid for earlier) but grouped under their material.
+      ...offcutStock.map((s) => ({
+        stockId: s.id,
+        material: (s.material && mat.get(s.material)?.name) || 'Unnamed material',
+      })),
+    ],
     edgeBands: project.parts.map((p) => {
       const b = band.get(p.edgeBandId ?? project.defaultEdgeBandId ?? '');
       return { partId: p.id, band: b?.name ?? 'Edge band', perMetre: b?.pricePerMetre ?? null };

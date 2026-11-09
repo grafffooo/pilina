@@ -25,7 +25,8 @@ export function usePricing() {
       return;
     }
     let stale = false;
-    const input = buildPriceInput(project, materials, edgeBands, settings);
+    const offcutStock = job.stock.filter((s) => s.offcut);
+    const input = buildPriceInput(project, materials, edgeBands, settings, offcutStock);
     price(job, plan, input)
       .then((cost) => {
         if (stale) return;

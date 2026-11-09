@@ -126,7 +126,7 @@ Parts get a material field. The current app assumes a single material, but furni
 | 1 ✅ | **Rust engine:** port plus improvements, property tests, benchmarks, CLI, WASM build | Better than or equal to the JS engine on the test jobs; no overlaps across 10k random jobs |
 | 2 ✅ | **Web foundation:** design tokens, layout (desktop and phone), projects and IndexedDB, parts/stock editors, live optimizing in a worker, sheet drawing, cut list | You can enter "Skrinky do dielne" and see the correct layout |
 | 3 ✅ | **Materials, pricing, PDF** | Costs show in Results and the PDF; Slovak/Czech text prints correctly |
-| 4 | **Workshop flow:** cut mode, keep offcuts, offcut library, A4 QR labels, offcuts used first | The canvas flows work end to end; printed labels scan |
+| 4 ✅ | **Workshop flow:** cut mode, keep offcuts, offcut library, A4 QR labels, offcuts used first | The canvas flows work end to end; printed labels scan |
 | 5 | **Statistics, import, PWA, EN/SK/CS** | Installs, works offline, imports old projects |
 | 6 | **Later:** AR (WebXR), native apps through UniFFI, CNC nesting, more languages | Separate plans |
 
@@ -140,4 +140,7 @@ Each milestone ends with tests passing and a short demo in the browser.
 - **End-to-end tests (Playwright)** aren't set up yet; milestone 2 was checked by unit tests (model, store with an in-memory IndexedDB) and by hand in the browser at desktop, tablet and phone sizes. Worth adding before milestone 4's cut-mode flow.
 - **PDF size:** pdf-lib's font subsetting drops glyphs from the Inter TTFs, so both weights are embedded whole (~370 KB per PDF). Revisit if a fixed fontkit appears or with a different subsetter.
 - **Edge bands** are chosen per part (or the project default), not per edge; the plan's "type per edge" can come later if anyone needs mixed bands on one part.
+- **Cut mode positions** are measured from the sheet's left/top edge. Measuring from the edge of the piece being cut (what a panel saw fence needs) would be a useful option.
+- **Label printing** was checked on screen (layout in millimetres, QR codes decode with the browser's barcode reader); a real print on sticker sheets still needs a try, using the outline test page first. Custom sticker sizes aren't in yet.
+- **Scanning labels** works with a hardware scanner typing into the library search; scanning with the phone camera (BarcodeDetector) is a natural next step.
 - **Interface text** is English only and written inline; it moves to i18next in milestone 5.

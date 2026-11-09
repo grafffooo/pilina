@@ -1,7 +1,7 @@
 // The project as stored on this device. Sizes are millimetres; `null` means "not entered yet".
 import type { Edges, Grain } from '../engine/types';
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export interface PartRow {
   id: string;
@@ -67,6 +67,10 @@ export interface Project {
   stock: StockRow[];
   pricing: ProjectPricing;
   defaultEdgeBandId: string | null;
+  /** Use matching offcuts from the library before full sheets. */
+  useOffcuts: boolean;
+  /** When the last sheet was marked as cut in cut mode. */
+  cutAt: number | null;
   summary: ProjectSummary | null;
 }
 
@@ -141,6 +145,8 @@ export function newProject(
     ],
     pricing: { ...DEFAULT_PRICING, extras: [] },
     defaultEdgeBandId: null,
+    useOffcuts: true,
+    cutAt: null,
     summary: null,
   };
 }
@@ -173,6 +179,8 @@ export function migrate(stored: Partial<Project> & { id: string }): Project {
     }),
     pricing: { ...DEFAULT_PRICING, ...stored.pricing, extras: stored.pricing?.extras ?? [] },
     defaultEdgeBandId: stored.defaultEdgeBandId ?? null,
+    useOffcuts: stored.useOffcuts ?? true,
+    cutAt: stored.cutAt ?? null,
     summary: stored.summary ?? null,
   };
 }

@@ -39,12 +39,21 @@ export function SheetDrawing({
   sheet,
   parts,
   label,
+  cutStep,
 }: {
   sheet: SheetLayout;
   parts: Map<string, PartInfo>;
   label: string;
+  /** Cut mode: highlight this cut, dim the ones before it, and ignore the view toggles. */
+  cutStep?: number;
 }) {
-  const { activeCut, showCuts, showSizes, showEdges, setActiveCut } = useView();
+  const view = useView();
+  const controlled = cutStep !== undefined;
+  const activeCut = controlled ? cutStep : view.activeCut;
+  const showCuts = controlled || view.showCuts;
+  const showSizes = controlled || view.showSizes;
+  const showEdges = !controlled && view.showEdges;
+  const setActiveCut = controlled ? () => {} : view.setActiveCut;
   const hatchId = useId();
   const w = sheet.width;
   const l = sheet.length;
@@ -124,8 +133,9 @@ export function SheetDrawing({
         sheet.cuts.map((c) => {
           const rip = isRipLike(c);
           const active = c.number === activeCut;
+          const done = controlled && c.number < activeCut!;
           return (
-            <g key={c.number}>
+            <g key={c.number} opacity={done ? 0.3 : 1}>
               {active && (
                 <line
                   x1={c.x1}

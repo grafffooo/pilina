@@ -1,0 +1,435 @@
+/* Full-screen, big targets: used at the saw, often with gloves or dusty hands. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.headerButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-2);
+}
+
+.headerButton:hover {
+  background: var(--chip);
+}
+
+.headerText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.headerTitle {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.headerSub {
+  font-size: 12px;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progress {
+  height: 4px;
+  background: var(--chip);
+}
+
+.progress div {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s ease;
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.cutBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  overflow: auto;
+}
+
+.cutCard {
+  flex: 1 1 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  align-self: flex-start;
+}
+
+.kindRip,
+.kindCross {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.kindNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  font-size: 14px;
+}
+
+.kindRip .kindNumber {
+  background: var(--cut-rip);
+  color: #1b2029;
+}
+
+.kindCross .kindNumber {
+  background: var(--cut-cross);
+  color: #fff;
+}
+
+.position {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.positionLabel {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.positionValue {
+  font-size: 64px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.unit {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-3);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.facts div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.facts span {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.drawing {
+  flex: 1 1 320px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--paper);
+}
+
+.drawing svg {
+  max-height: calc(100dvh - 220px);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.actions > button {
+  height: 56px;
+  font-size: 15px;
+}
+
+.back {
+  flex: 0 0 110px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font-weight: 600;
+}
+
+.back:disabled {
+  opacity: 0.4;
+}
+
+.primary {
+  flex: 1;
+  border: 0;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+
+.primary:disabled {
+  opacity: 0.45;
+}
+
+.actions > :global(button):not(.back):not(.primary) {
+  flex: 0 0 110px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* Keep offcuts */
+
+.keepBody {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.keepTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.keepHint {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.keepLabel {
+  margin: 0 0 8px;
+  font-weight: 600;
+  display: block;
+}
+
+.keepPieces {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.mini {
+  flex: none;
+  width: 110px;
+  height: auto;
+}
+
+.keepList {
+  flex: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.keepItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.keepItem input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--accent);
+}
+
+.keepItem > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.keepSize {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.tag,
+.tagGood {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.tagGood {
+  color: var(--ok-text);
+  font-weight: 600;
+}
+
+.places {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.places button {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 500;
+}
+
+.places button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.switchRow > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.switchRow .keepLabel {
+  margin: 0;
+}
+
+.switchRow input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--accent);
+}
+
+/* Finished */
+
+.finished {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+}
+
+.bigCheck {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 36px;
+  background: var(--ok-bg);
+  color: var(--ok-text);
+}
+
+.finishedTitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 8px 0 0;
+}
+
+@media (max-width: 767px) {
+  .cutBody {
+    flex-direction: column;
+    padding: 12px;
+  }
+
+  .cutCard {
+    align-self: stretch;
+    padding: 16px;
+  }
+
+  .positionValue {
+    font-size: 54px;
+  }
+
+  .drawing svg {
+    max-height: 40dvh;
+  }
+}
+
+.startLarge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 52px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.startLarge:disabled {
+  opacity: 0.45;
+}

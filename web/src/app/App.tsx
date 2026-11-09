@@ -15,6 +15,10 @@ import { CostCard } from '../results/CostCard';
 import { ExportPdfButton } from '../results/ExportPdfButton';
 import { PricingCard } from '../editor/PricingCard';
 import { LibraryScreen } from '../library/LibraryScreen';
+import { CutMode } from '../cutting/CutMode';
+import { StartCuttingButton } from '../cutting/StartCuttingButton';
+import { LabelPrint } from '../offcuts/LabelPrint';
+import { OffcutLibrary } from '../offcuts/OffcutLibrary';
 import { useCurrentProject, useStore } from '../store/store';
 import { useMediaQuery } from '../ui/hooks';
 import { CloseIcon, MenuIcon, PartsIcon, SawIcon, SheetIcon } from '../ui/icons';
@@ -39,6 +43,7 @@ export function App() {
       .catch((e: unknown) => console.error('Could not open the project database', e));
   }, []);
   const view = useStore((s) => s.view);
+  const cutting = useStore((s) => s.cutting);
   useOptimizer();
   usePricing();
   useUndoShortcuts();
@@ -51,10 +56,16 @@ export function App() {
 
   return (
     <>
-      {view === 'library' ? (
+      {view !== 'project' ? (
         <div className={styles.desktop}>
           {wide && <Sidebar />}
-          <LibraryScreen onMenu={wide ? undefined : () => setDrawer(true)} />
+          {view === 'library' && (
+            <LibraryScreen onMenu={wide ? undefined : () => setDrawer(true)} />
+          )}
+          {view === 'offcuts' && (
+            <OffcutLibrary onMenu={wide ? undefined : () => setDrawer(true)} />
+          )}
+          {view === 'labels' && <LabelPrint onMenu={wide ? undefined : () => setDrawer(true)} />}
         </div>
       ) : phone ? (
         <PhoneLayout project={project} onMenu={() => setDrawer(true)} />
@@ -73,6 +84,7 @@ export function App() {
         </div>
       )}
       {drawer && !wide && <Drawer onClose={() => setDrawer(false)} />}
+      {cutting && <CutMode />}
     </>
   );
 }
@@ -123,6 +135,7 @@ function PhoneLayout({ project, onMenu }: { project: Project; onMenu: () => void
         {tab === 'cut' &&
           (plan && plan.sheets.length > 0 ? (
             <>
+              <StartCuttingButton large />
               <SheetPager plan={plan} />
               <CutOrder plan={plan} title={false} fullHeight />
             </>

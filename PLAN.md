@@ -1,6 +1,6 @@
-# CutList Next: rebuild plan
+# Pilina: plan
 
-A ground-up rebuild of CutList Optimizer. The existing apps (`index.html`, `CutListOptimizerApp`, `CutListOptimizerApp-i18n`) are not part of this project. This project lives in `~/Developer/cutlist-next` and in a private GitHub repository (see [README](README.md#repository)).
+Pilina started as a ground-up rebuild of CutList Optimizer. The existing apps (`index.html`, `CutListOptimizerApp`, `CutListOptimizerApp-i18n`) are not part of this project. This project lives in `~/Developer/pilina` and in a private GitHub repository (see [README](README.md#repository)).
 
 ## Goals
 
@@ -15,7 +15,7 @@ A ground-up rebuild of CutList Optimizer. The existing apps (`index.html`, `CutL
 
 | Topic | Decision |
 |---|---|
-| Data | **Local only.** Each device keeps its own data in IndexedDB. Share by file (`.cutlist` JSON, plus `.md` the old app can read), a linked folder (Chromium desktop), the phone's share sheet, or a link/QR code holding a small project. No server. |
+| Data | **Local only.** Each device keeps its own data in IndexedDB. Share by file (`.pilina.json`, plus `.md` the old app can read), a linked folder (Chromium desktop), the phone's share sheet, or a link/QR code holding a small project. No server. |
 | Pricing | **Chosen per project:** whole sheets, or area used plus a waste %. Kept offcuts can be credited back. Edge banding is priced per metre. |
 | Cut modes | **Guillotine first** (table saw / panel saw). The engine's API leaves room for a CNC nesting mode later. |
 | Languages | **English, Slovak and Czech** at launch, with translations set up from day one. The other 41 come later from the old translation files. |
@@ -24,18 +24,18 @@ A ground-up rebuild of CutList Optimizer. The existing apps (`index.html`, `CutL
 ## Architecture
 
 ```
-cutlist-next/
+pilina/
 ├─ crates/
-│  ├─ cutlist-core/   Rust: data types, optimizer, pricing, statistics. Pure functions, no I/O.
-│  ├─ cutlist-wasm/   wasm-bindgen wrapper → npm package the web app imports
-│  ├─ cutlist-cli/    command line: optimize a project file, run benchmarks
-│  └─ cutlist-ffi/    (later) UniFFI wrapper → Kotlin (Android) and Swift (iOS)
+│  ├─ pilina-core/   Rust: data types, optimizer, pricing, statistics. Pure functions, no I/O.
+│  ├─ pilina-wasm/   wasm-bindgen wrapper → npm package the web app imports
+│  ├─ pilina-cli/    command line: optimize a project file, run benchmarks
+│  └─ pilina-ffi/    (later) UniFFI wrapper → Kotlin (Android) and Swift (iOS)
 ├─ web/               the PWA (TypeScript)
 ├─ desktop/           Tauri shell: the web app as a Mac app
 └─ docs/
 ```
 
-### 1. Rust core (`cutlist-core`)
+### 1. Rust core (`pilina-core`)
 
 - **Input/output:** plain data that converts to JSON: `Job { parts, stock, offcuts, kerf, trim, options }` produces `Plan { sheets, cuts, offcutsProduced, unplaced, totals }`. All sizes are in millimetres, and every sheet's layout uses that sheet's own coordinates, so the same data can drive the SVG drawing, the PDF and AR.
 - **Optimizer:** a `Packer` interface with `GuillotinePacker` in version 1. It starts as a port of the improved JS engine:
@@ -64,7 +64,7 @@ cutlist-next/
 | Styling | CSS custom properties copied from the canvas tokens, plus CSS modules | Themes and accent switching come straight from the design. |
 | State | Zustand | Small, simple, works well with a worker. |
 | Storage | IndexedDB via Dexie, with a versioned schema and migrations | Local only, larger than localStorage, survives offline. |
-| Engine | `cutlist-wasm` in a Web Worker via Comlink | Typed calls, the interface stays responsive. |
+| Engine | `pilina-wasm` in a Web Worker via Comlink | Typed calls, the interface stays responsive. |
 | Sheet drawing | SVG components | Sharp at any zoom, prints, accessible. |
 | PDF | `pdf-lib` with an embedded Inter font subset | Fixes the "?" problem with Slovak/Czech characters in the old PDF. |
 | Labels | Print stylesheet in millimetre units for A4 sticker sheets, plus the `qrcode` library | Exact positions on the stickers; the QR holds identifying text only. |
@@ -135,7 +135,6 @@ Each milestone ends with tests passing and a short demo in the browser.
 
 ## Still open (not blocking)
 
-- **Folder name** `cutlist-next` is a working title.
 - **Engine speed on big jobs:** about 10 ms per greedy pass for 40 part types (≈12,000 strip simulations), so very large jobs get fewer lookahead passes within the budget. Fine for furniture; revisit if needed.
 - **TypeScript types** are kept in sync with `model.rs` by hand; generating them (e.g. `ts-rs`) once the model settles.
 - **End-to-end tests (Playwright)** aren't set up yet; milestone 2 was checked by unit tests (model, store with an in-memory IndexedDB) and by hand in the browser at desktop, tablet and phone sizes. Worth adding before milestone 4's cut-mode flow.
@@ -146,4 +145,4 @@ Each milestone ends with tests passing and a short demo in the browser.
 - **Scanning labels** works with a hardware scanner typing into the library search; scanning with the phone camera (BarcodeDetector) is a natural next step.
 - **Interface languages:** English, Slovak and Czech via i18next, with English sentences as keys. `src/i18n/i18n.test.ts` fails if a Slovak or Czech translation (or a plural form) is missing, so new text can't slip through untranslated. More languages: add a JSON file and one line in `LANGUAGES`.
 - **Offline install** is checked from the build (manifest, PNG/maskable icons, every needed file precached, navigation fallback), but the built-in browser pane can't register service workers and no Chromium browser is installed here. Still to do by hand: open the production build in Safari (File → Add to Dock) or Chrome, go offline, and reload.
-- **Import:** old `.md` exports, the old app's browser storage (read directly when served from the same address, otherwise pasted), and this app's `.cutlist.json` project files. Old project folders synced with "Link folder" are imported by selecting all their `.md` files.
+- **Import:** old `.md` exports, the old app's browser storage (read directly when served from the same address, otherwise pasted), and this app's `.pilina.json` (and older `.cutlist.json`) project files. Old project folders synced with "Link folder" are imported by selecting all their `.md` files.

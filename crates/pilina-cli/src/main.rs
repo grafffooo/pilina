@@ -1,11 +1,11 @@
-//! `cutlist [--stats] [job.json]` prints the optimized plan as JSON. Reads stdin when no
+//! `pilina [--stats] [job.json]` prints the optimized plan as JSON. Reads stdin when no
 //! file is given. `--stats` prints a one-line summary to stderr instead of the plan.
 
 use std::io::Read;
 use std::process::ExitCode;
 use std::time::Instant;
 
-use cutlist_core::{Control, Progress};
+use pilina_core::{Control, Progress};
 
 struct Clock {
     start: Instant,
@@ -29,7 +29,7 @@ fn main() -> ExitCode {
     for arg in std::env::args().skip(1) {
         match arg.as_str() {
             "--version" => {
-                println!("cutlist {}", cutlist_core::version());
+                println!("pilina {}", pilina_core::version());
                 return ExitCode::SUCCESS;
             }
             "--stats" => stats = true,
@@ -55,7 +55,7 @@ fn main() -> ExitCode {
         }
     };
 
-    let job: cutlist_core::Job = match serde_json::from_str(&input) {
+    let job: pilina_core::Job = match serde_json::from_str(&input) {
         Ok(job) => job,
         Err(e) => {
             eprintln!("invalid job JSON: {e}");
@@ -67,7 +67,7 @@ fn main() -> ExitCode {
         start: Instant::now(),
         last: None,
     };
-    let plan = cutlist_core::optimize_with(&job, &mut clock);
+    let plan = pilina_core::optimize_with(&job, &mut clock);
 
     if stats {
         let t = &plan.totals;

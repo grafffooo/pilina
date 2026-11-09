@@ -1,5 +1,5 @@
 // Moving projects in and out: the old CutList (.md files or its browser storage) and
-// this app's own project files for sharing (.cutlist.json).
+// this app's own project files for sharing (.pilina.json; older exports are .cutlist.json).
 import type { Edges, Grain } from '../engine/types';
 import { linkLegacyStockLabels, type EdgeBand, type Material } from './library';
 import {
@@ -205,6 +205,7 @@ export function parseOldStorage(json: string): OldProject[] {
 
 // ---- This app's project files ----
 
+// Kept from before the rename to Pilina, so older project files still import.
 export const FILE_FORMAT = 'cutlist-project';
 export const FILE_VERSION = 1;
 

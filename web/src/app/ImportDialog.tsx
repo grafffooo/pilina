@@ -1,4 +1,4 @@
-// Brings projects in: old CutList .md files or browser storage, and shared .cutlist.json files.
+// Brings projects in: old CutList .md files or browser storage, and shared .pilina.json files (older .cutlist.json too).
 import { useEffect, useRef, useState, type DragEvent } from 'react';
 import {
   OLD_STORAGE_KEY,
@@ -166,7 +166,7 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
           <span className={styles.dropTitle}>{t('Drop files here, or click to choose')}</span>
           <span className={styles.dropHint}>
             {t(
-              'Old CutList .md exports (select many at once), or .cutlist.json project files shared from this app.',
+              'Old CutList .md exports (select many at once), or .pilina.json project files shared from this app.',
             )}
           </span>
         </label>

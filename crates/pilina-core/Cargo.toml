@@ -1,5 +1,5 @@
 [package]
-name = "cutlist-core"
+name = "pilina-core"
 description = "Sheet-goods cut optimizer: data model, guillotine packing, pricing and statistics."
 version.workspace = true
 edition.workspace = true

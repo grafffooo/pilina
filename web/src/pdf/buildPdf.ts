@@ -96,8 +96,8 @@ export async function buildPdf(input: PdfInput, fonts: PdfFonts): Promise<Uint8A
   const regular = await doc.embedFont(fonts.regular, { subset: false });
   const bold = await doc.embedFont(fonts.semibold, { subset: false });
   doc.setTitle(input.project.name || tr('Cutting plan'));
-  doc.setCreator('CutList');
-  doc.setProducer('CutList');
+  doc.setCreator('Pilina');
+  doc.setProducer('Pilina');
 
   const ctx: Ctx = {
     doc,

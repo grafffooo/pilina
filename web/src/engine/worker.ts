@@ -4,7 +4,7 @@ import init, {
   optimize as wasmOptimize,
   price as wasmPrice,
   version as wasmVersion,
-} from './pkg/cutlist.js';
+} from './pkg/pilina.js';
 import type { CostBreakdown, Job, Plan, PriceInput, Progress } from './types';
 
 const ready = init();

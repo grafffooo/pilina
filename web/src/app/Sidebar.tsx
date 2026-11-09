@@ -81,7 +81,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     <aside className={styles.sidebar} aria-label={t('Projects')}>
       <div className={styles.brand}>
         <LogoIcon />
-        <span className={styles.brandName}>CutList</span>
+        <span className={styles.brandName}>Pilina</span>
         <span className={styles.spacer} />
         <AppearanceMenu />
       </div>

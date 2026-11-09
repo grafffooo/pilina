@@ -1,6 +1,6 @@
 [package]
-name = "cutlist-desktop"
-description = "CutList as a standalone Mac app (Tauri shell around the web app)."
+name = "pilina-desktop"
+description = "Pilina as a standalone Mac app (Tauri shell around the web app)."
 version.workspace = true
 edition.workspace = true
 license.workspace = true

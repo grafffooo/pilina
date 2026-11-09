@@ -1,15 +1,15 @@
 [package]
-name = "cutlist-cli"
-description = "Command-line runner for cutlist-core: optimize a job file and print the plan."
+name = "pilina-cli"
+description = "Command-line runner for pilina-core: optimize a job file and print the plan."
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
 
 [[bin]]
-name = "cutlist"
+name = "pilina"
 path = "src/main.rs"
 
 [dependencies]
-cutlist-core.workspace = true
+pilina-core.workspace = true
 serde_json.workspace = true

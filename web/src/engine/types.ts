@@ -1,4 +1,4 @@
-// TypeScript mirror of crates/cutlist-core/src/model.rs (JSON uses camelCase).
+// TypeScript mirror of crates/pilina-core/src/model.rs (JSON uses camelCase).
 // Keep in sync by hand (see `model.rs` for field docs).
 
 export type Grain = 'none' | 'length' | 'width';
@@ -116,7 +116,7 @@ export interface Plan {
   totals: Totals;
 }
 
-// ---- Pricing (crates/cutlist-core/src/pricing.rs) ----
+// ---- Pricing (crates/pilina-core/src/pricing.rs) ----
 
 export type PricingMode = 'sheets' | 'area';
 

@@ -62,8 +62,8 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
                 const file = exportProjectFile(project, materials, edgeBands);
                 void downloadBlob(
                   new Blob([JSON.stringify(file, null, 2)], { type: 'application/json' }),
-                  `${fileSlug(project.name)}.cutlist.json`,
-                  { name: t('CutList project'), extensions: ['json'] },
+                  `${fileSlug(project.name)}.pilina.json`,
+                  { name: t('Pilina project'), extensions: ['json'] },
                 );
               },
             },

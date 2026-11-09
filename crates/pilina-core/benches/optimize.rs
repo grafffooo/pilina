@@ -1,8 +1,8 @@
-//! `cargo bench -p cutlist-core`. Runs without a clock, so each benchmark does a fixed
+//! `cargo bench -p pilina-core`. Runs without a clock, so each benchmark does a fixed
 //! amount of work (the search stops when it stops improving).
 
 use criterion::{Criterion, criterion_group, criterion_main};
-use cutlist_core::{Job, NoClock, optimize_with};
+use pilina_core::{Job, NoClock, optimize_with};
 use std::hint::black_box;
 
 fn job(json: &str) -> Job {

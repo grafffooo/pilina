@@ -1,4 +1,4 @@
-//! CutList core: the cut optimizer and related calculations.
+//! Pilina core: the cut optimizer and related calculations.
 //!
 //! [`optimize`] packs parts onto stock sheets with a 3-stage guillotine model (see
 //! `pack.rs`), so every layout can be cut on a panel saw. It runs many greedy passes with

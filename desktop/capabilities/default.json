@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "What the CutList window may do: save files the user picks in a save dialog.",
+  "description": "What the Pilina window may do: save files the user picks in a save dialog.",
   "windows": ["main"],
   "permissions": [
     "core:default",

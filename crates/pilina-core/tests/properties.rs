@@ -1,6 +1,6 @@
 //! Property tests: every plan for a random job must be physically cuttable and complete.
 
-use cutlist_core::*;
+use pilina_core::*;
 use proptest::prelude::*;
 
 const EPS: f64 = 0.011; // coordinates are rounded to 0.01 mm

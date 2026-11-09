@@ -1,10 +1,10 @@
 {
-  "name": "cutlist-web",
+  "name": "pilina-web",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "engine": "wasm-pack build ../crates/cutlist-wasm --target web --release --out-dir ../../web/src/engine/pkg --out-name cutlist",
+    "engine": "wasm-pack build ../crates/pilina-wasm --target web --release --out-dir ../../web/src/engine/pkg --out-name pilina",
     "dev": "npm run engine && vite",
     "build": "npm run engine && npm run typecheck && vite build",
     "preview": "vite preview",

@@ -21,8 +21,8 @@ export function PwaNotices() {
     <div className={styles.toast} role="status">
       <span>
         {needRefresh
-          ? t('A new version of CutList is ready.')
-          : t('CutList now works offline. Your projects stay on this device.')}
+          ? t('A new version of Pilina is ready.')
+          : t('Pilina now works offline. Your projects stay on this device.')}
       </span>
       {needRefresh ? (
         <button
@@ -80,7 +80,7 @@ export function InstallButton({ className }: { className?: string }) {
         setEvent(null);
       }}
     >
-      {t('Install CutList as an app')}
+      {t('Install Pilina as an app')}
     </button>
   );
 }

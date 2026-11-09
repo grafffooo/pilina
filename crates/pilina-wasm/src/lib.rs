@@ -1,12 +1,12 @@
-//! Thin wasm-bindgen layer: JS objects in, JS objects out. All logic lives in `cutlist-core`.
+//! Thin wasm-bindgen layer: JS objects in, JS objects out. All logic lives in `pilina-core`.
 
-use cutlist_core::{Control, Progress};
+use pilina_core::{Control, Progress};
 use wasm_bindgen::prelude::*;
 
 /// Engine version string.
 #[wasm_bindgen]
 pub fn version() -> String {
-    cutlist_core::version().to_string()
+    pilina_core::version().to_string()
 }
 
 /// Uses the JS clock (wasm has no system clock) and forwards progress to an optional callback.
@@ -42,12 +42,12 @@ impl Control for JsControl {
 /// `{ passes, bestSheets, bestUnplaced, elapsedMs }`.
 #[wasm_bindgen]
 pub fn optimize(job: JsValue, on_progress: Option<js_sys::Function>) -> Result<JsValue, JsError> {
-    let job: cutlist_core::Job = serde_wasm_bindgen::from_value(job)?;
+    let job: pilina_core::Job = serde_wasm_bindgen::from_value(job)?;
     let mut control = JsControl {
         start: js_sys::Date::now(),
         on_progress,
     };
-    let plan = cutlist_core::optimize_with(&job, &mut control);
+    let plan = pilina_core::optimize_with(&job, &mut control);
     let serializer = serde_wasm_bindgen::Serializer::json_compatible();
     Ok(serde::Serialize::serialize(&plan, &serializer)?)
 }
@@ -56,10 +56,10 @@ pub fn optimize(job: JsValue, on_progress: Option<js_sys::Function>) -> Result<J
 /// and `PriceInput`; returns a `CostBreakdown`.
 #[wasm_bindgen]
 pub fn price(job: JsValue, plan: JsValue, input: JsValue) -> Result<JsValue, JsError> {
-    let job: cutlist_core::Job = serde_wasm_bindgen::from_value(job)?;
-    let plan: cutlist_core::Plan = serde_wasm_bindgen::from_value(plan)?;
-    let input: cutlist_core::PriceInput = serde_wasm_bindgen::from_value(input)?;
-    let cost = cutlist_core::price(&job, &plan, &input);
+    let job: pilina_core::Job = serde_wasm_bindgen::from_value(job)?;
+    let plan: pilina_core::Plan = serde_wasm_bindgen::from_value(plan)?;
+    let input: pilina_core::PriceInput = serde_wasm_bindgen::from_value(input)?;
+    let cost = pilina_core::price(&job, &plan, &input);
     let serializer = serde_wasm_bindgen::Serializer::json_compatible();
     Ok(serde::Serialize::serialize(&cost, &serializer)?)
 }

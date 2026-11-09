@@ -9,7 +9,7 @@ interface SettingsRow extends Settings {
   key: 'app';
 }
 
-class CutListDb extends Dexie {
+class PilinaDb extends Dexie {
   projects!: EntityTable<Project, 'id'>;
   materials!: EntityTable<Material, 'id'>;
   edgeBands!: EntityTable<EdgeBand, 'id'>;
@@ -17,6 +17,7 @@ class CutListDb extends Dexie {
   offcuts!: EntityTable<Offcut, 'id'>;
   cutRecords!: EntityTable<CutRecord, 'id'>;
 
+  // The database keeps its pre-rename name ('cutlist') so saved projects stay where they are.
   constructor(name = 'cutlist') {
     super(name);
     this.version(1).stores({ projects: 'id, updatedAt' });
@@ -27,7 +28,7 @@ class CutListDb extends Dexie {
   }
 }
 
-export const db = new CutListDb();
+export const db = new PilinaDb();
 
 /** Raw records: the store migrates them (see `migrate` and `linkLegacyStockLabels`). */
 export async function loadRawProjects(): Promise<(Partial<Project> & { id: string })[]> {

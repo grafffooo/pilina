@@ -1,4 +1,4 @@
-// Where the app runs: a normal browser (PWA) or the CutList Mac app (Tauri).
+// Where the app runs: a normal browser (PWA) or the Pilina Mac app (Tauri).
 
 /** True inside the Mac app, where Tauri provides native dialogs and printing. */
 export function isDesktopApp(): boolean {

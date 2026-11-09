@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'CutList',
-        short_name: 'CutList',
+        name: 'Pilina',
+        short_name: 'Pilina',
         description: 'Plan sheet-goods cuts, track offcuts and material costs.',
         theme_color: '#127A6E',
         background_color: '#F5F6F8',

@@ -669,46 +669,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "914a755b7c2d4af2bdcff7ce1739e2db9a1b81a9b07123d8015786ae03c0980d"
 
 [[package]]
-name = "cutlist-cli"
-version = "0.1.0"
-dependencies = [
- "cutlist-core",
- "serde_json",
-]
-
-[[package]]
-name = "cutlist-core"
-version = "0.1.0"
-dependencies = [
- "criterion",
- "proptest",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "cutlist-desktop"
-version = "0.1.0"
-dependencies = [
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "tauri-plugin-fs",
-]
-
-[[package]]
-name = "cutlist-wasm"
-version = "0.1.0"
-dependencies = [
- "cutlist-core",
- "js-sys",
- "serde",
- "serde-wasm-bindgen",
- "wasm-bindgen",
-]
-
-[[package]]
 name = "darling"
 version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2470,6 +2430,46 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e57fef6bc5981e38c2ce2d63bfa546861309f875b8a75f092d1d54ae2d64f266"
 dependencies = [
  "siphasher",
+]
+
+[[package]]
+name = "pilina-cli"
+version = "0.1.0"
+dependencies = [
+ "pilina-core",
+ "serde_json",
+]
+
+[[package]]
+name = "pilina-core"
+version = "0.1.0"
+dependencies = [
+ "criterion",
+ "proptest",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "pilina-desktop"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "tauri-plugin-fs",
+]
+
+[[package]]
+name = "pilina-wasm"
+version = "0.1.0"
+dependencies = [
+ "js-sys",
+ "pilina-core",
+ "serde",
+ "serde-wasm-bindgen",
+ "wasm-bindgen",
 ]
 
 [[package]]

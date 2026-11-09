@@ -10,10 +10,24 @@ web/                  React + TypeScript + Vite PWA
 desktop/              Tauri shell: the web app as a standalone Mac app
 ```
 
+## Repository
+
+- **Working copy:** `~/Developer/cutlist-next` on the Mac. Keep it out of the iCloud-synced Desktop and Documents folders: iCloud sync and git repositories don't mix well, and an earlier copy in Documents was lost that way.
+- **Remote:** private GitHub repository [`grafffooo/cutlist-next`](https://github.com/grafffooo/cutlist-next) (`origin`). Push after every commit, so GitHub always holds a full copy.
+- **History:** the commits for milestones 0–5 were rebuilt on 9 Nov 2026 from Claude Code's session log after the original folder was lost. Content and messages match the originals; commit IDs differ.
+
+To set up on another Mac:
+
+```bash
+git clone https://github.com/grafffooo/cutlist-next.git ~/Developer/cutlist-next
+cd ~/Developer/cutlist-next/web && npm install && npm run dev
+```
+
 ## Prerequisites
 
 - Rust (stable) with the `wasm32-unknown-unknown` target, plus `wasm-pack`
 - Node.js 22+
+- For the Mac app: Xcode Command Line Tools (`xcode-select --install`)
 
 ## Commands
 

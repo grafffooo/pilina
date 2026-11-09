@@ -1,6 +1,6 @@
 # CutList Next: rebuild plan
 
-A ground-up rebuild of CutList Optimizer. The existing apps (`index.html`, `CutListOptimizerApp`, `CutListOptimizerApp-i18n`) stay untouched next to this folder.
+A ground-up rebuild of CutList Optimizer. The existing apps (`index.html`, `CutListOptimizerApp`, `CutListOptimizerApp-i18n`) are not part of this project. This project lives in `~/Developer/cutlist-next` and in a private GitHub repository (see [README](README.md#repository)).
 
 ## Goals
 
@@ -31,6 +31,7 @@ cutlist-next/
 │  ├─ cutlist-cli/    command line: optimize a project file, run benchmarks
 │  └─ cutlist-ffi/    (later) UniFFI wrapper → Kotlin (Android) and Swift (iOS)
 ├─ web/               the PWA (TypeScript)
+├─ desktop/           Tauri shell: the web app as a Mac app
 └─ docs/
 ```
 

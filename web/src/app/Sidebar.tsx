@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { formatNumber } from '../lib/format';
 import { formatMoney } from '../model/library';
 import { useNow } from '../ui/hooks';
@@ -14,21 +15,13 @@ import {
   SettingsIcon,
   WarningIcon,
 } from '../ui/icons';
-import { Popover } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import { useStore } from '../store/store';
 import { ImportDialog } from './ImportDialog';
 import { isDesktopApp } from '../lib/platform';
 import { InstallButton } from './Pwa';
-import {
-  LANGUAGES,
-  loadLanguageChoice,
-  locale,
-  setLanguageChoice,
-  t as i18nT,
-  type LanguageChoice,
-} from '../i18n';
-import { loadAppearance, saveAppearance, type Theme } from './appearance';
+import { locale, t as i18nT } from '../i18n';
+import { SettingsDialog } from './SettingsDialog';
 import styles from './Sidebar.module.css';
 import { useTranslation } from 'react-i18next';
 
@@ -84,7 +77,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <LogoIcon />
         <span className={styles.brandName}>Pilina</span>
         <span className={styles.spacer} />
-        <AppearanceMenu />
+        <SettingsButton />
       </div>
 
       <label className={styles.search}>
@@ -198,7 +191,8 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </button>
         {!isDesktopApp() && <InstallButton className={styles.libraryLink} />}
       </div>
-      {importing && <ImportDialog onClose={() => setImporting(false)} />}
+      {importing &&
+        createPortal(<ImportDialog onClose={() => setImporting(false)} />, document.body)}
 
       <div className={styles.saveState} role="status">
         {saveState === 'error' ? (
@@ -223,57 +217,21 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function AppearanceMenu() {
+function SettingsButton() {
   const { t } = useTranslation();
-  const [appearance, setAppearance] = useState(loadAppearance);
-  const [language, setLanguage] = useState(loadLanguageChoice);
-  const update = (patch: Partial<{ theme: Theme }>) => {
-    const next = { ...appearance, ...patch };
-    setAppearance(next);
-    saveAppearance(next);
-  };
+  const [open, setOpen] = useState(false);
   return (
-    <Popover
-      label={<SettingsIcon />}
-      ariaLabel={t('Settings')}
-      triggerClassName={ui.iconButton}
-      align="end"
-    >
-      {() => (
-        <div className={styles.appearance}>
-          <span className={styles.appearanceLabel}>{t('Language')}</span>
-          <select
-            className={ui.fieldInput}
-            aria-label={t('Language')}
-            value={language}
-            onChange={(e) => {
-              const choice = e.target.value as LanguageChoice;
-              setLanguage(choice);
-              setLanguageChoice(choice);
-            }}
-          >
-            <option value="auto">{t('Same as this device')}</option>
-            {LANGUAGES.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
-          <span className={styles.appearanceLabel}>{t('Theme')}</span>
-          <div className={ui.segmented} role="group" aria-label={t('Theme')}>
-            {(['system', 'light', 'dark'] as const).map((th) => (
-              <button
-                key={th}
-                type="button"
-                aria-pressed={appearance.theme === th}
-                onClick={() => update({ theme: th })}
-              >
-                {th === 'system' ? t('Auto') : th === 'light' ? t('Light') : t('Dark')}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </Popover>
+    <>
+      <button
+        type="button"
+        className={ui.iconButton}
+        aria-label={t('Settings')}
+        aria-haspopup="dialog"
+        onClick={() => setOpen(true)}
+      >
+        <SettingsIcon />
+      </button>
+      {open && createPortal(<SettingsDialog onClose={() => setOpen(false)} />, document.body)}
+    </>
   );
 }

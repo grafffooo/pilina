@@ -527,5 +527,8 @@
   "… and {{count}} more cuts (numbered on the drawing)_other": "… a ešte {{count}} rezov (očíslované na výkrese)",
   "Full screen": "Celá obrazovka",
   "Exit full screen": "Zavrieť celú obrazovku",
-  "Sheet in full screen": "Doska na celej obrazovke"
+  "Sheet in full screen": "Doska na celej obrazovke",
+  "This device": "Toto zariadenie",
+  "Workshop": "Dielňa",
+  "Done": "Hotovo"
 }

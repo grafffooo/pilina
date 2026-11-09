@@ -1,5 +1,4 @@
 // Materials & prices: the board and edge-band library shared by every project.
-import { CURRENCIES, formatMoney } from '../model/library';
 import {
   addEdgeBand,
   addMaterial,
@@ -7,7 +6,6 @@ import {
   removeMaterial,
   updateEdgeBand,
   updateMaterial,
-  updateSettings,
   useStore,
 } from '../store/store';
 import { MenuIcon, MoreIcon } from '../ui/icons';
@@ -293,59 +291,6 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
               ))}
             </tbody>
           </table>
-        </div>
-      </section>
-
-      <section className={editor.card} aria-labelledby="settings-h">
-        <div className={editor.cardHeader}>
-          <h2 id="settings-h">{t('Settings')}</h2>
-        </div>
-        <div className={editor.form}>
-          <label className={editor.formRow}>
-            <span className={editor.formLabel}>{t('Currency')}</span>
-            <select
-              className={ui.fieldInput}
-              value={settings.currency}
-              onChange={(e) => updateSettings({ currency: e.target.value })}
-            >
-              {CURRENCIES.map((c) => (
-                <option key={c} value={c}>
-                  {c} ({formatMoney(1234.5, c)})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={editor.formRow}>
-            <span className={editor.formLabel}>{t('Edge band allowance')}</span>
-            <span className={editor.inline}>
-              <NumberInput
-                className={`${ui.fieldInput} ${editor.shortInput}`}
-                value={settings.edgeAllowance}
-                onCommit={(v) => updateSettings({ edgeAllowance: Math.max(0, v ?? 0) })}
-              />
-              {t('mm extra per banded edge')}
-            </span>
-          </label>
-          <div className={editor.formRow}>
-            <span className={editor.formLabel}>{t('Reusable leftover')}</span>
-            <span className={editor.inline}>
-              {t('at least')}
-              <NumberInput
-                className={`${ui.fieldInput} ${editor.shortInput}`}
-                aria-label={t('Minimum leftover length, mm')}
-                value={settings.offcutMinLength}
-                onCommit={(v) => updateSettings({ offcutMinLength: Math.max(0, v ?? 0) })}
-              />
-              ×
-              <NumberInput
-                className={`${ui.fieldInput} ${editor.shortInput}`}
-                aria-label={t('Minimum leftover width, mm')}
-                value={settings.offcutMinWidth}
-                onCommit={(v) => updateSettings({ offcutMinWidth: Math.max(0, v ?? 0) })}
-              />
-              mm
-            </span>
-          </div>
         </div>
       </section>
     </div>

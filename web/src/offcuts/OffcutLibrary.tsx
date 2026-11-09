@@ -5,6 +5,7 @@ import type { Offcut, OffcutStatus } from '../model/offcut';
 import { useStore } from '../store/store';
 import { MenuIcon, MoreIcon, PlusIcon, SearchIcon } from '../ui/icons';
 import { NumberInput } from '../ui/NumberInput';
+import { ComboInput } from '../ui/ComboInput';
 import { confirmDialog } from '../ui/dialogs';
 import { Menu, Popover } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
@@ -20,11 +21,24 @@ const statusText = (s: OffcutStatus) =>
 
 const dateFormat = () => new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'short' });
 
+/** Places to offer: the saved ones, then any other place an offcut is stored in. */
+function usePlaces(): string[] {
+  const saved = useStore((s) => s.settings.locations);
+  const offcuts = useStore((s) => s.offcuts);
+  return useMemo(() => {
+    const seen = new Set(saved.map((l) => l.toLowerCase()));
+    const extra = [...new Set(offcuts.map((o) => o.location.trim()).filter(Boolean))]
+      .filter((l) => !seen.has(l.toLowerCase()))
+      .sort((a, b) => a.localeCompare(b));
+    return [...saved, ...extra];
+  }, [saved, offcuts]);
+}
+
 export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
   const { t } = useTranslation();
   const offcuts = useStore((s) => s.offcuts);
   const materials = useStore((s) => s.materials);
-  const settings = useStore((s) => s.settings);
+  const places = usePlaces();
   const { updateOffcuts, removeOffcut, setView } = useStore.getState();
 
   const [query, setQuery] = useState('');
@@ -244,13 +258,13 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
                     </span>
                   </td>
                   <td>
-                    <input
+                    <ComboInput
                       className={`${editor.cell} ${editor.cellText} ${styles.place}`}
                       aria-label={t('Place of {{code}}', { code: o.code })}
-                      list="offcut-places"
+                      options={places}
                       placeholder="—"
                       value={o.location}
-                      onChange={(e) => updateOffcuts([o.id], { location: e.target.value })}
+                      onChange={(location) => updateOffcuts([o.id], { location })}
                     />
                   </td>
                   <td className={styles.added}>{dateFormat().format(o.createdAt)}</td>
@@ -324,11 +338,6 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
           </table>
         </div>
       </section>
-      <datalist id="offcut-places">
-        {settings.locations.map((l) => (
-          <option key={l} value={l} />
-        ))}
-      </datalist>
     </div>
   );
 }
@@ -354,6 +363,7 @@ function Shape({ offcut, color }: { offcut: Offcut; color: string }) {
 
 /** "Add offcut" form for leftovers that didn't come from a cut in this app. */
 function AddOffcut() {
+  const places = usePlaces();
   const { t } = useTranslation();
   const [length, setLength] = useState<number | null>(null);
   const [width, setWidth] = useState<number | null>(null);
@@ -410,13 +420,13 @@ function AddOffcut() {
             ariaLabel={t('Material')}
             onChange={setMaterialId}
           />
-          <input
+          <ComboInput
             className={ui.fieldInput}
             aria-label={t('Place')}
             placeholder={t('Place, e.g. Rack A')}
-            list="offcut-places"
+            options={places}
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            onChange={setLocation}
           />
           <button type="submit" className={ui.buttonPrimary} disabled={!ok}>
             {t('Add and queue its label')}

@@ -1,6 +1,7 @@
 // Edge banding per part: top/bottom are the long (length) edges, left/right the short ones.
 import type { Edges } from '../engine/types';
 import { ALL_EDGES, NO_EDGES } from '../model/project';
+import { useCurrentProject, useStore } from '../store/store';
 import { Popover } from '../ui/Popover';
 import styles from './Editor.module.css';
 
@@ -37,12 +38,20 @@ export function EdgeGlyph({ edges, size = 18 }: { edges: Edges; size?: number })
 export function EdgePicker({
   edges,
   partName,
+  bandId,
   onChange,
+  onBandChange,
 }: {
   edges: Edges;
   partName: string;
+  /** This part's band; `null` = the project's default. */
+  bandId: string | null;
   onChange: (e: Edges) => void;
+  onBandChange: (id: string | null) => void;
 }) {
+  const bands = useStore((s) => s.edgeBands);
+  const defaultId = useCurrentProject()?.defaultEdgeBandId ?? null;
+  const defaultName = bands.find((b) => b.id === defaultId)?.name;
   return (
     <Popover
       triggerClassName={styles.edgeButton}
@@ -71,6 +80,23 @@ export function EdgePicker({
               None
             </button>
           </div>
+          {bands.length > 0 && (
+            <label className={styles.edgeBand}>
+              Band
+              <select
+                className={styles.select}
+                value={bandId ?? ''}
+                onChange={(e) => onBandChange(e.target.value || null)}
+              >
+                <option value="">Project default{defaultName ? ` (${defaultName})` : ''}</option>
+                {bands.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
         </fieldset>
       )}
     </Popover>

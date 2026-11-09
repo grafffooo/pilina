@@ -14,12 +14,13 @@ export function useOptimizer() {
   const stock = project?.stock;
   const kerf = project?.kerf;
   const trim = project?.trim;
+  const materials = useStore((s) => s.materials);
 
   // Only the fields that change the cut; renaming a project doesn't re-run the engine.
   const job = useMemo(
-    () => (project ? projectToJob(project) : null),
+    () => (project ? projectToJob(project, materials) : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [id, parts, stock, kerf, trim],
+    [id, parts, stock, kerf, trim, materials],
   );
   const key = jobKey(job);
 

@@ -1,9 +1,19 @@
 // App state: projects (saved to IndexedDB), undo history of the open project, and its results.
 import { create } from 'zustand';
 import * as storage from '../db/db';
-import type { Job, Plan } from '../engine/types';
+import type { CostBreakdown, Job, Plan } from '../engine/types';
 import { emptyHistory, record, redo, undo, type History } from '../model/history';
 import {
+  DEFAULT_SETTINGS,
+  linkLegacyStockLabels,
+  newEdgeBand,
+  newMaterial,
+  type EdgeBand,
+  type Material,
+  type Settings,
+} from '../model/library';
+import {
+  migrate,
   newId,
   newProject,
   type PartRow,
@@ -24,9 +34,18 @@ export interface ResultState {
 
 export type SaveState = 'saved' | 'pending' | 'error';
 
+/** Main area: the open project, or the material and price library. */
+export type MainView = 'project' | 'library';
+
 interface AppState {
   ready: boolean;
+  view: MainView;
   projects: Project[];
+  materials: Material[];
+  edgeBands: EdgeBand[];
+  settings: Settings;
+  /** Cost of the current plan; `null` until priced. */
+  cost: CostBreakdown | null;
   currentId: string | null;
   history: History<Project>;
   saveState: SaveState;
@@ -43,13 +62,24 @@ interface AppState {
   undo(): void;
   redo(): void;
   setResult(result: Partial<ResultState>): void;
-  setSummary(id: string, summary: ProjectSummary): void;
+  setSummary(id: string, summary: Partial<ProjectSummary>): void;
+  setCost(cost: CostBreakdown | null): void;
+  setView(view: MainView): void;
+  /** Edits the shared library (not part of a project's undo history). */
+  editLibrary(fn: (lib: Library) => Library): void;
+}
+
+export interface Library {
+  materials: Material[];
+  edgeBands: EdgeBand[];
+  settings: Settings;
 }
 
 const LAST_PROJECT = 'cutlist.currentProject';
 const SAVE_DELAY_MS = 400;
 
 const dirty = new Set<string>();
+let libraryDirty = false;
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 
 function readLast(): string | null {
@@ -81,17 +111,21 @@ export const useStore = create<AppState>()((set, get) => {
   async function flush() {
     clearTimeout(saveTimer);
     const ids = [...dirty];
+    const lib = libraryDirty;
     dirty.clear();
-    const { projects } = get();
+    libraryDirty = false;
+    const { projects, materials, edgeBands, settings } = get();
     try {
       for (const id of ids) {
         const p = projects.find((x) => x.id === id);
         if (p) await storage.saveProject(p);
       }
-      if (dirty.size === 0) set({ saveState: 'saved', savedAt: Date.now() });
+      if (lib) await storage.saveLibrary(materials, edgeBands, settings);
+      if (dirty.size === 0 && !libraryDirty) set({ saveState: 'saved', savedAt: Date.now() });
     } catch (e) {
       console.error('Saving failed', e);
       ids.forEach((id) => dirty.add(id));
+      libraryDirty ||= lib;
       set({ saveState: 'error' });
     }
   }
@@ -99,7 +133,7 @@ export const useStore = create<AppState>()((set, get) => {
   if (typeof window !== 'undefined') {
     // Don't lose the last keystrokes when the tab is closed or hidden.
     const flushNow = () => {
-      if (dirty.size > 0) void flush();
+      if (dirty.size > 0 || libraryDirty) void flush();
     };
     window.addEventListener('pagehide', flushNow);
     document.addEventListener('visibilitychange', () => {
@@ -113,27 +147,65 @@ export const useStore = create<AppState>()((set, get) => {
 
   let initOnce: Promise<void> | undefined;
 
+  function scheduleLibrarySave() {
+    libraryDirty = true;
+    set({ saveState: 'pending' });
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => void flush(), SAVE_DELAY_MS);
+  }
+
   async function load() {
-    let projects = await storage.loadProjects();
+    const [raw, library] = await Promise.all([storage.loadRawProjects(), storage.loadLibrary()]);
+    let { materials } = library;
+    const { edgeBands, settings } = library;
+
+    // Older projects named their stock with free text: turn those names into materials.
+    const created = linkLegacyStockLabels(raw, materials);
+    let projects = raw.map(migrate);
+    const outdated = raw.some((r) => r.schema !== projects[0]?.schema);
+
     if (projects.length === 0) {
-      const first = newProject();
-      await storage.saveProject(first);
-      projects = [first];
+      const board = materials[0] ?? newMaterial('Chipboard 18mm');
+      if (!materials[0]) {
+        board.sheetLength = 2800;
+        board.sheetWidth = 2070;
+        created.push(board);
+      }
+      projects = [newProject(undefined, undefined, board.id)];
+      await storage.saveProject(projects[0]!);
+    } else if (outdated || created.length > 0) {
+      await Promise.all(projects.map((p) => storage.saveProject(p)));
     }
+    if (created.length > 0) {
+      materials = [...materials, ...created];
+      await storage.saveLibrary(materials, edgeBands, settings);
+    }
+
     const last = readLast();
     const current = projects.find((p) => p.id === last) ?? projects[0]!;
-    set({ projects, ready: true, savedAt: Date.now() });
+    set({ projects, materials, edgeBands, settings, ready: true, savedAt: Date.now() });
     open(current.id);
   }
 
   function open(id: string) {
     writeLast(id);
-    set({ currentId: id, history: emptyHistory(), result: emptyResult });
+    set({
+      currentId: id,
+      history: emptyHistory(),
+      result: emptyResult,
+      cost: null,
+      view: 'project',
+    });
   }
 
   return {
     ready: false,
+    view: 'project',
     projects: [],
+    materials: [],
+    edgeBands: [],
+    settings: DEFAULT_SETTINGS,
+    cost: null,
     currentId: null,
     history: emptyHistory(),
     saveState: 'saved',
@@ -151,7 +223,11 @@ export const useStore = create<AppState>()((set, get) => {
     },
 
     createProject() {
-      const p = newProject();
+      // Start on the board the open project uses, or the first material.
+      const { projects, currentId, materials } = get();
+      const active = projects.find((x) => x.id === currentId);
+      const board = active?.stock.find((s) => s.materialId)?.materialId ?? materials[0]?.id ?? null;
+      const p = newProject(undefined, undefined, board);
       set((s) => ({ projects: [p, ...s.projects] }));
       scheduleSave(p.id);
       open(p.id);
@@ -222,20 +298,37 @@ export const useStore = create<AppState>()((set, get) => {
       set((s) => ({ result: { ...s.result, ...result } }));
     },
 
-    setSummary(id, summary) {
+    setSummary(id, patch) {
       const p = get().projects.find((x) => x.id === id);
       if (!p) return;
-      const old = p.summary;
+      const old = p.summary ?? { pieces: 0, sheets: 0, usedPct: 0, cost: null };
+      const next = { ...old, ...patch };
       if (
-        old &&
-        old.pieces === summary.pieces &&
-        old.sheets === summary.sheets &&
-        Math.round(old.usedPct) === Math.round(summary.usedPct)
+        p.summary &&
+        old.pieces === next.pieces &&
+        old.sheets === next.sheets &&
+        Math.round(old.usedPct) === Math.round(next.usedPct) &&
+        (old.cost ?? null) === (next.cost ?? null)
       ) {
         return;
       }
-      replace({ ...p, summary });
+      replace({ ...p, summary: next });
       scheduleSave(id);
+    },
+
+    setCost(cost) {
+      set({ cost });
+    },
+
+    setView(view) {
+      set({ view });
+    },
+
+    editLibrary(fn) {
+      const { materials, edgeBands, settings } = get();
+      const next = fn({ materials, edgeBands, settings });
+      set(next);
+      scheduleLibrarySave();
     },
   };
 });
@@ -305,4 +398,54 @@ export function duplicateStock(id: string) {
     stock.splice(i + 1, 0, { ...structuredClone(p.stock[i]!), id: newId() });
     return { ...p, stock };
   });
+}
+
+// ---- Library helpers ----
+
+const editLibrary = (fn: (lib: Library) => Library) => useStore.getState().editLibrary(fn);
+
+export function addMaterial(name: string, sheet?: { length: number; width: number }): Material {
+  const m = newMaterial(name, useStore.getState().materials.length);
+  if (sheet) {
+    m.sheetLength = sheet.length;
+    m.sheetWidth = sheet.width;
+  }
+  editLibrary((l) => ({ ...l, materials: [...l.materials, m] }));
+  return m;
+}
+
+export function updateMaterial(id: string, patch: Partial<Material>) {
+  editLibrary((l) => ({
+    ...l,
+    materials: l.materials.map((m) => (m.id === id ? { ...m, ...patch } : m)),
+  }));
+}
+
+export function removeMaterial(id: string) {
+  editLibrary((l) => ({ ...l, materials: l.materials.filter((m) => m.id !== id) }));
+}
+
+export function addEdgeBand(): EdgeBand {
+  const b = newEdgeBand(useStore.getState().edgeBands.length === 0 ? 'ABS 2 mm' : 'New edge band');
+  editLibrary((l) => ({ ...l, edgeBands: [...l.edgeBands, b] }));
+  return b;
+}
+
+export function updateEdgeBand(id: string, patch: Partial<EdgeBand>) {
+  editLibrary((l) => ({
+    ...l,
+    edgeBands: l.edgeBands.map((b) => (b.id === id ? { ...b, ...patch } : b)),
+  }));
+}
+
+export function removeEdgeBand(id: string) {
+  editLibrary((l) => ({ ...l, edgeBands: l.edgeBands.filter((b) => b.id !== id) }));
+}
+
+export function updateSettings(patch: Partial<Settings>) {
+  editLibrary((l) => ({ ...l, settings: { ...l.settings, ...patch } }));
+}
+
+export function updatePricing(patch: Partial<Project['pricing']>, key: string | null = null) {
+  edit((p) => ({ ...p, pricing: { ...p.pricing, ...patch } }), key);
 }

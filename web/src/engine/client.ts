@@ -2,7 +2,7 @@
 // running by restarting the worker, so results never lag behind the latest edit.
 import * as Comlink from 'comlink';
 import type { EngineApi } from './worker';
-import type { Job, Plan, Progress } from './types';
+import type { CostBreakdown, Job, Plan, PriceInput, Progress } from './types';
 
 let worker: Worker;
 let api: Comlink.Remote<EngineApi>;
@@ -43,4 +43,15 @@ export async function optimize(
   } finally {
     if (running === token) running = null;
   }
+}
+
+// Pricing runs on its own worker, which is never restarted, so a new optimization can't
+// cancel it.
+let pricer: Comlink.Remote<EngineApi> | undefined;
+
+export function price(job: Job, plan: Plan, input: PriceInput): Promise<CostBreakdown> {
+  pricer ??= Comlink.wrap<EngineApi>(
+    new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' }),
+  );
+  return pricer.price(job, plan, input);
 }

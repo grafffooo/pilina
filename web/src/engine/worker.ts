@@ -1,7 +1,11 @@
 // Runs the Rust engine (WebAssembly) off the main thread so long optimizations never freeze the UI.
 import * as Comlink from 'comlink';
-import init, { optimize as wasmOptimize, version as wasmVersion } from './pkg/cutlist.js';
-import type { Job, Plan, Progress } from './types';
+import init, {
+  optimize as wasmOptimize,
+  price as wasmPrice,
+  version as wasmVersion,
+} from './pkg/cutlist.js';
+import type { CostBreakdown, Job, Plan, PriceInput, Progress } from './types';
 
 const ready = init();
 
@@ -19,6 +23,10 @@ const api = {
     // The proxied callback is async, so its return value can't stop the search.
     const report = onProgress ? (p: Progress) => void onProgress(p) : undefined;
     return wasmOptimize(job, report) as Plan;
+  },
+  async price(job: Job, plan: Plan, input: PriceInput): Promise<CostBreakdown> {
+    await ready;
+    return wasmPrice(job, plan, input) as CostBreakdown;
   },
 };
 

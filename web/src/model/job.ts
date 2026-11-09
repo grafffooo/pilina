@@ -1,5 +1,6 @@
 // Project → engine job, plus checks the editor uses to flag incomplete rows.
 import type { Job, PartSpec, Plan, StockSpec } from '../engine/types';
+import type { Material } from './library';
 import type { PartRow, Project, StockRow } from './project';
 
 const positive = (v: number | null): v is number => v !== null && Number.isFinite(v) && v > 0;
@@ -23,8 +24,16 @@ export function missingPartFields(p: PartRow): Set<'length' | 'width' | 'qty'> {
   return missing;
 }
 
-/** Builds the engine job, or `null` when there is nothing to optimize yet. */
-export function projectToJob(project: Project, timeBudgetMs = 600): Job | null {
+/**
+ * Builds the engine job, or `null` when there is nothing to optimize yet. Material ids are
+ * the engine's material keys, so a part with a material only goes on that material's stock.
+ */
+export function projectToJob(
+  project: Project,
+  materials: Material[] = [],
+  timeBudgetMs = 600,
+): Job | null {
+  const names = new Map(materials.map((m) => [m.id, m.name]));
   const parts: PartSpec[] = project.parts
     .filter((p) => p.enabled && partIsComplete(p))
     .map((p) => ({
@@ -35,6 +44,7 @@ export function projectToJob(project: Project, timeBudgetMs = 600): Job | null {
       label: p.label,
       grain: p.grain,
       edges: p.edges,
+      material: p.materialId,
     }));
   const stock: StockSpec[] = project.stock
     .filter((s) => s.enabled && stockIsComplete(s))
@@ -44,7 +54,8 @@ export function projectToJob(project: Project, timeBudgetMs = 600): Job | null {
       width: s.width!,
       qty: s.qty === null ? null : Math.floor(s.qty),
       priority: s.priority,
-      label: s.label,
+      material: s.materialId,
+      label: (s.materialId && names.get(s.materialId)) || '',
     }));
   if (parts.length === 0 || stock.length === 0) return null;
   return {

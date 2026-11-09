@@ -1,13 +1,16 @@
 import { stockIsComplete } from '../model/job';
 import { emptyStock, type Project } from '../model/project';
-import { addStock, duplicateStock, removeStock, updateStock } from '../store/store';
+import { addStock, duplicateStock, removeStock, updateStock, useStore } from '../store/store';
 import { MoreIcon, StarIcon } from '../ui/icons';
 import { NumberInput } from '../ui/NumberInput';
 import { Menu } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
+import { MaterialSelect } from './MaterialSelect';
 import styles from './Editor.module.css';
 
 export function StockTable({ project }: { project: Project }) {
+  const materials = useStore((s) => s.materials);
+  const nameOf = (id: string | null) => materials.find((m) => m.id === id)?.name;
   return (
     <section className={styles.card} aria-labelledby="stock-h">
       <div className={styles.cardHeader}>
@@ -50,12 +53,12 @@ export function StockTable({ project }: { project: Project }) {
           </thead>
           <tbody>
             {project.stock.map((s, i) => {
-              const name = s.label || `Sheet ${i + 1}`;
+              const name = nameOf(s.materialId) || `Sheet ${i + 1}`;
               const started = s.length !== null || s.width !== null;
               const bad = started && !stockIsComplete(s);
               return (
                 <tr key={s.id} className={s.enabled ? undefined : styles.disabledRow}>
-                  <td className={styles.colCheck}>
+                  <td className={`${styles.colCheck} ${styles.cCheck}`}>
                     <input
                       type="checkbox"
                       checked={s.enabled}
@@ -63,7 +66,7 @@ export function StockTable({ project }: { project: Project }) {
                       onChange={(e) => updateStock(s.id, { enabled: e.target.checked })}
                     />
                   </td>
-                  <td>
+                  <td className={styles.cLength}>
                     <NumberInput
                       className={styles.cell}
                       aria-label={`Length, ${name}`}
@@ -74,7 +77,7 @@ export function StockTable({ project }: { project: Project }) {
                       onCommit={(v) => updateStock(s.id, { length: v }, `${s.id}.length`)}
                     />
                   </td>
-                  <td>
+                  <td className={styles.cWidth}>
                     <NumberInput
                       className={styles.cell}
                       aria-label={`Width, ${name}`}
@@ -84,7 +87,7 @@ export function StockTable({ project }: { project: Project }) {
                       onCommit={(v) => updateStock(s.id, { width: v }, `${s.id}.width`)}
                     />
                   </td>
-                  <td className={styles.colQty}>
+                  <td className={`${styles.colQty} ${styles.cQty}`}>
                     <NumberInput
                       className={styles.cell}
                       aria-label={`Quantity, ${name}. Leave empty for unlimited`}
@@ -95,18 +98,15 @@ export function StockTable({ project }: { project: Project }) {
                       onCommit={(v) => updateStock(s.id, { qty: v }, `${s.id}.qty`)}
                     />
                   </td>
-                  <td>
-                    <input
-                      className={`${styles.cell} ${styles.cellText}`}
-                      aria-label={`Material, sheet ${i + 1}`}
-                      placeholder="Material"
-                      value={s.label}
-                      onChange={(e) =>
-                        updateStock(s.id, { label: e.target.value }, `${s.id}.label`)
-                      }
+                  <td className={styles.cMaterial}>
+                    <MaterialSelect
+                      value={s.materialId}
+                      ariaLabel={`Material, sheet ${i + 1}`}
+                      sheet={s.length && s.width ? { length: s.length, width: s.width } : undefined}
+                      onChange={(materialId) => updateStock(s.id, { materialId })}
                     />
                   </td>
-                  <td className={styles.colStar}>
+                  <td className={`${styles.colStar} ${styles.cStar}`}>
                     <button
                       type="button"
                       className={s.priority ? styles.starOn : styles.star}
@@ -118,7 +118,7 @@ export function StockTable({ project }: { project: Project }) {
                       <StarIcon filled={s.priority} />
                     </button>
                   </td>
-                  <td className={styles.colMore}>
+                  <td className={`${styles.colMore} ${styles.cMore}`}>
                     <Menu
                       label={<MoreIcon />}
                       ariaLabel={`More actions for ${name}`}

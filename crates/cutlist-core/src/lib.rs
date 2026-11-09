@@ -8,9 +8,11 @@ mod layout;
 pub mod model;
 mod pack;
 mod prep;
+pub mod pricing;
 mod search;
 
 pub use model::*;
+pub use pricing::{CostBreakdown, PriceInput, price};
 
 use search::{Ctx, EVAL_MODES, EvalMode, Rng};
 

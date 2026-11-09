@@ -10,6 +10,7 @@ import { NumberInput } from '../ui/NumberInput';
 import { Menu } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import { EdgePicker } from './EdgePicker';
+import { MaterialSelect } from './MaterialSelect';
 import styles from './Editor.module.css';
 
 const GRAIN_NEXT: Record<Grain, Grain> = { none: 'length', length: 'width', width: 'none' };
@@ -29,6 +30,9 @@ export function PartsTable({ project }: { project: Project }) {
   const parts = project.parts;
   const pieces = countPieces(project);
   const rowsWithData = parts.filter((p) => !isBlankPart(p)).length;
+  // Only ask for a material per part once the project cuts more than one board type.
+  const stockMaterials = new Set(project.stock.map((s) => s.materialId).filter(Boolean));
+  const showMaterial = stockMaterials.size > 1 || parts.some((p) => p.materialId);
 
   const addRow = (focusCol = 'length') => {
     insertParts([emptyPart()]);
@@ -81,6 +85,7 @@ export function PartsTable({ project }: { project: Project }) {
               <th className={styles.num}>Width</th>
               <th className={`${styles.num} ${styles.colQty}`}>Qty</th>
               <th>Label</th>
+              {showMaterial && <th>Material</th>}
               <th className={styles.colGrain}>Grain</th>
               <th className={styles.colEdges}>Edges</th>
               <th className={styles.colMore}>
@@ -108,7 +113,7 @@ export function PartsTable({ project }: { project: Project }) {
               );
               return (
                 <tr key={p.id} className={p.enabled ? undefined : styles.disabledRow}>
-                  <td className={styles.colCheck}>
+                  <td className={`${styles.colCheck} ${styles.cCheck}`}>
                     <span className={styles.checkWrap}>
                       <input
                         type="checkbox"
@@ -123,10 +128,10 @@ export function PartsTable({ project }: { project: Project }) {
                       />
                     </span>
                   </td>
-                  <td>{cell('length', 'Length')}</td>
-                  <td>{cell('width', 'Width')}</td>
-                  <td className={styles.colQty}>{cell('qty', 'Qty')}</td>
-                  <td>
+                  <td className={styles.cLength}>{cell('length', 'Length')}</td>
+                  <td className={styles.cWidth}>{cell('width', 'Width')}</td>
+                  <td className={`${styles.colQty} ${styles.cQty}`}>{cell('qty', 'Qty')}</td>
+                  <td className={styles.cLabel}>
                     <input
                       className={`${styles.cell} ${styles.cellText}`}
                       aria-label={`Label, part ${i + 1}`}
@@ -139,7 +144,17 @@ export function PartsTable({ project }: { project: Project }) {
                       onPaste={(e) => onPaste(e, p)}
                     />
                   </td>
-                  <td className={styles.colGrain}>
+                  {showMaterial && (
+                    <td className={styles.cMaterial}>
+                      <MaterialSelect
+                        value={p.materialId}
+                        anyLabel="Any board"
+                        ariaLabel={`Material, ${name}`}
+                        onChange={(materialId) => updatePart(p.id, { materialId })}
+                      />
+                    </td>
+                  )}
+                  <td className={`${styles.colGrain} ${styles.cGrain}`}>
                     <button
                       type="button"
                       className={p.grain === 'none' ? styles.grain : styles.grainSet}
@@ -150,14 +165,16 @@ export function PartsTable({ project }: { project: Project }) {
                       {GRAIN_TEXT[p.grain]}
                     </button>
                   </td>
-                  <td className={styles.colEdges}>
+                  <td className={`${styles.colEdges} ${styles.cEdges}`}>
                     <EdgePicker
                       edges={p.edges}
                       partName={name}
+                      bandId={p.edgeBandId}
                       onChange={(edges) => updatePart(p.id, { edges })}
+                      onBandChange={(edgeBandId) => updatePart(p.id, { edgeBandId })}
                     />
                   </td>
-                  <td className={styles.colMore}>
+                  <td className={`${styles.colMore} ${styles.cMore}`}>
                     <Menu
                       label={<MoreIcon />}
                       ariaLabel={`More actions for ${name}`}

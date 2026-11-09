@@ -125,7 +125,7 @@ Parts get a material field. The current app assumes a single material, but furni
 | 0 ✅ | **Setup:** Rust toolchain (rustup, wasm32 target, wasm-pack), git repo, Vite app skeleton, lint and format | `cargo test` and `npm run dev` both work |
 | 1 ✅ | **Rust engine:** port plus improvements, property tests, benchmarks, CLI, WASM build | Better than or equal to the JS engine on the test jobs; no overlaps across 10k random jobs |
 | 2 ✅ | **Web foundation:** design tokens, layout (desktop and phone), projects and IndexedDB, parts/stock editors, live optimizing in a worker, sheet drawing, cut list | You can enter "Skrinky do dielne" and see the correct layout |
-| 3 | **Materials, pricing, PDF** | Costs show in Results and the PDF; Slovak/Czech text prints correctly |
+| 3 ✅ | **Materials, pricing, PDF** | Costs show in Results and the PDF; Slovak/Czech text prints correctly |
 | 4 | **Workshop flow:** cut mode, keep offcuts, offcut library, A4 QR labels, offcuts used first | The canvas flows work end to end; printed labels scan |
 | 5 | **Statistics, import, PWA, EN/SK/CS** | Installs, works offline, imports old projects |
 | 6 | **Later:** AR (WebXR), native apps through UniFFI, CNC nesting, more languages | Separate plans |
@@ -134,9 +134,10 @@ Each milestone ends with tests passing and a short demo in the browser.
 
 ## Still open (not blocking)
 
-- **Currency:** EUR by default, changeable in settings?
 - **Folder name** `cutlist-next` is a working title.
 - **Engine speed on big jobs:** about 10 ms per greedy pass for 40 part types (≈12,000 strip simulations), so very large jobs get fewer lookahead passes within the budget. Fine for furniture; revisit if needed.
 - **TypeScript types** are kept in sync with `model.rs` by hand; generating them (e.g. `ts-rs`) once the model settles.
 - **End-to-end tests (Playwright)** aren't set up yet; milestone 2 was checked by unit tests (model, store with an in-memory IndexedDB) and by hand in the browser at desktop, tablet and phone sizes. Worth adding before milestone 4's cut-mode flow.
+- **PDF size:** pdf-lib's font subsetting drops glyphs from the Inter TTFs, so both weights are embedded whole (~370 KB per PDF). Revisit if a fixed fontkit appears or with a different subsetter.
+- **Edge bands** are chosen per part (or the project default), not per edge; the plan's "type per edge" can come later if anyone needs mixed bands on one part.
 - **Interface text** is English only and written inline; it moves to i18next in milestone 5.

@@ -11,6 +11,10 @@ import {
   StatCards,
   UnplacedBanner,
 } from '../results/Results';
+import { CostCard } from '../results/CostCard';
+import { ExportPdfButton } from '../results/ExportPdfButton';
+import { PricingCard } from '../editor/PricingCard';
+import { LibraryScreen } from '../library/LibraryScreen';
 import { useCurrentProject, useStore } from '../store/store';
 import { useMediaQuery } from '../ui/hooks';
 import { CloseIcon, MenuIcon, PartsIcon, SawIcon, SheetIcon } from '../ui/icons';
@@ -18,6 +22,7 @@ import ui from '../ui/ui.module.css';
 import { ProjectHeader, RunStatus } from './ProjectHeader';
 import { Sidebar } from './Sidebar';
 import { useOptimizer } from './useOptimizer';
+import { usePricing } from './usePricing';
 import styles from './App.module.css';
 
 export function App() {
@@ -33,7 +38,9 @@ export function App() {
       .init()
       .catch((e: unknown) => console.error('Could not open the project database', e));
   }, []);
+  const view = useStore((s) => s.view);
   useOptimizer();
+  usePricing();
   useUndoShortcuts();
 
   if (!ready || !project) {
@@ -44,7 +51,12 @@ export function App() {
 
   return (
     <>
-      {phone ? (
+      {view === 'library' ? (
+        <div className={styles.desktop}>
+          {wide && <Sidebar />}
+          <LibraryScreen onMenu={wide ? undefined : () => setDrawer(true)} />
+        </div>
+      ) : phone ? (
         <PhoneLayout project={project} onMenu={() => setDrawer(true)} />
       ) : (
         <div className={styles.desktop}>
@@ -53,6 +65,7 @@ export function App() {
             <ProjectHeader project={project} onMenu={openDrawer} />
             <PartsTable project={project} />
             <StockTable project={project} />
+            <PricingCard project={project} />
           </main>
           <div className={styles.resultsCol}>
             <Results project={project} />
@@ -83,6 +96,7 @@ function PhoneLayout({ project, onMenu }: { project: Project; onMenu: () => void
             <ProjectHeader project={project} onMenu={onMenu} />
             <PartsTable project={project} />
             <StockTable project={project} />
+            <PricingCard project={project} />
           </>
         )}
         {tab !== 'parts' && (
@@ -92,6 +106,7 @@ function PhoneLayout({ project, onMenu }: { project: Project; onMenu: () => void
             </button>
             <span className={styles.phoneTitle}>{project.name || 'Untitled project'}</span>
             <RunStatus />
+            <ExportPdfButton compact />
           </div>
         )}
         {tab === 'sheets' &&
@@ -100,6 +115,7 @@ function PhoneLayout({ project, onMenu }: { project: Project; onMenu: () => void
               <StatCards plan={plan} job={job} compact />
               <UnplacedBanner plan={plan} job={job} project={project} />
               {plan.sheets.length > 0 && <SheetPanel plan={plan} project={project} />}
+              <CostCard project={project} />
             </>
           ) : (
             <EmptyResults running={status === 'running'} />

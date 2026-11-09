@@ -51,3 +51,15 @@ pub fn optimize(job: JsValue, on_progress: Option<js_sys::Function>) -> Result<J
     let serializer = serde_wasm_bindgen::Serializer::json_compatible();
     Ok(serde::Serialize::serialize(&plan, &serializer)?)
 }
+
+/// Prices a plan: `price(job, plan, input)` with plain JS objects shaped like `Job`, `Plan`
+/// and `PriceInput`; returns a `CostBreakdown`.
+#[wasm_bindgen]
+pub fn price(job: JsValue, plan: JsValue, input: JsValue) -> Result<JsValue, JsError> {
+    let job: cutlist_core::Job = serde_wasm_bindgen::from_value(job)?;
+    let plan: cutlist_core::Plan = serde_wasm_bindgen::from_value(plan)?;
+    let input: cutlist_core::PriceInput = serde_wasm_bindgen::from_value(input)?;
+    let cost = cutlist_core::price(&job, &plan, &input);
+    let serializer = serde_wasm_bindgen::Serializer::json_compatible();
+    Ok(serde::Serialize::serialize(&cost, &serializer)?)
+}

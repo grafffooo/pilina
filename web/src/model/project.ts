@@ -1,7 +1,7 @@
 // The project as stored on this device. Sizes are millimetres; `null` means "not entered yet".
 import type { Edges, Grain } from '../engine/types';
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export interface PartRow {
   id: string;
@@ -12,6 +12,10 @@ export interface PartRow {
   grain: Grain;
   edges: Edges;
   enabled: boolean;
+  /** Board the part is cut from; `null` = any stock sheet. */
+  materialId: string | null;
+  /** Edge band for this part; `null` = the project's default band. */
+  edgeBandId: string | null;
 }
 
 export interface StockRow {
@@ -20,8 +24,7 @@ export interface StockRow {
   width: number | null;
   /** `null` = unlimited */
   qty: number | null;
-  /** Material name shown to the user, e.g. "DTD Black 18mm". */
-  label: string;
+  materialId: string | null;
   priority: boolean;
   enabled: boolean;
 }
@@ -31,6 +34,25 @@ export interface ProjectSummary {
   pieces: number;
   sheets: number;
   usedPct: number;
+  /** Total cost when every price is known. */
+  cost?: number | null;
+}
+
+export interface ExtraLine {
+  id: string;
+  label: string;
+  /** Price per piece. */
+  amount: number | null;
+  qty: number | null;
+}
+
+export interface ProjectPricing {
+  mode: 'sheets' | 'area';
+  /** Area mode: material added on top of the parts' area, percent. */
+  wastePct: number;
+  /** Sheets mode: credit reusable leftovers back. */
+  offcutCredit: boolean;
+  extras: ExtraLine[];
 }
 
 export interface Project {
@@ -43,6 +65,8 @@ export interface Project {
   trim: number;
   parts: PartRow[];
   stock: StockRow[];
+  pricing: ProjectPricing;
+  defaultEdgeBandId: string | null;
   summary: ProjectSummary | null;
 }
 
@@ -63,7 +87,13 @@ export function emptyPart(): PartRow {
     grain: 'none',
     edges: { ...NO_EDGES },
     enabled: true,
+    materialId: null,
+    edgeBandId: null,
   };
+}
+
+export function emptyExtra(): ExtraLine {
+  return { id: newId(), label: '', amount: null, qty: 1 };
 }
 
 export function emptyStock(): StockRow {
@@ -72,14 +102,25 @@ export function emptyStock(): StockRow {
     length: null,
     width: null,
     qty: null,
-    label: '',
+    materialId: null,
     priority: false,
     enabled: true,
   };
 }
 
+export const DEFAULT_PRICING: ProjectPricing = {
+  mode: 'sheets',
+  wastePct: 10,
+  offcutCredit: false,
+  extras: [],
+};
+
 /** A fresh project: one empty part row and a common 2800 × 2070 board. */
-export function newProject(name = 'Untitled project', now = Date.now()): Project {
+export function newProject(
+  name = 'Untitled project',
+  now = Date.now(),
+  materialId: string | null = null,
+): Project {
   return {
     schema: SCHEMA_VERSION,
     id: newId(),
@@ -94,10 +135,12 @@ export function newProject(name = 'Untitled project', now = Date.now()): Project
         ...emptyStock(),
         length: 2800,
         width: 2070,
-        label: 'Chipboard 18mm',
+        materialId,
         priority: true,
       },
     ],
+    pricing: { ...DEFAULT_PRICING, extras: [] },
+    defaultEdgeBandId: null,
     summary: null,
   };
 }
@@ -123,7 +166,13 @@ export function migrate(stored: Partial<Project> & { id: string }): Project {
     ...stored,
     schema: SCHEMA_VERSION,
     parts: (stored.parts ?? base.parts).map((p) => ({ ...emptyPart(), ...p })),
-    stock: (stored.stock ?? base.stock).map((s) => ({ ...emptyStock(), ...s })),
+    stock: (stored.stock ?? base.stock).map((s) => {
+      // Schema 1 named stock with free text; `linkLegacyStockLabels` turns it into a material.
+      const { label: _legacy, ...rest } = s as StockRow & { label?: string };
+      return { ...emptyStock(), ...rest };
+    }),
+    pricing: { ...DEFAULT_PRICING, ...stored.pricing, extras: stored.pricing?.extras ?? [] },
+    defaultEdgeBandId: stored.defaultEdgeBandId ?? null,
     summary: stored.summary ?? null,
   };
 }

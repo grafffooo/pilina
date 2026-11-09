@@ -1,5 +1,8 @@
 // A button that opens a small panel below it. Closes on Escape, outside click, or `close()`.
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+// The panel is rendered in <body> with fixed positioning, so scrolling table containers
+// can't clip it.
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './ui.module.css';
 
 interface PopoverProps {
@@ -22,12 +25,42 @@ export function Popover({
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
   const id = useId();
+
+  // Place the panel under the trigger (or above it near the bottom of the window) and keep
+  // it there while the page scrolls.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const place = () => {
+      const t = trigger.current?.getBoundingClientRect();
+      const el = panel.current;
+      if (!t || !el) return;
+      const gap = 6;
+      const below = t.bottom + gap + el.offsetHeight <= window.innerHeight - 8;
+      el.style.top = below
+        ? `${t.bottom + gap}px`
+        : `${Math.max(8, t.top - gap - el.offsetHeight)}px`;
+      const left =
+        align === 'end'
+          ? t.right - el.offsetWidth
+          : Math.min(t.left, window.innerWidth - el.offsetWidth - 8);
+      el.style.left = `${Math.max(8, left)}px`;
+    };
+    place();
+    window.addEventListener('scroll', place, true);
+    window.addEventListener('resize', place);
+    return () => {
+      window.removeEventListener('scroll', place, true);
+      window.removeEventListener('resize', place);
+    };
+  }, [open, align]);
 
   useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
-      if (!root.current?.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (!root.current?.contains(target) && !panel.current?.contains(target)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -45,11 +78,7 @@ export function Popover({
 
   // Move focus into the panel when it opens.
   useEffect(() => {
-    if (open) {
-      root.current
-        ?.querySelector<HTMLElement>('[data-popover-panel] input, [data-popover-panel] button')
-        ?.focus();
-    }
+    if (open) panel.current?.querySelector<HTMLElement>('input, select, button')?.focus();
   }, [open]);
 
   // Looked up by id (not the ref) because `close` is handed to the render function.
@@ -72,11 +101,13 @@ export function Popover({
       >
         {label}
       </button>
-      {open && (
-        <div id={id} data-popover-panel className={styles.popover} data-align={align}>
-          {children(close)}
-        </div>
-      )}
+      {open &&
+        createPortal(
+          <div ref={panel} id={id} className={styles.popover}>
+            {children(close)}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

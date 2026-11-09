@@ -8,6 +8,8 @@ import { useStore } from '../store/store';
 import { useView } from '../store/view';
 import { ChevronLeftIcon, ChevronRightIcon, MinusIcon, PlusIcon, WarningIcon } from '../ui/icons';
 import ui from '../ui/ui.module.css';
+import { CostCard } from './CostCard';
+import { ExportPdfButton } from './ExportPdfButton';
 import { usePartInfo, type PartInfo } from './partInfo';
 import { SheetDrawing } from './SheetDrawing';
 import styles from './Results.module.css';
@@ -19,6 +21,8 @@ export function Results({ project }: { project: Project }) {
     <section className={styles.results} aria-labelledby="results-h">
       <div className={styles.resultsHeader}>
         <h2 id="results-h">Results</h2>
+        <span className={styles.spacer} />
+        <ExportPdfButton />
       </div>
       {!plan || !job ? (
         <EmptyResults running={status === 'running'} />
@@ -26,6 +30,7 @@ export function Results({ project }: { project: Project }) {
         <>
           <StatCards plan={plan} job={job} />
           <UnplacedBanner plan={plan} job={job} project={project} />
+          <CostCard project={project} />
           {plan.sheets.length > 0 && (
             <>
               <SheetPanel plan={plan} project={project} withLegend />

@@ -115,3 +115,70 @@ export interface Plan {
   unplaced: Unplaced[];
   totals: Totals;
 }
+
+// ---- Pricing (crates/cutlist-core/src/pricing.rs) ----
+
+export type PricingMode = 'sheets' | 'area';
+
+export interface OffcutRule {
+  minLength: number;
+  minWidth: number;
+}
+
+export interface StockPrice {
+  stockId: string;
+  material: string;
+  perSheet?: number | null;
+  perSqm?: number | null;
+}
+
+export interface EdgeBandPrice {
+  partId: string;
+  band: string;
+  perMetre?: number | null;
+}
+
+export interface ExtraCost {
+  label: string;
+  amount: number;
+}
+
+export interface PriceInput {
+  mode: PricingMode;
+  wastePct: number;
+  offcutCredit: boolean;
+  offcutRule: OffcutRule;
+  stock: StockPrice[];
+  edgeBands: EdgeBandPrice[];
+  /** mm per banded edge */
+  edgeAllowance: number;
+  extras: ExtraCost[];
+}
+
+export interface MaterialCost {
+  material: string;
+  sheets: number;
+  sheetArea: number;
+  usedArea: number;
+  creditArea: number;
+  gross: number;
+  credit: number;
+  cost: number;
+  priced: boolean;
+}
+
+export interface EdgeBandCost {
+  band: string;
+  /** mm */
+  length: number;
+  cost: number;
+  priced: boolean;
+}
+
+export interface CostBreakdown {
+  materials: MaterialCost[];
+  edgeBands: EdgeBandCost[];
+  extras: number;
+  total: number;
+  complete: boolean;
+}

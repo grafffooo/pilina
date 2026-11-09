@@ -1,7 +1,16 @@
 import { useMemo, useState } from 'react';
 import { formatNumber } from '../lib/format';
+import { formatMoney } from '../model/library';
 import { useNow } from '../ui/hooks';
-import { CheckIcon, LogoIcon, PlusIcon, SearchIcon, SettingsIcon, WarningIcon } from '../ui/icons';
+import {
+  CheckIcon,
+  LogoIcon,
+  PlusIcon,
+  PriceIcon,
+  SearchIcon,
+  SettingsIcon,
+  WarningIcon,
+} from '../ui/icons';
 import { Popover } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import { useStore } from '../store/store';
@@ -37,6 +46,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const currentId = useStore((s) => s.currentId);
   const saveState = useStore((s) => s.saveState);
   const savedAt = useStore((s) => s.savedAt);
+  const view = useStore((s) => s.view);
+  const materialCount = useStore((s) => s.materials.length);
+  const currency = useStore((s) => s.settings.currency);
   const [query, setQuery] = useState('');
   const now = useNow();
 
@@ -83,6 +95,20 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         New project
       </button>
 
+      <button
+        type="button"
+        className={styles.libraryLink}
+        aria-current={view === 'library' ? 'page' : undefined}
+        onClick={() => {
+          useStore.getState().setView('library');
+          onNavigate?.();
+        }}
+      >
+        <PriceIcon />
+        <span>Materials & prices</span>
+        <span className={styles.count}>{materialCount}</span>
+      </button>
+
       <div className={styles.sectionTitle}>
         <span>Projects</span>
         <span>{projects.length}</span>
@@ -97,7 +123,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
               key={p.id}
               type="button"
               className={styles.project}
-              aria-current={active ? 'page' : undefined}
+              aria-current={active && view === 'project' ? 'page' : undefined}
               onClick={() => {
                 useStore.getState().select(p.id);
                 onNavigate?.();
@@ -109,6 +135,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                   {s.pieces} {s.pieces === 1 ? 'part' : 'parts'} · {s.sheets}{' '}
                   {s.sheets === 1 ? 'sheet' : 'sheets'} · {formatNumber(Math.round(s.usedPct))}%
                   used
+                  {s.cost != null && s.cost > 0 && ` · ${formatMoney(s.cost, currency)}`}
                 </span>
               )}
               <span className={styles.projectDate}>{when(p.updatedAt, now)}</span>

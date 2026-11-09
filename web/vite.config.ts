@@ -21,7 +21,7 @@ export default defineConfig({
       },
       workbox: {
         // The engine's .wasm file must be cached for offline use.
-        globPatterns: ['**/*.{js,css,html,svg,wasm,woff2}'],
+        globPatterns: ['**/*.{js,css,html,svg,wasm,woff2,ttf}'],
       },
     }),
   ],

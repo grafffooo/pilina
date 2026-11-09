@@ -124,3 +124,14 @@ export const LogoIcon = ({ size = 28 }: { size?: number }) => (
     <path d="M8 8h5v12H8zM15 8h5v5h-5zM15 15h5v5h-5z" fill="var(--on-accent)" />
   </svg>
 );
+export const PriceIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z" />
+    <circle cx="7.5" cy="7.5" r="1.5" />
+  </Icon>
+);
+export const DownloadIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3v12M7 10l5 5 5-5M4 21h16" />
+  </Icon>
+);

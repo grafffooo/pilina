@@ -433,3 +433,99 @@
   color: var(--text-3);
   font-size: 12px;
 }
+
+/* Cost */
+
+.costCard {
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.costHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.costTitle {
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.costMode {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.costTotal {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.costPartial {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--warn-text);
+}
+
+.costLines {
+  display: grid;
+  gap: 2px;
+  margin: 10px 0 0;
+}
+
+.costLine {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+}
+
+.costLine dt,
+.costLine dd {
+  margin: 0;
+}
+
+.costLine dd {
+  text-align: right;
+  font-weight: 500;
+}
+
+.costNote {
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.costCredit {
+  color: var(--ok-text);
+}
+
+.costMissing {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--warn-text);
+}
+
+.costMissing svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.linkButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

@@ -43,7 +43,8 @@ pub struct PartSpec {
     pub label: String,
     #[serde(default)]
     pub grain: Grain,
-    /// Material key; parts are only placed on stock with the same material (`None` matches anything).
+    /// Material key. A part only goes on stock with the same material; `None` on either
+    /// side matches anything.
     #[serde(default)]
     pub material: Option<String>,
     #[serde(default)]
@@ -59,8 +60,14 @@ pub struct StockSpec {
     /// `None` = unlimited.
     #[serde(default)]
     pub qty: Option<u32>,
+    /// Priority stock is used before other stock.
     #[serde(default)]
     pub priority: bool,
+    /// A leftover from the offcut library. Offcuts are used before any stock and their area
+    /// doesn't count as new material.
+    #[serde(default)]
+    pub offcut: bool,
+    /// Material key, see `PartSpec::material` (`None` takes any part).
     #[serde(default)]
     pub material: Option<String>,
     #[serde(default)]
@@ -134,7 +141,8 @@ pub struct Placement {
 pub struct Cut {
     /// 1-based, in sawing order.
     pub number: u32,
-    /// 1 = rip through the whole (trimmed) sheet, 2 = cross cut of a strip, 3 = split a row, 4 = trim a part.
+    /// 0 = edge trim, 1 = rip through the whole (trimmed) sheet, 2 = cross cut of a strip,
+    /// 3 = split a row, 4 = trim a part to its length.
     pub stage: u8,
     pub axis: Axis,
     pub pos: f64,
@@ -149,6 +157,7 @@ pub struct Cut {
 #[serde(rename_all = "camelCase")]
 pub struct SheetLayout {
     pub stock_id: String,
+    /// Sheet size: `width` runs along x, `length` along y.
     pub width: f64,
     pub length: f64,
     /// Identical sheets are merged: this layout is cut `qty` times.
@@ -169,9 +178,13 @@ pub struct Unplaced {
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Totals {
+    /// Sheets to cut, library offcuts included.
     pub sheets: u32,
+    /// Of `sheets`, how many are library offcuts.
+    pub offcuts_used: u32,
     pub sheet_area: f64,
     pub used_area: f64,
+    /// `sheet_area - used_area` (saw kerf and trim included).
     pub waste_area: f64,
     pub cuts: u32,
     pub cut_length: f64,

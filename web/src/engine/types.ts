@@ -1,5 +1,5 @@
 // TypeScript mirror of crates/cutlist-core/src/model.rs (JSON uses camelCase).
-// Keep in sync by hand for now; generating these from Rust is planned for milestone 1.
+// Keep in sync by hand (see `model.rs` for field docs).
 
 export type Grain = 'none' | 'length' | 'width';
 
@@ -27,7 +27,10 @@ export interface StockSpec {
   width: number;
   /** null/undefined = unlimited */
   qty?: number | null;
+  /** Used before non-priority stock. */
   priority?: boolean;
+  /** A library offcut: used before any stock, its area doesn't count as new material. */
+  offcut?: boolean;
   material?: string | null;
   label?: string;
 }
@@ -61,7 +64,8 @@ export interface Placement {
 
 export interface Cut {
   number: number;
-  stage: 1 | 2 | 3 | 4;
+  /** 0 edge trim, 1 rip, 2 cross cut, 3 split a row, 4 trim a part to length */
+  stage: 0 | 1 | 2 | 3 | 4;
   axis: 'x' | 'y';
   pos: number;
   x1: number;
@@ -87,13 +91,23 @@ export interface Unplaced {
 }
 
 export interface Totals {
+  /** Sheets to cut, library offcuts included. */
   sheets: number;
+  offcutsUsed: number;
   sheetArea: number;
   usedArea: number;
   wasteArea: number;
   cuts: number;
   cutLength: number;
   edgeBandLength: number;
+}
+
+/** Reported after each search pass. */
+export interface Progress {
+  passes: number;
+  bestSheets: number;
+  bestUnplaced: number;
+  elapsedMs: number;
 }
 
 export interface Plan {

@@ -17,9 +17,12 @@ web/                  React + TypeScript + Vite PWA
 ## Commands
 
 ```bash
-cargo test --workspace                      # engine tests
+cargo test --workspace --release           # engine tests (property tests run 256 random jobs)
+PROPTEST_CASES=10000 cargo test --release   # …or many more
 cargo clippy --workspace --all-targets      # engine lint
-cargo run -p cutlist-cli -- job.json        # optimize a job file
+cargo bench -p cutlist-core                 # benchmarks
+cargo run --release -p cutlist-cli -- job.json          # optimize a job file, print the plan
+cargo run --release -p cutlist-cli -- --stats job.json  # one-line summary instead
 
 cd web
 npm install

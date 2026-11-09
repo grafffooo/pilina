@@ -45,7 +45,9 @@ cutlist-next/
   - identical sheets merged into one layout with a count;
   - cuts numbered in sawing order.
 
-  It then gets better than the JS version: a beam search over strip choices, and **library offcuts used first** when the material matches. A `NestingPacker` for CNC can be added behind the same interface later.
+  It then gets better than the JS version: a **pilot (lookahead) search** that tries the best few candidates for each sheet, finishes the job greedily from each and keeps the one leading to the best plan; and **library offcuts used first** (stock marked `offcut`) when the material matches. A `NestingPacker` for CNC can be added behind the same interface later.
+
+  *Status (milestone 1):* done. The port matches the JS engine exactly on every test job; with the lookahead it beats it (random 40-type job: 12 sheets instead of 13, at the area lower bound) inside the same 600 ms budget. Plans compare by: fewest unplaced parts, least new sheet area (offcuts are free), biggest leftover on the last sheet, fewest cuts.
 - **Behaviour:** results are deterministic (seeded), the run has a time budget, and it reports progress and can be cancelled. Large jobs run in a Web Worker so the page never freezes.
 - **Pricing and statistics** are also in the core, so phones and the web always get the same numbers.
 - **Quality checks:**
@@ -120,8 +122,8 @@ Parts get a material field. The current app assumes a single material, but furni
 
 | # | Milestone | Done when |
 |---|---|---|
-| 0 | **Setup:** Rust toolchain (rustup, wasm32 target, wasm-pack), git repo, Vite app skeleton, lint and format | `cargo test` and `npm run dev` both work |
-| 1 | **Rust engine:** port plus improvements, property tests, benchmarks, CLI, WASM build | Better than or equal to the JS engine on the test jobs; no overlaps across 10k random jobs |
+| 0 ✅ | **Setup:** Rust toolchain (rustup, wasm32 target, wasm-pack), git repo, Vite app skeleton, lint and format | `cargo test` and `npm run dev` both work |
+| 1 ✅ | **Rust engine:** port plus improvements, property tests, benchmarks, CLI, WASM build | Better than or equal to the JS engine on the test jobs; no overlaps across 10k random jobs |
 | 2 | **Web foundation:** design tokens, layout (desktop and phone), projects and IndexedDB, parts/stock editors, live optimizing in a worker, sheet drawing, cut list | You can enter "Skrinky do dielne" and see the correct layout |
 | 3 | **Materials, pricing, PDF** | Costs show in Results and the PDF; Slovak/Czech text prints correctly |
 | 4 | **Workshop flow:** cut mode, keep offcuts, offcut library, A4 QR labels, offcuts used first | The canvas flows work end to end; printed labels scan |
@@ -133,5 +135,6 @@ Each milestone ends with tests passing and a short demo in the browser.
 ## Still open (not blocking)
 
 - **Currency:** EUR by default, changeable in settings?
-- **Installing Rust** needs your OK: it downloads rustup from rust-lang.org, about 1 GB with the WASM target.
 - **Folder name** `cutlist-next` is a working title.
+- **Engine speed on big jobs:** about 10 ms per greedy pass for 40 part types (≈12,000 strip simulations), so very large jobs get fewer lookahead passes within the budget. Fine for furniture; revisit if needed.
+- **TypeScript types** are kept in sync with `model.rs` by hand; generating them (e.g. `ts-rs`) can wait until the model settles in milestone 2.

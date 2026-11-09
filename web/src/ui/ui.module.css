@@ -1,0 +1,153 @@
+.popoverRoot {
+  position: relative;
+  display: inline-flex;
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  min-width: 200px;
+  padding: 12px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 8px 24px rgb(0 0 0 / 0.14),
+    0 1px 3px rgb(0 0 0 / 0.08);
+}
+
+.popover[data-align='end'] {
+  left: auto;
+  right: 0;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  margin: -6px;
+  min-width: 160px;
+}
+
+.menuItem,
+.menuDanger {
+  height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  text-align: left;
+}
+
+.menuItem:hover,
+.menuDanger:hover {
+  background: var(--chip);
+}
+
+.menuDanger {
+  color: var(--danger);
+}
+
+/* Shared buttons */
+
+.button,
+.buttonPrimary,
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.button {
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.button:hover {
+  background: var(--chip);
+}
+
+.buttonPrimary {
+  border: 0;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+.buttonPrimary:hover {
+  filter: brightness(1.08);
+}
+
+.iconButton {
+  width: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+}
+
+.iconButton:hover:not(:disabled) {
+  background: var(--chip);
+  color: var(--text);
+}
+
+.iconButton:disabled {
+  opacity: 0.4;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.fieldInput {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.fieldInput:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  border-radius: var(--radius-md);
+  background: var(--chip);
+}
+
+.segmented button {
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+}

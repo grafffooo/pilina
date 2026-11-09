@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatMetres, formatNumber, formatSquareMetres } from './format';
+import { formatMetres, formatNumber, formatSquareMetres, formatMm } from './format';
 
 describe('format', () => {
   it('rounds to two decimals and groups thousands', () => {
@@ -20,5 +20,13 @@ describe('format', () => {
 
   it('shows a dash for non-numbers', () => {
     expect(formatNumber(Number.NaN)).toBe('–');
+  });
+});
+
+describe('formatMm', () => {
+  it('never groups thousands', () => {
+    expect(formatMm(2800)).toBe('2800');
+    expect(formatMm(18.5)).toBe('18.5');
+    expect(formatMm(1234.567, 'sk')).toBe('1234,57');
   });
 });

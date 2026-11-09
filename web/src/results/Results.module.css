@@ -1,0 +1,435 @@
+.results {
+  container: results / inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.resultsHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+}
+
+.resultsHeader h2 {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.empty {
+  padding: 32px 20px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  color: var(--text-3);
+}
+
+.empty p {
+  margin: 4px 0;
+}
+
+.emptyTitle {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Stat cards */
+
+.stats,
+.statsCompact {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.statsCompact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@container results (max-width: 520px) {
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  min-width: 0;
+}
+
+.statsCompact .stat {
+  padding: 10px 12px;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.statValue {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.statsCompact .statValue {
+  font-size: 22px;
+}
+
+.statNote {
+  font-size: var(--text-xs);
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar {
+  display: block;
+  height: 6px;
+  margin-top: 4px;
+  border-radius: 3px;
+  background: var(--chip);
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+/* Unplaced parts */
+
+.unplaced {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-lg);
+  background: var(--warn-bg);
+  color: var(--warn-text);
+}
+
+.unplaced svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.unplacedTitle {
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.unplaced ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+/* Sheet panel */
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.toolbarMeta {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.pager {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.pagerLabel {
+  padding: 0 4px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.qtyChip {
+  margin-left: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.fit {
+  min-width: 44px;
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--chip);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.paper {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background: var(--paper);
+  align-items: flex-start;
+  flex-wrap: wrap;
+  /* The paper is always light, so text on it uses fixed dark ink. */
+  color: #2b313b;
+}
+
+.canvas {
+  flex: 1 1 280px;
+  min-width: 0;
+  overflow: auto;
+  max-height: 72vh;
+}
+
+.canvasInner {
+  min-width: 100%;
+}
+
+.drawing {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+}
+
+.canvas[data-zoomed] .drawing {
+  max-height: none;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 150px;
+  font-size: 12px;
+}
+
+.legendTitle {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #4a5260;
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legendRule {
+  height: 1px;
+  background: #d5d9df;
+}
+
+.legendSwatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid #5d6573;
+}
+
+/* Lists below the drawing */
+
+.lists {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.listCard {
+  flex: 1.4 1 300px;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.offcutsCard {
+  flex: 1 1 220px;
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.listHeader h3 {
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.listMeta {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.listEmpty {
+  margin: 0;
+  padding: 14px;
+  color: var(--text-3);
+}
+
+.cutList {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.cutListFull {
+  max-height: none;
+}
+
+.cutRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 14px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.cutRow:hover,
+.cutRow[aria-pressed='true'] {
+  background: var(--accent-soft);
+}
+
+.cutNumRip,
+.cutNumCross {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1.5px solid;
+}
+
+.cutNumRip {
+  border-color: var(--cut-rip);
+  color: #9a3412;
+}
+
+.cutNumCross {
+  border-color: var(--cut-cross);
+  color: var(--cut-cross);
+}
+
+:root[data-theme='dark'] .cutNumRip,
+:root[data-theme='dark'] .cutNumCross {
+  color: var(--text);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .cutNumRip,
+  :root:not([data-theme='light']) .cutNumCross {
+    color: var(--text);
+  }
+}
+
+.cutRow[aria-pressed='true'] .cutNumRip {
+  background: var(--cut-rip);
+  color: #1b2029;
+}
+
+.cutRow[aria-pressed='true'] .cutNumCross {
+  background: var(--cut-cross);
+  color: #ffffff;
+}
+
+.cutPos {
+  min-width: 72px;
+  font-weight: 600;
+}
+
+.cutKind {
+  flex: 1;
+  color: var(--text-2);
+}
+
+.cutLen {
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.offcutList {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.offcutList li {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 14px;
+}
+
+.offcutBig {
+  font-weight: 600;
+}
+
+.offcutKeep {
+  color: var(--accent-ink);
+  font-weight: 500;
+}
+
+.offcutKind {
+  color: var(--text-3);
+}
+
+.offcutMore {
+  color: var(--text-3);
+  font-size: 12px;
+}

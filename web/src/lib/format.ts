@@ -26,3 +26,16 @@ export function formatSquareMetres(mm2: number, locale = 'en'): string {
   if (!Number.isFinite(mm2)) return '–';
   return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(mm2 / 1e6)} m²`;
 }
+
+const sizeCache = new Map<string, Intl.NumberFormat>();
+
+/** Millimetre sizes and positions: no thousands grouping ("2800", "18.5"), as on a cut list. */
+export function formatMm(value: number, locale = 'en'): string {
+  if (!Number.isFinite(value)) return '–';
+  let f = sizeCache.get(locale);
+  if (!f) {
+    f = new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: false });
+    sizeCache.set(locale, f);
+  }
+  return f.format(value);
+}

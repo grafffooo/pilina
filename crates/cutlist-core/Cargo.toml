@@ -1,0 +1,13 @@
+[package]
+name = "cutlist-core"
+description = "Sheet-goods cut optimizer: data model, guillotine packing, pricing and statistics."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

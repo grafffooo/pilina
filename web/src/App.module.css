@@ -1,0 +1,45 @@
+.shell {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: var(--text-xl);
+  letter-spacing: -0.02em;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.card h2 {
+  margin: 0 0 8px;
+  font-size: var(--text-md);
+}
+
+.card p {
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+
+.muted {
+  color: var(--text-3);
+}
+
+.error {
+  color: var(--danger);
+}

@@ -1,0 +1,15 @@
+# Rust
+/target/
+
+# Web
+node_modules/
+web/dist/
+web/dev-dist/
+web/src/engine/pkg/
+*.local
+
+# Editors / OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/

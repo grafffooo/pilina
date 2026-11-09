@@ -118,7 +118,7 @@
 
 .kindRip .kindNumber {
   background: var(--cut-rip);
-  color: #1b2029;
+  color: #2a2119;
 }
 
 .kindCross .kindNumber {
@@ -424,12 +424,19 @@
   height: 52px;
   border: 0;
   border-radius: 12px;
-  background: var(--accent);
-  color: var(--on-accent);
+  background: var(--moss);
+  color: var(--on-moss);
   font-size: 15px;
   font-weight: 700;
 }
 
 .startLarge:disabled {
   opacity: 0.45;
+}
+
+/* The desktop Start cutting button: a primary button in moss, the one place moss is used. */
+button.start {
+  background: var(--moss);
+  border-color: var(--moss);
+  color: var(--on-moss);
 }

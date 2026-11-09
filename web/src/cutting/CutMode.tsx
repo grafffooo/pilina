@@ -545,8 +545,8 @@ function MiniSheet({ sheet, highlight }: { sheet: SheetLayout; highlight: Rect[]
       <rect
         width={sheet.width}
         height={sheet.length}
-        fill="#ECEEF1"
-        stroke="#2B313B"
+        fill="#EEE6D9"
+        stroke="#3A2E22"
         strokeWidth={m * 0.006}
       />
       {sheet.placements.map((p, i) => (
@@ -556,8 +556,8 @@ function MiniSheet({ sheet, highlight }: { sheet: SheetLayout; highlight: Rect[]
           y={p.rect.y}
           width={p.rect.w}
           height={p.rect.h}
-          fill="#D5D9DF"
-          stroke="#9AA1AC"
+          fill="#DCCFBB"
+          stroke="#A8987F"
           strokeWidth={m * 0.003}
         />
       ))}
@@ -568,9 +568,9 @@ function MiniSheet({ sheet, highlight }: { sheet: SheetLayout; highlight: Rect[]
           y={r.y}
           width={r.w}
           height={r.h}
-          fill="#127A6E"
+          fill="#8A5A34"
           fillOpacity={0.35}
-          stroke="#127A6E"
+          stroke="#8A5A34"
           strokeWidth={m * 0.008}
         />
       ))}

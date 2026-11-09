@@ -13,8 +13,8 @@ export default defineConfig({
         name: 'Pilina',
         short_name: 'Pilina',
         description: 'Plan sheet-goods cuts, track offcuts and material costs.',
-        theme_color: '#127A6E',
-        background_color: '#F5F6F8',
+        theme_color: '#F4EEE4',
+        background_color: '#F4EEE4',
         display: 'standalone',
         start_url: '/',
         icons: [

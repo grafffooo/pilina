@@ -119,10 +119,7 @@ export const SawIcon = (p: IconProps) => (
   </Icon>
 );
 export const LogoIcon = ({ size = 28 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 28 28" aria-hidden="true">
-    <rect x="1" y="1" width="26" height="26" rx="7" fill="var(--accent)" />
-    <path d="M8 8h5v12H8zM15 8h5v5h-5zM15 15h5v5h-5z" fill="var(--on-accent)" />
-  </svg>
+  <img src={`${import.meta.env.BASE_URL}icon.svg`} width={size} height={size} alt="" />
 );
 export const PriceIcon = (p: IconProps) => (
   <Icon {...p}>

@@ -1,6 +1,6 @@
-/* Design tokens from the "CutList Optimizer Redesign" canvas.
+/* Design tokens: the warm Pilina palette ("Palette and icon" on the design canvas).
    Theme: [data-theme="light|dark"] on <html> (defaults to the system setting).
-   Accent: [data-accent="seafoam|moss"] on <html>. */
+   Wood brown is the accent for selection, links and focus; moss green is only for Start cutting. */
 
 :root {
   --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -16,95 +16,84 @@
   /* Drawing colors: identical in both themes (the sheet sits on light "paper"). */
   --cut-rip: #dd6b0b;
   --cut-cross: #b42318;
-  --paper: #f5f6f8;
 }
 
 :root,
 :root[data-theme='light'] {
-  --bg: #f5f6f8;
-  --side: #eef0f3;
-  --surface: #ffffff;
-  --surface-2: #f5f6f8;
-  --border: #e2e5ea;
-  --text: #14181f;
-  --text-2: #444d5a;
-  --text-3: #5b6575;
+  --bg: #f4eee4;
+  --side: #ece3d4;
+  --surface: #fbf8f2;
+  --surface-2: #f7f1e8;
+  --border: #e2d6c3;
+  --text: #2a2119;
+  --text-2: #574a3c;
+  --text-3: #6e5f4e;
   --ok-bg: #e6f4ec;
   --ok-text: #1e6b3e;
   --warn-bg: #fff3e0;
   --warn-text: #8a4300;
   --danger: #b42318;
-  --chip: #f1f3f6;
-  --accent: #127a6e;
+  --chip: #efe6d7;
+  --accent: #8a5a34;
   --on-accent: #ffffff;
-  --accent-soft: #e3f3f0;
-  --accent-ink: #0d5c53;
+  --accent-soft: #f1e3d1;
+  --accent-ink: #6b4426;
+  --moss: #4f6b2a;
+  --on-moss: #ffffff;
+  --paper: #f7f1e8;
   color-scheme: light;
-}
-
-:root[data-accent='moss'] {
-  --accent: #4f6b2a;
-  --accent-soft: #eef2e3;
-  --accent-ink: #3e5420;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #0e1116;
-    --side: #12161c;
-    --surface: #171b22;
-    --surface-2: #1c212a;
-    --border: #2a303b;
-    --text: #e9ecf1;
-    --text-2: #bcc3ce;
-    --text-3: #a0a9b6;
+    --bg: #1a1612;
+    --side: #1f1a15;
+    --surface: #25201a;
+    --surface-2: #2a241d;
+    --border: #3a3229;
+    --text: #f1eadf;
+    --text-2: #d2c6b4;
+    --text-3: #b3a592;
     --ok-bg: #14301f;
     --ok-text: #8fd9ae;
     --warn-bg: #33240f;
     --warn-text: #ffcb8a;
     --danger: #ff9c8f;
-    --chip: #1f242d;
-    --accent: #6fd3c2;
-    --on-accent: #0e1116;
-    --accent-soft: #173a36;
-    --accent-ink: #9be3d6;
-    --paper: #e9ebef;
+    --chip: #2c261f;
+    --accent: #d9a672;
+    --on-accent: #1a1612;
+    --accent-soft: #3a2c1e;
+    --accent-ink: #e8c298;
+    --moss: #b5cf7a;
+    --on-moss: #1a1612;
+    --paper: #efe8dc;
     color-scheme: dark;
-  }
-  :root:not([data-theme='light'])[data-accent='moss'] {
-    --accent: #b5cf7a;
-    --accent-soft: #2a331a;
-    --accent-ink: #cfe3a0;
   }
 }
 
 :root[data-theme='dark'] {
-  --bg: #0e1116;
-  --side: #12161c;
-  --surface: #171b22;
-  --surface-2: #1c212a;
-  --border: #2a303b;
-  --text: #e9ecf1;
-  --text-2: #bcc3ce;
-  --text-3: #a0a9b6;
+  --bg: #1a1612;
+  --side: #1f1a15;
+  --surface: #25201a;
+  --surface-2: #2a241d;
+  --border: #3a3229;
+  --text: #f1eadf;
+  --text-2: #d2c6b4;
+  --text-3: #b3a592;
   --ok-bg: #14301f;
   --ok-text: #8fd9ae;
   --warn-bg: #33240f;
   --warn-text: #ffcb8a;
   --danger: #ff9c8f;
-  --chip: #1f242d;
-  --accent: #6fd3c2;
-  --on-accent: #0e1116;
-  --accent-soft: #173a36;
-  --accent-ink: #9be3d6;
-  --paper: #e9ebef;
+  --chip: #2c261f;
+  --accent: #d9a672;
+  --on-accent: #1a1612;
+  --accent-soft: #3a2c1e;
+  --accent-ink: #e8c298;
+  --moss: #b5cf7a;
+  --on-moss: #1a1612;
+  --paper: #efe8dc;
   color-scheme: dark;
-}
-
-:root[data-theme='dark'][data-accent='moss'] {
-  --accent: #b5cf7a;
-  --accent-soft: #2a331a;
-  --accent-ink: #cfe3a0;
 }
 
 *,

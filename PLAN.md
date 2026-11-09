@@ -19,7 +19,7 @@ Pilina started as a ground-up rebuild of CutList Optimizer. The existing apps (`
 | Pricing | **Chosen per project:** whole sheets, or area used plus a waste %. Kept offcuts can be credited back. Edge banding is priced per metre. |
 | Cut modes | **Guillotine first** (table saw / panel saw). The engine's API leaves room for a CNC nesting mode later. |
 | Languages | **English, Slovak and Czech** at launch, with translations set up from day one. The other 41 come later from the old translation files. |
-| Look | The design canvas: seafoam/moss accent, Inter font, orange rip cuts, red dashed cross cuts, light and dark themes. |
+| Look | The design canvas: warm workshop palette (wood-brown accent, moss green only on Start cutting), Inter font, orange rip cuts, red dashed cross cuts, light and dark themes. |
 
 ## Architecture
 
@@ -61,7 +61,7 @@ pilina/
 | Concern | Choice | Why |
 |---|---|---|
 | Framework | **React 19 + TypeScript + Vite** | Largest ecosystem, and `react-three-fiber` / `@react-three/xr` make the future AR view natural. |
-| Styling | CSS custom properties copied from the canvas tokens, plus CSS modules | Themes and accent switching come straight from the design. |
+| Styling | CSS custom properties copied from the canvas tokens, plus CSS modules | Light and dark themes come straight from the design. |
 | State | Zustand | Small, simple, works well with a worker. |
 | Storage | IndexedDB via Dexie, with a versioned schema and migrations | Local only, larger than localStorage, survives offline. |
 | Engine | `pilina-wasm` in a Web Worker via Comlink | Typed calls, the interface stays responsive. |

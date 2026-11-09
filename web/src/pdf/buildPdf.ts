@@ -31,15 +31,15 @@ const W = 595.28;
 const H = 841.89;
 const M = 40;
 
-const INK = hex('#1B2029');
-const INK_2 = hex('#4A5260');
-const INK_3 = hex('#6B7280');
-const RULE = hex('#D5D9DF');
-const BOARD = hex('#ECEEF1');
-const PART_STROKE = hex('#5D6573');
+const INK = hex('#2A2119');
+const INK_2 = hex('#5E5040');
+const INK_3 = hex('#7A6A57');
+const RULE = hex('#DCCFBB');
+const BOARD = hex('#EEE6D9');
+const PART_STROKE = hex('#6A5B4A');
 const RIP = hex('#DD6B0B');
 const CROSS = hex('#B42318');
-const ACCENT = hex('#127A6E');
+const ACCENT = hex('#8A5A34');
 const WARN = hex('#8A4300');
 
 function hex(h: string): RGB {
@@ -514,7 +514,7 @@ function drawSheet(
   page.drawRectangle({
     ...rect(0, 0, sheet.width, sheet.length),
     color: BOARD,
-    borderColor: hex('#2B313B'),
+    borderColor: hex('#3A2E22'),
     borderWidth: 1.2,
   });
 

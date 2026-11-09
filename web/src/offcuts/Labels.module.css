@@ -106,14 +106,14 @@
 .miniFilled {
   height: 18px;
   border-radius: 3px;
-  border: 1px solid #c9ced6;
+  border: 1px solid #cdbea6;
   font-size: 9px;
   padding: 0;
   line-height: 1;
 }
 
 .miniUsed {
-  background: #c9ced6;
+  background: #cdbea6;
 }
 
 .miniFree {
@@ -196,7 +196,7 @@
 }
 
 .stickerOutline {
-  border: 0.3mm dashed #c9ced6;
+  border: 0.3mm dashed #cdbea6;
   border-radius: 1.5mm;
 }
 
@@ -205,7 +205,7 @@
 }
 
 .stickerUsed {
-  background: #f1f2f4;
+  background: #f1ebe1;
 }
 
 .stickerNumber,
@@ -214,7 +214,7 @@
   right: 2mm;
   bottom: 1.5mm;
   font-size: 7pt;
-  color: #8a919c;
+  color: #9a8a74;
 }
 
 .zoom {

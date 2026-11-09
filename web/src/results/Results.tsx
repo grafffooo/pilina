@@ -351,7 +351,7 @@ function Legend({ sheet, parts }: { sheet: SheetLayout; parts: Map<string, PartI
       </div>
       <div className={styles.legendRow}>
         <svg width="28" height="14" aria-hidden="true">
-          <rect width="28" height="14" fill="#E3E6EA" stroke="#B7BDC6" />
+          <rect width="28" height="14" fill="#E8DFD0" stroke="#C2B39C" />
         </svg>
         {t('Leftover')}
       </div>

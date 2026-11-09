@@ -27,7 +27,7 @@ import {
   t as i18nT,
   type LanguageChoice,
 } from '../i18n';
-import { loadAppearance, saveAppearance, type Accent, type Theme } from './appearance';
+import { loadAppearance, saveAppearance, type Theme } from './appearance';
 import styles from './Sidebar.module.css';
 import { useTranslation } from 'react-i18next';
 
@@ -223,7 +223,7 @@ function AppearanceMenu() {
   const { t } = useTranslation();
   const [appearance, setAppearance] = useState(loadAppearance);
   const [language, setLanguage] = useState(loadLanguageChoice);
-  const update = (patch: Partial<{ theme: Theme; accent: Accent }>) => {
+  const update = (patch: Partial<{ theme: Theme }>) => {
     const next = { ...appearance, ...patch };
     setAppearance(next);
     saveAppearance(next);
@@ -265,19 +265,6 @@ function AppearanceMenu() {
                 onClick={() => update({ theme: th })}
               >
                 {th === 'system' ? t('Auto') : th === 'light' ? t('Light') : t('Dark')}
-              </button>
-            ))}
-          </div>
-          <span className={styles.appearanceLabel}>{t('Accent')}</span>
-          <div className={ui.segmented} role="group" aria-label={t('Accent colour')}>
-            {(['seafoam', 'moss'] as const).map((a) => (
-              <button
-                key={a}
-                type="button"
-                aria-pressed={appearance.accent === a}
-                onClick={() => update({ accent: a })}
-              >
-                {a === 'seafoam' ? t('Seafoam') : t('Moss')}
               </button>
             ))}
           </div>

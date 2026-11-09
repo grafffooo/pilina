@@ -210,7 +210,7 @@
   align-items: flex-start;
   flex-wrap: wrap;
   /* The paper is always light, so text on it uses fixed dark ink. */
-  color: #2b313b;
+  color: #3a2e22;
 }
 
 .canvas {
@@ -248,7 +248,7 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #4a5260;
+  color: #5e5040;
 }
 
 .legendRow {
@@ -259,14 +259,14 @@
 
 .legendRule {
   height: 1px;
-  background: #d5d9df;
+  background: #dccfbb;
 }
 
 .legendSwatch {
   width: 12px;
   height: 12px;
   border-radius: 3px;
-  border: 1px solid #5d6573;
+  border: 1px solid #6a5b4a;
 }
 
 /* Lists below the drawing */
@@ -381,7 +381,7 @@
 
 .cutRow[aria-pressed='true'] .cutNumRip {
   background: var(--cut-rip);
-  color: #1b2029;
+  color: #2a2119;
 }
 
 .cutRow[aria-pressed='true'] .cutNumCross {

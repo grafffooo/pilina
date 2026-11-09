@@ -35,7 +35,7 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
 
   const matName = (id: string | null) =>
     materials.find((m) => m.id === id)?.name ?? t('No material');
-  const matColor = (id: string | null) => materials.find((m) => m.id === id)?.color ?? '#C9CED6';
+  const matColor = (id: string | null) => materials.find((m) => m.id === id)?.color ?? '#CDBEA6';
 
   const available = offcuts.filter((o) => o.status === 'available');
   const area = available.reduce((a, o) => a + o.length * o.width, 0);

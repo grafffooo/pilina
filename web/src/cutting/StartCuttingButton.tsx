@@ -13,7 +13,7 @@ export function StartCuttingButton({ large }: { large?: boolean }) {
   return (
     <button
       type="button"
-      className={large ? styles.startLarge : ui.buttonPrimary}
+      className={large ? styles.startLarge : `${ui.buttonPrimary} ${styles.start}`}
       disabled={!ready}
       title={ready ? undefined : t('Available once the plan is up to date')}
       onClick={() => useStore.getState().setCutting(true)}

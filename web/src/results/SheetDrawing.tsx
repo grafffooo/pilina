@@ -9,12 +9,12 @@ import type { PartInfo } from './partInfo';
 import styles from './Results.module.css';
 import { useTranslation } from 'react-i18next';
 
-const INK = '#1B2029';
-const INK_2 = '#4A5260';
-const PART_STROKE = '#5D6573';
+const INK = '#2A2119';
+const INK_2 = '#5E5040';
+const PART_STROKE = '#6A5B4A';
 const RIP = '#DD6B0B';
 const CROSS = '#B42318';
-const EDGE = '#0D5C53';
+const EDGE = '#6B4426';
 
 /** Rough text width for Inter at `size`. */
 const textWidth = (text: string, size: number) => text.length * size * 0.56;
@@ -79,8 +79,8 @@ export function SheetDrawing({
           patternUnits="userSpaceOnUse"
           patternTransform="rotate(45)"
         >
-          <rect width={m * 0.017} height={m * 0.017} fill="#ECEEF1" />
-          <line x1="0" y1="0" x2="0" y2={m * 0.017} stroke="#D3D8DF" strokeWidth={m * 0.0045} />
+          <rect width={m * 0.017} height={m * 0.017} fill="#EEE6D9" />
+          <line x1="0" y1="0" x2="0" y2={m * 0.017} stroke="#DACDB8" strokeWidth={m * 0.0045} />
         </pattern>
       </defs>
 
@@ -88,7 +88,7 @@ export function SheetDrawing({
         width={w}
         height={l}
         fill={`url(#${hatchId})`}
-        stroke="#2B313B"
+        stroke="#3A2E22"
         strokeWidth={m * 0.0035}
       />
 

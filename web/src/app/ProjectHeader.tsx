@@ -1,3 +1,7 @@
+import { downloadBlob } from '../lib/download';
+import { confirmDialog } from '../ui/dialogs';
+import { formatMm } from '../lib/format';
+import { exportProjectFile, fileSlug } from '../model/importExport';
 import { useStore, updateProject } from '../store/store';
 import type { Project } from '../model/project';
 import { CheckIcon, MenuIcon, MoreIcon, RedoIcon, UndoIcon, WarningIcon } from '../ui/icons';
@@ -5,33 +9,35 @@ import { NumberInput } from '../ui/NumberInput';
 import { Menu, Popover } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import styles from './ProjectHeader.module.css';
+import { useTranslation } from 'react-i18next';
 
 export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className={styles.header}>
       {onMenu && (
-        <button type="button" className={ui.iconButton} aria-label="Projects" onClick={onMenu}>
+        <button type="button" className={ui.iconButton} aria-label={t('Projects')} onClick={onMenu}>
           <MenuIcon size={22} />
         </button>
       )}
       <div className={styles.titleBlock}>
         <input
           className={styles.title}
-          aria-label="Project name"
+          aria-label={t('Project name')}
           value={project.name}
-          placeholder="Untitled project"
+          placeholder={t('Untitled project')}
           onChange={(e) => updateProject({ name: e.target.value }, 'name')}
         />
         <div className={styles.chips}>
           <SettingChip
-            label="Kerf"
-            hint="Saw blade thickness"
+            label={t('Kerf')}
+            hint={t('Saw blade thickness')}
             value={project.kerf}
             onCommit={(kerf) => updateProject({ kerf }, 'kerf')}
           />
           <SettingChip
-            label="Edge trim"
-            hint="Trimmed off every sheet edge before cutting"
+            label={t('Edge trim')}
+            hint={t('Trimmed off every sheet edge before cutting')}
             value={project.trim}
             onCommit={(trim) => updateProject({ trim }, 'trim')}
           />
@@ -42,21 +48,37 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
         <UndoRedo />
         <Menu
           label={<MoreIcon />}
-          ariaLabel="Project actions"
+          ariaLabel={t('Project actions')}
           triggerClassName={ui.iconButton}
           items={[
             {
-              label: 'Duplicate project',
+              label: t('Duplicate project'),
               onSelect: () => useStore.getState().duplicateProject(project.id),
             },
             {
-              label: 'Delete project…',
-              danger: true,
+              label: t('Export project file'),
               onSelect: () => {
-                const name = project.name || 'Untitled project';
-                if (window.confirm(`Delete “${name}”? This can’t be undone.`)) {
-                  void useStore.getState().deleteProject(project.id);
-                }
+                const { materials, edgeBands } = useStore.getState();
+                const file = exportProjectFile(project, materials, edgeBands);
+                void downloadBlob(
+                  new Blob([JSON.stringify(file, null, 2)], { type: 'application/json' }),
+                  `${fileSlug(project.name)}.cutlist.json`,
+                  { name: t('CutList project'), extensions: ['json'] },
+                );
+              },
+            },
+            {
+              label: t('Delete project…'),
+              danger: true,
+              onSelect: async () => {
+                const name = project.name || t('Untitled project');
+                const ok = await confirmDialog({
+                  title: t('Delete project?'),
+                  message: t('Delete “{{name}}”? This can’t be undone.', { name }),
+                  confirmLabel: t('Delete'),
+                  danger: true,
+                });
+                if (ok) void useStore.getState().deleteProject(project.id);
               },
             },
           ]}
@@ -82,7 +104,7 @@ function SettingChip({
       triggerClassName={styles.chip}
       label={
         <>
-          {label} <strong>{value} mm</strong>
+          {label} <strong>{formatMm(value)} mm</strong>
         </>
       }
     >
@@ -105,13 +127,14 @@ function SettingChip({
 }
 
 export function RunStatus() {
+  const { t } = useTranslation();
   const status = useStore((s) => s.result.status);
   if (status === 'empty') return null;
   if (status === 'error') {
     return (
       <span className={styles.statusError} role="status">
         <WarningIcon size={14} />
-        Engine error
+        {t('Engine error')}
       </span>
     );
   }
@@ -120,12 +143,12 @@ export function RunStatus() {
       {status === 'running' ? (
         <>
           <span className={styles.spinner} aria-hidden="true" />
-          Optimizing…
+          {t('Optimizing…')}
         </>
       ) : (
         <>
           <CheckIcon size={14} />
-          Up to date
+          {t('Up to date')}
         </>
       )}
     </span>
@@ -133,6 +156,7 @@ export function RunStatus() {
 }
 
 function UndoRedo() {
+  const { t } = useTranslation();
   const canUndo = useStore((s) => s.history.past.length > 0);
   const canRedo = useStore((s) => s.history.future.length > 0);
   const mac = typeof navigator !== 'undefined' && /Mac|iP/.test(navigator.platform);
@@ -141,8 +165,8 @@ function UndoRedo() {
       <button
         type="button"
         className={ui.iconButton}
-        aria-label="Undo"
-        title={mac ? 'Undo (⌘Z)' : 'Undo (Ctrl+Z)'}
+        aria-label={t('Undo')}
+        title={`${t('Undo')} (${mac ? '⌘Z' : 'Ctrl+Z'})`}
         disabled={!canUndo}
         onClick={() => useStore.getState().undo()}
       >
@@ -151,8 +175,8 @@ function UndoRedo() {
       <button
         type="button"
         className={ui.iconButton}
-        aria-label="Redo"
-        title={mac ? 'Redo (⇧⌘Z)' : 'Redo (Ctrl+Y)'}
+        aria-label={t('Redo')}
+        title={`${t('Redo')} (${mac ? '⇧⌘Z' : 'Ctrl+Y'})`}
         disabled={!canRedo}
         onClick={() => useStore.getState().redo()}
       >

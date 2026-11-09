@@ -1,4 +1,6 @@
 // Locale-aware number formatting used across the UI (max 2 decimals, grouped thousands).
+// Without an explicit locale, the current interface language is used.
+import { locale as current } from '../i18n';
 
 const cache = new Map<string, Intl.NumberFormat>();
 
@@ -11,18 +13,18 @@ function formatter(locale: string): Intl.NumberFormat {
   return f;
 }
 
-export function formatNumber(value: number, locale = 'en'): string {
+export function formatNumber(value: number, locale: string = current()): string {
   return Number.isFinite(value) ? formatter(locale).format(value) : '–';
 }
 
 /** Millimetres to metres for long totals (cut length, edge banding), e.g. 16386 → "16.4 m". */
-export function formatMetres(mm: number, locale = 'en'): string {
+export function formatMetres(mm: number, locale: string = current()): string {
   if (!Number.isFinite(mm)) return '–';
   return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(mm / 1000)} m`;
 }
 
 /** Square millimetres to square metres, e.g. 2559200 → "2.56 m²". */
-export function formatSquareMetres(mm2: number, locale = 'en'): string {
+export function formatSquareMetres(mm2: number, locale: string = current()): string {
   if (!Number.isFinite(mm2)) return '–';
   return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(mm2 / 1e6)} m²`;
 }
@@ -30,7 +32,7 @@ export function formatSquareMetres(mm2: number, locale = 'en'): string {
 const sizeCache = new Map<string, Intl.NumberFormat>();
 
 /** Millimetre sizes and positions: no thousands grouping ("2800", "18.5"), as on a cut list. */
-export function formatMm(value: number, locale = 'en'): string {
+export function formatMm(value: number, locale: string = current()): string {
   if (!Number.isFinite(value)) return '–';
   let f = sizeCache.get(locale);
   if (!f) {

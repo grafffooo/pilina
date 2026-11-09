@@ -12,12 +12,15 @@ import {
 } from '../store/store';
 import { ChevronLeftIcon, MenuIcon, MoreIcon } from '../ui/icons';
 import { NumberInput } from '../ui/NumberInput';
+import { confirmDialog } from '../ui/dialogs';
 import { Menu } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import editor from '../editor/Editor.module.css';
 import styles from './Library.module.css';
+import { useTranslation } from 'react-i18next';
 
 export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
+  const { t } = useTranslation();
   const materials = useStore((s) => s.materials);
   const bands = useStore((s) => s.edgeBands);
   const settings = useStore((s) => s.settings);
@@ -33,35 +36,42 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
     <div className={styles.screen}>
       <div className={styles.header}>
         {onMenu && (
-          <button type="button" className={ui.iconButton} aria-label="Projects" onClick={onMenu}>
+          <button
+            type="button"
+            className={ui.iconButton}
+            aria-label={t('Projects')}
+            onClick={onMenu}
+          >
             <MenuIcon size={22} />
           </button>
         )}
         <button type="button" className={ui.button} onClick={back}>
           <ChevronLeftIcon size={16} />
-          Back to project
+          {t('Back to project')}
         </button>
-        <h1 className={styles.title}>Materials & prices</h1>
+        <h1 className={styles.title}>{t('Materials & prices')}</h1>
       </div>
 
       <section className={editor.card} aria-labelledby="materials-h">
         <div className={editor.cardHeader}>
-          <h2 id="materials-h">Boards</h2>
+          <h2 id="materials-h">{t('Boards')}</h2>
           <span className={editor.cardMeta}>
-            A per-sheet price is for the size shown; other sizes (and offcuts) are priced by area.
+            {t(
+              'A per-sheet price is for the size shown; other sizes (and offcuts) are priced by area.',
+            )}
           </span>
           <span className={editor.spacer} />
           <button
             type="button"
             className={ui.buttonPrimary}
             onClick={() => {
-              const m = addMaterial('New board', { length: 2800, width: 2070 });
+              const m = addMaterial(t('New board'), { length: 2800, width: 2070 });
               requestAnimationFrame(() =>
                 document.querySelector<HTMLInputElement>(`[data-material="${m.id}"]`)?.select(),
               );
             }}
           >
-            Add board
+            {t('Add board')}
           </button>
         </div>
         <div className={editor.tableWrap}>
@@ -69,15 +79,15 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
             <thead>
               <tr>
                 <th className={styles.colColor}>
-                  <span className="sr-only">Colour</span>
+                  <span className="sr-only">{t('Colour')}</span>
                 </th>
-                <th>Name</th>
-                <th className={editor.num}>Thickness</th>
-                <th className={editor.num}>Price</th>
-                <th>Per</th>
-                <th>For sheet size</th>
+                <th>{t('Name')}</th>
+                <th className={editor.num}>{t('Thickness')}</th>
+                <th className={editor.num}>{t('Price')}</th>
+                <th>{t('Per')}</th>
+                <th>{t('For sheet size')}</th>
                 <th className={editor.colMore}>
-                  <span className="sr-only">More</span>
+                  <span className="sr-only">{t('More')}</span>
                 </th>
               </tr>
             </thead>
@@ -85,7 +95,7 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
               {materials.length === 0 && (
                 <tr>
                   <td colSpan={7} className={styles.empty}>
-                    No boards yet. Add the sheet materials you buy, with their prices.
+                    {t('No boards yet. Add the sheet materials you buy, with their prices.')}
                   </td>
                 </tr>
               )}
@@ -97,7 +107,7 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                       <input
                         type="color"
                         className={styles.color}
-                        aria-label={`Colour of ${m.name}`}
+                        aria-label={t('Colour of {{name}}', { name: m.name })}
                         value={m.color}
                         onChange={(e) => updateMaterial(m.id, { color: e.target.value })}
                       />
@@ -105,22 +115,20 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                     <td>
                       <input
                         className={`${editor.cell} ${editor.cellText}`}
-                        aria-label="Board name"
+                        aria-label={t('Board name')}
                         data-material={m.id}
                         value={m.name}
                         onChange={(e) => updateMaterial(m.id, { name: e.target.value })}
                       />
                       {used > 0 && (
-                        <span className={styles.usage}>
-                          in {used} {used === 1 ? 'project' : 'projects'}
-                        </span>
+                        <span className={styles.usage}>{t('in_n_projects', { count: used })}</span>
                       )}
                     </td>
                     <td className={styles.colNum}>
                       <span className={styles.withUnit}>
                         <NumberInput
                           className={editor.cell}
-                          aria-label={`Thickness of ${m.name}, mm`}
+                          aria-label={t('Thickness of {{name}}, mm', { name: m.name })}
                           value={m.thickness}
                           onCommit={(thickness) => updateMaterial(m.id, { thickness })}
                         />
@@ -130,7 +138,7 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                     <td className={styles.colNum}>
                       <NumberInput
                         className={editor.cell}
-                        aria-label={`Price of ${m.name}`}
+                        aria-label={t('Price of {{name}}', { name: m.name })}
                         aria-invalid={m.price === null || undefined}
                         placeholder="—"
                         value={m.price}
@@ -140,13 +148,13 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                     <td>
                       <select
                         className={editor.select}
-                        aria-label={`Price unit of ${m.name}`}
+                        aria-label={t('Price unit of {{name}}', { name: m.name })}
                         value={m.priceUnit}
                         onChange={(e) =>
                           updateMaterial(m.id, { priceUnit: e.target.value as 'sheet' | 'sqm' })
                         }
                       >
-                        <option value="sheet">sheet</option>
+                        <option value="sheet">{t('sheet')}</option>
                         <option value="sqm">m²</option>
                       </select>
                     </td>
@@ -155,42 +163,50 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                         <span className={styles.size}>
                           <NumberInput
                             className={editor.cell}
-                            aria-label={`Sheet length for the price of ${m.name}`}
-                            placeholder="Length"
+                            aria-label={t('Sheet length for the price of {{name}}', {
+                              name: m.name,
+                            })}
+                            placeholder={t('Length')}
                             value={m.sheetLength}
                             onCommit={(sheetLength) => updateMaterial(m.id, { sheetLength })}
                           />
                           ×
                           <NumberInput
                             className={editor.cell}
-                            aria-label={`Sheet width for the price of ${m.name}`}
-                            placeholder="Width"
+                            aria-label={t('Sheet width for the price of {{name}}', {
+                              name: m.name,
+                            })}
+                            placeholder={t('Width')}
                             value={m.sheetWidth}
                             onCommit={(sheetWidth) => updateMaterial(m.id, { sheetWidth })}
                           />
                         </span>
                       ) : (
-                        <span className={styles.muted}>any size</span>
+                        <span className={styles.muted}>{t('any size')}</span>
                       )}
                     </td>
                     <td className={editor.colMore}>
                       <Menu
                         label={<MoreIcon />}
-                        ariaLabel={`More actions for ${m.name}`}
+                        ariaLabel={t('More actions for {{name}}', { name: m.name })}
                         triggerClassName={ui.iconButton}
                         items={[
                           {
-                            label: 'Delete',
+                            label: t('Delete'),
                             danger: true,
-                            onSelect: () => {
-                              if (
+                            onSelect: async () => {
+                              const ok =
                                 used === 0 ||
-                                window.confirm(
-                                  `“${m.name}” is used in ${used} ${used === 1 ? 'project' : 'projects'}. Delete it anyway? Those sheets will have no price.`,
-                                )
-                              ) {
-                                removeMaterial(m.id);
-                              }
+                                (await confirmDialog({
+                                  title: t('Delete material?'),
+                                  message: t('delete_material_in_use', {
+                                    name: m.name,
+                                    count: used,
+                                  }),
+                                  confirmLabel: t('Delete'),
+                                  danger: true,
+                                }));
+                              if (ok) removeMaterial(m.id);
                             },
                           },
                         ]}
@@ -206,9 +222,9 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
 
       <section className={editor.card} aria-labelledby="bands-h">
         <div className={editor.cardHeader}>
-          <h2 id="bands-h">Edge bands</h2>
+          <h2 id="bands-h">{t('Edge bands')}</h2>
           <span className={editor.cardMeta}>
-            Priced per metre, plus {settings.edgeAllowance} mm per banded edge
+            {t('Priced per metre, plus {{mm}} mm per banded edge', { mm: settings.edgeAllowance })}
           </span>
           <span className={editor.spacer} />
           <button
@@ -221,17 +237,17 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
               );
             }}
           >
-            Add edge band
+            {t('Add edge band')}
           </button>
         </div>
         <div className={editor.tableWrap}>
           <table className={`${editor.table} ${styles.table}`}>
             <thead>
               <tr>
-                <th>Name</th>
-                <th className={editor.num}>Price per metre</th>
+                <th>{t('Name')}</th>
+                <th className={editor.num}>{t('Price per metre')}</th>
                 <th className={editor.colMore}>
-                  <span className="sr-only">More</span>
+                  <span className="sr-only">{t('More')}</span>
                 </th>
               </tr>
             </thead>
@@ -239,7 +255,7 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
               {bands.length === 0 && (
                 <tr>
                   <td colSpan={3} className={styles.empty}>
-                    No edge bands yet.
+                    {t('No edge bands yet.')}
                   </td>
                 </tr>
               )}
@@ -248,7 +264,7 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                   <td>
                     <input
                       className={`${editor.cell} ${editor.cellText}`}
-                      aria-label="Edge band name"
+                      aria-label={t('Edge band name')}
                       data-band={b.id}
                       value={b.name}
                       onChange={(e) => updateEdgeBand(b.id, { name: e.target.value })}
@@ -257,7 +273,7 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                   <td className={styles.colNum}>
                     <NumberInput
                       className={editor.cell}
-                      aria-label={`Price per metre of ${b.name}`}
+                      aria-label={t('Price per metre of {{name}}', { name: b.name })}
                       aria-invalid={b.pricePerMetre === null || undefined}
                       placeholder="—"
                       value={b.pricePerMetre}
@@ -267,10 +283,10 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                   <td className={editor.colMore}>
                     <Menu
                       label={<MoreIcon />}
-                      ariaLabel={`More actions for ${b.name}`}
+                      ariaLabel={t('More actions for {{name}}', { name: b.name })}
                       triggerClassName={ui.iconButton}
                       items={[
-                        { label: 'Delete', danger: true, onSelect: () => removeEdgeBand(b.id) },
+                        { label: t('Delete'), danger: true, onSelect: () => removeEdgeBand(b.id) },
                       ]}
                     />
                   </td>
@@ -283,11 +299,11 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
 
       <section className={editor.card} aria-labelledby="settings-h">
         <div className={editor.cardHeader}>
-          <h2 id="settings-h">Settings</h2>
+          <h2 id="settings-h">{t('Settings')}</h2>
         </div>
         <div className={editor.form}>
           <label className={editor.formRow}>
-            <span className={editor.formLabel}>Currency</span>
+            <span className={editor.formLabel}>{t('Currency')}</span>
             <select
               className={ui.fieldInput}
               value={settings.currency}
@@ -301,30 +317,30 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
             </select>
           </label>
           <label className={editor.formRow}>
-            <span className={editor.formLabel}>Edge band allowance</span>
+            <span className={editor.formLabel}>{t('Edge band allowance')}</span>
             <span className={editor.inline}>
               <NumberInput
                 className={`${ui.fieldInput} ${editor.shortInput}`}
                 value={settings.edgeAllowance}
                 onCommit={(v) => updateSettings({ edgeAllowance: Math.max(0, v ?? 0) })}
               />
-              mm extra per banded edge
+              {t('mm extra per banded edge')}
             </span>
           </label>
           <div className={editor.formRow}>
-            <span className={editor.formLabel}>Reusable leftover</span>
+            <span className={editor.formLabel}>{t('Reusable leftover')}</span>
             <span className={editor.inline}>
-              at least
+              {t('at least')}
               <NumberInput
                 className={`${ui.fieldInput} ${editor.shortInput}`}
-                aria-label="Minimum leftover length, mm"
+                aria-label={t('Minimum leftover length, mm')}
                 value={settings.offcutMinLength}
                 onCommit={(v) => updateSettings({ offcutMinLength: Math.max(0, v ?? 0) })}
               />
               ×
               <NumberInput
                 className={`${ui.fieldInput} ${editor.shortInput}`}
-                aria-label="Minimum leftover width, mm"
+                aria-label={t('Minimum leftover width, mm')}
                 value={settings.offcutMinWidth}
                 onCommit={(v) => updateSettings({ offcutMinWidth: Math.max(0, v ?? 0) })}
               />

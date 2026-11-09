@@ -1,5 +1,6 @@
 // Human-readable descriptions of plan geometry, shared by the drawing and the lists.
 import type { Cut, Placement, Rect } from '../engine/types';
+import { t } from '../i18n';
 
 /** Soft fills for part rows, readable on the light "paper" in both themes. */
 export const PART_SWATCHES = [
@@ -36,13 +37,21 @@ export function cutKind(c: Cut): CutKind {
   }
 }
 
-export const CUT_KIND_LABEL: Record<CutKind, string> = {
-  trim: 'Edge trim',
-  rip: 'Rip, full length',
-  cross: 'Cross cut',
-  split: 'Split',
-  'part-trim': 'Trim to size',
-};
+/** Human name of a cut kind, in the interface language. */
+export function cutKindLabel(c: Cut): string {
+  switch (cutKind(c)) {
+    case 'trim':
+      return t('Edge trim');
+    case 'rip':
+      return t('Rip, full length');
+    case 'cross':
+      return t('Cross cut');
+    case 'split':
+      return t('Split');
+    default:
+      return t('Trim to size');
+  }
+}
 
 /** Rips (and edge trims) are drawn orange; every other cut is a red cross cut. */
 export function isRipLike(c: Cut): boolean {

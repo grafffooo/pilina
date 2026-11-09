@@ -3,22 +3,26 @@ import type { Edges } from '../engine/types';
 import { ALL_EDGES, NO_EDGES } from '../model/project';
 import { useCurrentProject, useStore } from '../store/store';
 import { Popover } from '../ui/Popover';
+import { t as i18nT } from '../i18n';
 import styles from './Editor.module.css';
+import { useTranslation } from 'react-i18next';
 
-const SIDES: { key: keyof Edges; label: string }[] = [
-  { key: 'top', label: 'Long edge 1' },
-  { key: 'bottom', label: 'Long edge 2' },
-  { key: 'left', label: 'Short edge 1' },
-  { key: 'right', label: 'Short edge 2' },
+const SIDES: { key: keyof Edges; label: () => string }[] = [
+  { key: 'top', label: () => i18nT('Long edge 1') },
+  { key: 'bottom', label: () => i18nT('Long edge 2') },
+  { key: 'left', label: () => i18nT('Short edge 1') },
+  { key: 'right', label: () => i18nT('Short edge 2') },
 ];
 
 export function describeEdges(e: Edges): string {
   const n = [e.top, e.bottom, e.left, e.right].filter(Boolean).length;
-  if (n === 0) return 'none';
-  if (n === 4) return 'all 4 edges';
+  if (n === 0) return i18nT('none');
+  if (n === 4) return i18nT('all 4 edges');
   const long = [e.top, e.bottom].filter(Boolean).length;
   const short = n - long;
-  return [long && `${long} long`, short && `${short} short`].filter(Boolean).join(', ');
+  return [long && i18nT('{{n}} long', { n: long }), short && i18nT('{{n}} short', { n: short })]
+    .filter(Boolean)
+    .join(', ');
 }
 
 /** Small part outline with the banded edges drawn thick in the accent colour. */
@@ -49,19 +53,23 @@ export function EdgePicker({
   onChange: (e: Edges) => void;
   onBandChange: (id: string | null) => void;
 }) {
+  const { t } = useTranslation();
   const bands = useStore((s) => s.edgeBands);
   const defaultId = useCurrentProject()?.defaultEdgeBandId ?? null;
   const defaultName = bands.find((b) => b.id === defaultId)?.name;
   return (
     <Popover
       triggerClassName={styles.edgeButton}
-      ariaLabel={`Edge banding for ${partName}: ${describeEdges(edges)}`}
+      ariaLabel={t('Edge banding for {{name}}: {{edges}}', {
+        name: partName,
+        edges: describeEdges(edges),
+      })}
       label={<EdgeGlyph edges={edges} />}
       align="end"
     >
       {() => (
         <fieldset className={styles.edgePanel}>
-          <legend>Edge banding</legend>
+          <legend>{t('Edge banding')}</legend>
           {SIDES.map((s) => (
             <label key={s.key} className={styles.edgeOption}>
               <input
@@ -69,26 +77,30 @@ export function EdgePicker({
                 checked={edges[s.key]}
                 onChange={(e) => onChange({ ...edges, [s.key]: e.target.checked })}
               />
-              {s.label}
+              {s.label()}
             </label>
           ))}
           <div className={styles.edgeQuick}>
             <button type="button" onClick={() => onChange({ ...ALL_EDGES })}>
-              All
+              {t('All')}
             </button>
             <button type="button" onClick={() => onChange({ ...NO_EDGES })}>
-              None
+              {t('None')}
             </button>
           </div>
           {bands.length > 0 && (
             <label className={styles.edgeBand}>
-              Band
+              {t('Band')}
               <select
                 className={styles.select}
                 value={bandId ?? ''}
                 onChange={(e) => onBandChange(e.target.value || null)}
               >
-                <option value="">Project default{defaultName ? ` (${defaultName})` : ''}</option>
+                <option value="">
+                  {defaultName
+                    ? t('Project default ({{name}})', { name: defaultName })
+                    : t('Project default')}
+                </option>
                 {bands.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}

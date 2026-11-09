@@ -1,6 +1,7 @@
 // A cutting session: a frozen copy of the plan plus where you are in it, kept on this
 // device so closing the tab (or the phone locking) doesn't lose your place.
 import type { Job, Plan, SheetLayout } from '../engine/types';
+import { t } from '../i18n';
 
 export interface CutSession {
   /** Identity of the job the plan was made for; a changed project starts a new session. */
@@ -49,5 +50,7 @@ export function saveSession(projectId: string, session: CutSession | null) {
 
 /** What to say for a cut, on screen and read aloud. */
 export function cutSentence(axis: 'x' | 'y', pos: number): string {
-  return axis === 'x' ? `${pos} mm from the left edge` : `${pos} mm from the top edge`;
+  return axis === 'x'
+    ? t('{{pos}} mm from the left edge', { pos })
+    : t('{{pos}} mm from the top edge', { pos });
 }

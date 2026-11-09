@@ -4,17 +4,11 @@ import fontkit from '@pdf-lib/fontkit';
 import { PDFDocument, degrees, rgb, type PDFFont, type PDFPage, type RGB } from 'pdf-lib';
 import type { CostBreakdown, Job, Plan, SheetLayout } from '../engine/types';
 import { formatMetres, formatMm, formatNumber, formatSquareMetres } from '../lib/format';
-import {
-  CUT_KIND_LABEL,
-  classifyOffcut,
-  cutKind,
-  isRipLike,
-  sizeOf,
-  swatch,
-} from '../model/describe';
+import { cutKindLabel, classifyOffcut, isRipLike, sizeOf, swatch } from '../model/describe';
 import { unplacedReason, usedPercent } from '../model/job';
 import { formatMoney, type Material } from '../model/library';
 import type { Project } from '../model/project';
+import { locale, t as tr } from '../i18n';
 
 export interface PdfInput {
   project: Project;
@@ -101,7 +95,7 @@ export async function buildPdf(input: PdfInput, fonts: PdfFonts): Promise<Uint8A
   // most viewers), so the file is ~370 KB instead of ~20 KB.
   const regular = await doc.embedFont(fonts.regular, { subset: false });
   const bold = await doc.embedFont(fonts.semibold, { subset: false });
-  doc.setTitle(input.project.name || 'Cutting plan');
+  doc.setTitle(input.project.name || tr('Cutting plan'));
   doc.setCreator('CutList');
   doc.setProducer('CutList');
 
@@ -118,7 +112,7 @@ export async function buildPdf(input: PdfInput, fonts: PdfFonts): Promise<Uint8A
 
   // Footers once the page count is known.
   const pages = doc.getPages();
-  const name = input.project.name || 'Untitled project';
+  const name = input.project.name || tr('Untitled project');
   pages.forEach((page, i) => {
     text(page, regular, clip(regular, name, 8, 300), M, H - 28, 8, INK_3);
     text(page, regular, `${i + 1} / ${pages.length}`, W - M, H - 28, 8, INK_3, 'right');
@@ -135,17 +129,21 @@ function summaryPages(ctx: Ctx) {
   let page = ctx.doc.addPage([W, H]);
   let y = M;
 
-  const date = (input.date ?? new Date()).toLocaleDateString('en-GB', {
+  const date = (input.date ?? new Date()).toLocaleDateString(locale(), {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   });
-  text(page, bold, clip(bold, project.name || 'Untitled project', 22, W - 2 * M), M, y, 22);
+  text(page, bold, clip(bold, project.name || tr('Untitled project'), 22, W - 2 * M), M, y, 22);
   y += 30;
   text(
     page,
     regular,
-    `Cutting plan · ${date} · kerf ${formatMm(job.kerf)} mm · edge trim ${formatMm(job.trim ?? 0)} mm`,
+    tr('Cutting plan · {{date}} · kerf {{kerf}} mm · edge trim {{trim}} mm', {
+      date,
+      kerf: formatMm(job.kerf),
+      trim: formatMm(job.trim ?? 0),
+    }),
     M,
     y,
     9,
@@ -156,13 +154,13 @@ function summaryPages(ctx: Ctx) {
   // Key numbers
   const t = plan.totals;
   const stats: [string, string][] = [
-    ['Sheets', formatNumber(t.sheets)],
-    ['Material used', `${formatNumber(Math.round(usedPercent(plan)))}%`],
-    ['Cuts', formatNumber(t.cuts)],
-    ['Sawing', formatMetres(t.cutLength)],
-    ['Edge banding', formatMetres(t.edgeBandLength)],
+    [tr('Sheets'), formatNumber(t.sheets)],
+    [tr('Material used'), `${formatNumber(Math.round(usedPercent(plan)))}%`],
+    [tr('Cuts'), formatNumber(t.cuts)],
+    [tr('Sawing'), formatMetres(t.cutLength)],
+    [tr('Edge banding'), formatMetres(t.edgeBandLength)],
   ];
-  if (cost) stats.push(['Cost', formatMoney(cost.total, currency)]);
+  if (cost) stats.push([tr('Cost'), formatMoney(cost.total, currency)]);
   const colW = (W - 2 * M) / stats.length;
   stats.forEach(([label, value], i) => {
     text(page, regular, label, M + i * colW, y, 8, INK_3);
@@ -174,14 +172,25 @@ function summaryPages(ctx: Ctx) {
 
   // Cost
   if (cost) {
-    text(page, bold, 'Cost', M, y, 12);
+    const costTitle = tr('Cost');
+    text(page, bold, costTitle, M, y, 12);
     const modeText =
       project.pricing.mode === 'area'
-        ? `board by area used + ${formatNumber(project.pricing.wastePct)}% waste`
+        ? tr('Board charged by area used + {{pct}}% waste', {
+            pct: formatNumber(project.pricing.wastePct),
+          })
         : project.pricing.offcutCredit
-          ? 'board by whole sheets, reusable leftovers credited'
-          : 'board by whole sheets';
-    text(page, regular, modeText, M + 40, y + 2, 8.5, INK_3);
+          ? tr('Board charged by whole sheets, leftovers credited')
+          : tr('Board charged by whole sheets');
+    text(
+      page,
+      regular,
+      modeText,
+      M + bold.widthOfTextAtSize(costTitle, 12) + 12,
+      y + 2,
+      8.5,
+      INK_3,
+    );
     y += 20;
     const line = (label: string, note: string, amount: string, color: RGB = INK) => {
       text(page, regular, clip(regular, label, 9.5, 260), M, y, 9.5, color);
@@ -192,17 +201,17 @@ function summaryPages(ctx: Ctx) {
     for (const m of cost.materials) {
       const note =
         project.pricing.mode === 'area'
-          ? `${formatSquareMetres(m.usedArea)} used`
-          : `${m.sheets} ${m.sheets === 1 ? 'sheet' : 'sheets'}`;
+          ? tr('{{area}} used', { area: formatSquareMetres(m.usedArea) })
+          : tr('n_sheets', { count: m.sheets });
       line(
         m.material,
         note,
-        m.priced ? formatMoney(m.gross, currency) : 'no price',
+        m.priced ? formatMoney(m.gross, currency) : tr('no price'),
         m.priced ? INK : WARN,
       );
       if (m.credit > 0) {
         line(
-          'Reusable leftovers credited',
+          tr('Reusable leftovers credited'),
           formatSquareMetres(m.creditArea),
           `−${formatMoney(m.credit, currency)}`,
           ACCENT,
@@ -213,28 +222,28 @@ function summaryPages(ctx: Ctx) {
       line(
         b.band,
         formatMetres(b.length),
-        b.priced ? formatMoney(b.cost, currency) : 'no price',
+        b.priced ? formatMoney(b.cost, currency) : tr('no price'),
         b.priced ? INK : WARN,
       );
     }
     for (const x of project.pricing.extras.filter((e) => e.amount !== null)) {
       const qty = x.qty ?? 1;
       line(
-        x.label || 'Extra cost',
+        x.label || tr('Extra cost'),
         qty !== 1 ? `${formatNumber(qty)} × ${formatMoney(x.amount!, currency)}` : '',
         formatMoney(x.amount! * qty, currency),
       );
     }
     rule(page, y - 3, M + 270);
     y += 4;
-    text(page, bold, 'Total', M + 270, y, 11);
+    text(page, bold, tr('Total'), M + 270, y, 11);
     text(page, bold, formatMoney(cost.total, currency), W - M, y, 11, INK, 'right');
     y += 18;
     if (!cost.complete) {
       text(
         page,
         regular,
-        'Some materials or edge bands have no price, so the total is incomplete.',
+        tr('Some materials or edge bands have no price, so the total is incomplete.'),
         M,
         y,
         8.5,
@@ -248,15 +257,15 @@ function summaryPages(ctx: Ctx) {
   // Parts that didn't fit
   if (plan.unplaced.length > 0) {
     const n = plan.unplaced.reduce((a, u) => a + u.count, 0);
-    text(page, bold, `${n} ${n === 1 ? 'part doesn’t' : 'parts don’t'} fit`, M, y, 11, WARN);
+    text(page, bold, tr('n_parts_dont_fit', { count: n }), M, y, 11, WARN);
     y += 16;
     for (const u of plan.unplaced) {
       const spec = job.parts.find((p) => p.id === u.partId);
       const why =
         spec && unplacedReason(spec, job) === 'too-big'
-          ? 'bigger than every stock sheet'
-          : 'not enough stock';
-      const label = spec?.label || 'Part';
+          ? tr('bigger than every stock sheet')
+          : tr('not enough stock');
+      const label = spec?.label || tr('Part');
       text(
         page,
         regular,
@@ -276,16 +285,16 @@ function summaryPages(ctx: Ctx) {
   const showMaterial = project.parts.some((p) => p.materialId);
   const cols = [
     { title: '', w: 14 },
-    { title: 'Label', w: showMaterial ? 150 : 220 },
-    { title: 'Length', w: 52, right: true },
-    { title: 'Width', w: 52, right: true },
-    { title: 'Qty', w: 34, right: true },
-    { title: 'Grain', w: 50 },
-    { title: 'Edges', w: 70 },
-    ...(showMaterial ? [{ title: 'Material', w: 93 }] : []),
+    { title: tr('Label'), w: showMaterial ? 125 : 195 },
+    { title: tr('Length'), w: 52, right: true },
+    { title: tr('Width'), w: 52, right: true },
+    { title: tr('Qty'), w: 34, right: true },
+    { title: tr('Grain'), w: 50 },
+    { title: tr('Edges'), w: 95 },
+    ...(showMaterial ? [{ title: tr('Material'), w: 93 }] : []),
   ];
   const header = (p: PDFPage, top: number) => {
-    text(p, bold, 'Parts', M, top, 12);
+    text(p, bold, tr('Parts'), M, top, 12);
     let x = M;
     for (const c of cols) {
       text(
@@ -315,17 +324,22 @@ function summaryPages(ctx: Ctx) {
     const long = Number(e.top) + Number(e.bottom);
     const short = Number(e.left) + Number(e.right);
     const edges =
-      long + short === 0 ? '—' : long + short === 4 ? 'all 4' : `${long} long, ${short} short`;
-    const grain = p.grain === 'none' ? 'any' : p.grain === 'length' ? 'length' : 'width';
+      long + short === 0
+        ? '—'
+        : long + short === 4
+          ? tr('all 4')
+          : tr('{{long}} long, {{short}} short', { long, short });
+    const grain =
+      p.grain === 'none' ? tr('any') : p.grain === 'length' ? tr('length') : tr('width');
     const cells = [
       '',
-      p.label || `Part ${i + 1}`,
+      p.label || tr('Part {{n}}', { n: i + 1 }),
       formatMm(p.length!),
       formatMm(p.width!),
       formatNumber(p.qty!),
       grain,
       edges,
-      ...(showMaterial ? [(p.materialId && materialName.get(p.materialId)) || 'any'] : []),
+      ...(showMaterial ? [(p.materialId && materialName.get(p.materialId)) || tr('any')] : []),
     ];
     page.drawRectangle({
       x: M,
@@ -363,17 +377,17 @@ function summaryPages(ctx: Ctx) {
     page = ctx.doc.addPage([W, H]);
     y = M;
   }
-  text(page, bold, 'Stock sheets used', M, y, 12);
+  text(page, bold, tr('Stock sheets used'), M, y, 12);
   y += 20;
   const used = new Map<string, number>();
   plan.sheets.forEach((s) => used.set(s.stockId, (used.get(s.stockId) ?? 0) + s.qty));
   for (const s of job.stock) {
     const n = used.get(s.id) ?? 0;
     if (n === 0) continue;
-    const name = s.label || 'Unnamed material';
+    const name = s.label || tr('Unnamed material');
     text(page, regular, `${formatMm(s.length)} × ${formatMm(s.width)}`, M, y, 9.5);
     text(page, regular, clip(regular, name, 9.5, 300), M + 110, y, 9.5);
-    text(page, bold, `${n} ${n === 1 ? 'sheet' : 'sheets'}`, W - M, y, 9.5, INK, 'right');
+    text(page, bold, tr('n_sheets', { count: n }), W - M, y, 9.5, INK, 'right');
     y += 15;
   }
 }
@@ -387,8 +401,13 @@ function sheetPage(ctx: Ctx, sheet: SheetLayout, index: number) {
   const before = plan.sheets.slice(0, index).reduce((n, s) => n + s.qty, 0);
   const title =
     sheet.qty > 1
-      ? `Sheets ${before + 1}–${before + sheet.qty} of ${plan.totals.sheets} (cut ×${sheet.qty})`
-      : `Sheet ${before + 1} of ${plan.totals.sheets}`;
+      ? tr('Sheets {{from}}–{{to}} of {{total}} (cut ×{{qty}})', {
+          from: before + 1,
+          to: before + sheet.qty,
+          total: plan.totals.sheets,
+          qty: sheet.qty,
+        })
+      : tr('Sheet {{n}} of {{total}}', { n: before + 1, total: plan.totals.sheets });
   const stock = job.stock.find((s) => s.id === sheet.stockId);
   const used =
     (sheet.placements.reduce((a, p) => a + p.rect.w * p.rect.h, 0) / (sheet.width * sheet.length)) *
@@ -400,7 +419,15 @@ function sheetPage(ctx: Ctx, sheet: SheetLayout, index: number) {
   text(
     page,
     regular,
-    `${formatMm(sheet.length)} × ${formatMm(sheet.width)} mm${stock?.label ? ` · ${stock.label}` : ''} · ${sheet.placements.length} parts · ${formatNumber(Math.round(used))}% used · ${sheet.cuts.length} cuts`,
+    [
+      `${formatMm(sheet.length)} × ${formatMm(sheet.width)} mm`,
+      stock?.label,
+      tr('n_parts', { count: sheet.placements.length }),
+      tr('{{pct}}% used', { pct: formatNumber(Math.round(used)) }),
+      tr('n_cuts', { count: sheet.cuts.length }),
+    ]
+      .filter(Boolean)
+      .join(' · '),
     M,
     y,
     9,
@@ -424,12 +451,13 @@ function sheetPage(ctx: Ctx, sheet: SheetLayout, index: number) {
 
   // Cut order in columns
   let ly = oy + dh + 22;
-  text(page, bold, 'Cut order', M, ly, 11);
+  const orderTitle = tr('Cut order');
+  text(page, bold, orderTitle, M, ly, 11);
   text(
     page,
     regular,
-    'Rip cuts (orange) run the full length; cross cuts (red) follow.',
-    M + 62,
+    tr('Rip cuts (orange) run the full length; cross cuts (red) follow.'),
+    M + bold.widthOfTextAtSize(orderTitle, 11) + 12,
     ly + 1.5,
     8,
     INK_3,
@@ -446,22 +474,16 @@ function sheetPage(ctx: Ctx, sheet: SheetLayout, index: number) {
     page.drawCircle({ x: x + 6, y: H - top - 4.5, size: 6, borderColor: color, borderWidth: 1 });
     text(page, bold, String(c.number), x + 6, top + 1, 6.5, INK, 'center');
     text(page, bold, `${c.axis} = ${formatMm(c.pos)}`, x + 16, top, 8.5);
-    text(
-      page,
-      regular,
-      clip(regular, CUT_KIND_LABEL[cutKind(c)], 8.5, 70),
-      x + 76,
-      top,
-      8.5,
-      INK_2,
-    );
+    text(page, regular, clip(regular, cutKindLabel(c), 8.5, 70), x + 76, top, 8.5, INK_2);
     text(page, regular, `${formatMm(c.length)}`, x + colW - 10, top, 8.5, INK_2, 'right');
   });
   if (sheet.cuts.length > perCol * 3) {
     text(
       page,
       regular,
-      `… and ${sheet.cuts.length - perCol * 3} more cuts (numbered on the drawing)`,
+      tr('… and {{count}} more cuts (numbered on the drawing)', {
+        count: sheet.cuts.length - perCol * 3,
+      }),
       M,
       H - M - 30,
       8,
@@ -525,7 +547,7 @@ function drawSheet(
       borderColor: PART_STROKE,
       borderWidth: 0.6,
     });
-    const lines = [part?.label || `Part ${i + 1}`];
+    const lines = [part?.label || tr('Part {{n}}', { n: i + 1 })];
     if (part?.length && part.width)
       lines.push(`${formatMm(part.length)} × ${formatMm(part.width)}`);
     label(page, bold, lines, X(r.x), Y(r.y), r.w * s, r.h * s, 9, INK, regular);

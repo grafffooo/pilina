@@ -1,6 +1,7 @@
 // QR code as one SVG path. The code only identifies the offcut (its ID as plain text).
 import QRCode from 'qrcode';
 import { useMemo } from 'react';
+import { t } from '../i18n';
 
 /** Quiet zone in modules (the spec asks for 4; 2 is plenty on a white label and saves space). */
 const QUIET = 2;
@@ -26,7 +27,7 @@ export function QrCode({ text, size }: { text: string; size: string }) {
       style={{ width: size, height: size, display: 'block', flex: 'none' }}
       shapeRendering="crispEdges"
       role="img"
-      aria-label={`QR code: ${text}`}
+      aria-label={t('QR code: {{text}}', { text })}
     >
       <rect width={n} height={n} fill="#fff" />
       <path d={path} fill="#000" />

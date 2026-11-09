@@ -3,6 +3,7 @@ import { formatNumber } from '../lib/format';
 import { formatMoney } from '../model/library';
 import { useNow } from '../ui/hooks';
 import {
+  ChartIcon,
   CheckIcon,
   LogoIcon,
   OffcutsIcon,
@@ -15,34 +16,45 @@ import {
 import { Popover } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import { useStore } from '../store/store';
+import { ImportDialog } from './ImportDialog';
+import { isDesktopApp } from '../lib/platform';
+import { InstallButton } from './Pwa';
+import {
+  LANGUAGES,
+  loadLanguageChoice,
+  locale,
+  setLanguageChoice,
+  t as i18nT,
+  type LanguageChoice,
+} from '../i18n';
 import { loadAppearance, saveAppearance, type Accent, type Theme } from './appearance';
 import styles from './Sidebar.module.css';
+import { useTranslation } from 'react-i18next';
 
-const dayFormat = new Intl.DateTimeFormat('en', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
-const timeFormat = new Intl.DateTimeFormat('en', { hour: '2-digit', minute: '2-digit' });
+const dayFormat = () =>
+  new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'short', year: 'numeric' });
+const timeFormat = () => new Intl.DateTimeFormat(locale(), { hour: '2-digit', minute: '2-digit' });
 
 function when(ts: number, now: number): string {
   const d = new Date(ts);
   const today = new Date(now);
-  if (d.toDateString() === today.toDateString()) return `Today, ${timeFormat.format(d)}`;
+  const time = timeFormat().format(d);
+  if (d.toDateString() === today.toDateString()) return i18nT('Today, {{time}}', { time });
   const yesterday = new Date(now - 86_400_000);
-  if (d.toDateString() === yesterday.toDateString()) return `Yesterday, ${timeFormat.format(d)}`;
-  return dayFormat.format(d);
+  if (d.toDateString() === yesterday.toDateString()) return i18nT('Yesterday, {{time}}', { time });
+  return dayFormat().format(d);
 }
 
 function ago(ts: number | null, now: number): string {
   if (ts === null) return '';
   const s = Math.max(0, Math.round((now - ts) / 1000));
-  if (s < 60) return 'just now';
+  if (s < 60) return i18nT('just now');
   const m = Math.round(s / 60);
-  return m < 60 ? `${m} min ago` : timeFormat.format(new Date(ts));
+  return m < 60 ? i18nT('{{count}} min ago', { count: m }) : timeFormat().format(new Date(ts));
 }
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+  const { t } = useTranslation();
   const projects = useStore((s) => s.projects);
   const currentId = useStore((s) => s.currentId);
   const saveState = useStore((s) => s.saveState);
@@ -52,6 +64,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const offcutCount = useStore((s) => s.offcuts.filter((o) => o.status === 'available').length);
   const currency = useStore((s) => s.settings.currency);
   const [query, setQuery] = useState('');
+  const [importing, setImporting] = useState(false);
   const now = useNow();
 
   const shown = useMemo(() => {
@@ -65,7 +78,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   }, [projects, query]);
 
   return (
-    <aside className={styles.sidebar} aria-label="Projects">
+    <aside className={styles.sidebar} aria-label={t('Projects')}>
       <div className={styles.brand}>
         <LogoIcon />
         <span className={styles.brandName}>CutList</span>
@@ -77,8 +90,8 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <SearchIcon size={16} />
         <input
           type="search"
-          placeholder="Search projects and parts"
-          aria-label="Search projects and parts"
+          placeholder={t('Search projects and parts')}
+          aria-label={t('Search projects and parts')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -94,7 +107,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         }}
       >
         <PlusIcon size={16} />
-        New project
+        {t('New project')}
       </button>
 
       <button
@@ -107,7 +120,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         }}
       >
         <OffcutsIcon />
-        <span>Offcut library</span>
+        <span>{t('Offcut library')}</span>
         <span className={styles.count}>{offcutCount}</span>
       </button>
 
@@ -121,12 +134,25 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         }}
       >
         <PriceIcon />
-        <span>Materials & prices</span>
+        <span>{t('Materials & prices')}</span>
         <span className={styles.count}>{materialCount}</span>
       </button>
 
+      <button
+        type="button"
+        className={styles.libraryLink}
+        aria-current={view === 'stats' ? 'page' : undefined}
+        onClick={() => {
+          useStore.getState().setView('stats');
+          onNavigate?.();
+        }}
+      >
+        <ChartIcon />
+        <span>{t('Statistics')}</span>
+      </button>
+
       <div className={styles.sectionTitle}>
-        <span>Projects</span>
+        <span>{t('Projects')}</span>
         <span>{projects.length}</span>
       </div>
 
@@ -145,12 +171,11 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 onNavigate?.();
               }}
             >
-              <span className={styles.projectName}>{p.name || 'Untitled project'}</span>
+              <span className={styles.projectName}>{p.name || t('Untitled project')}</span>
               {s && s.pieces > 0 && (
                 <span className={styles.projectMeta}>
-                  {s.pieces} {s.pieces === 1 ? 'part' : 'parts'} · {s.sheets}{' '}
-                  {s.sheets === 1 ? 'sheet' : 'sheets'} · {formatNumber(Math.round(s.usedPct))}%
-                  used
+                  {t('n_parts', { count: s.pieces })} · {t('n_sheets', { count: s.sheets })} ·{' '}
+                  {t('{{pct}}% used', { pct: formatNumber(Math.round(s.usedPct)) })}
                   {s.cost != null && s.cost > 0 && ` · ${formatMoney(s.cost, currency)}`}
                 </span>
               )}
@@ -158,23 +183,35 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             </button>
           );
         })}
-        {shown.length === 0 && <p className={styles.empty}>No projects match “{query}”.</p>}
+        {shown.length === 0 && (
+          <p className={styles.empty}>{t('No projects match “{{query}}”.', { query })}</p>
+        )}
       </nav>
 
       <div className={styles.spacerV} />
+
+      {!isDesktopApp() && <InstallButton className={styles.importButton} />}
+      <button type="button" className={styles.importButton} onClick={() => setImporting(true)}>
+        {t('Import projects…')}
+      </button>
+      {importing && <ImportDialog onClose={() => setImporting(false)} />}
 
       <div className={styles.saveState} role="status">
         {saveState === 'error' ? (
           <>
             <WarningIcon size={14} />
-            <span>Couldn’t save. Storage may be full.</span>
+            <span>{t('Couldn’t save. Storage may be full.')}</span>
           </>
         ) : saveState === 'pending' ? (
-          <span>Saving…</span>
+          <span>{t('Saving…')}</span>
         ) : (
           <>
             <CheckIcon size={14} />
-            <span>Saved in this browser · {ago(savedAt, now)}</span>
+            <span>
+              {isDesktopApp()
+                ? t('Saved on this Mac · {{when}}', { when: ago(savedAt, now) })
+                : t('Saved in this browser · {{when}}', { when: ago(savedAt, now) })}
+            </span>
           </>
         )}
       </div>
@@ -183,7 +220,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 function AppearanceMenu() {
+  const { t } = useTranslation();
   const [appearance, setAppearance] = useState(loadAppearance);
+  const [language, setLanguage] = useState(loadLanguageChoice);
   const update = (patch: Partial<{ theme: Theme; accent: Accent }>) => {
     const next = { ...appearance, ...patch };
     setAppearance(next);
@@ -192,27 +231,45 @@ function AppearanceMenu() {
   return (
     <Popover
       label={<SettingsIcon />}
-      ariaLabel="Appearance"
+      ariaLabel={t('Settings')}
       triggerClassName={ui.iconButton}
       align="end"
     >
       {() => (
         <div className={styles.appearance}>
-          <span className={styles.appearanceLabel}>Theme</span>
-          <div className={ui.segmented} role="group" aria-label="Theme">
-            {(['system', 'light', 'dark'] as const).map((t) => (
+          <span className={styles.appearanceLabel}>{t('Language')}</span>
+          <select
+            className={ui.fieldInput}
+            aria-label={t('Language')}
+            value={language}
+            onChange={(e) => {
+              const choice = e.target.value as LanguageChoice;
+              setLanguage(choice);
+              setLanguageChoice(choice);
+            }}
+          >
+            <option value="auto">{t('Same as this device')}</option>
+            {LANGUAGES.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.name}
+              </option>
+            ))}
+          </select>
+          <span className={styles.appearanceLabel}>{t('Theme')}</span>
+          <div className={ui.segmented} role="group" aria-label={t('Theme')}>
+            {(['system', 'light', 'dark'] as const).map((th) => (
               <button
-                key={t}
+                key={th}
                 type="button"
-                aria-pressed={appearance.theme === t}
-                onClick={() => update({ theme: t })}
+                aria-pressed={appearance.theme === th}
+                onClick={() => update({ theme: th })}
               >
-                {t === 'system' ? 'Auto' : t === 'light' ? 'Light' : 'Dark'}
+                {th === 'system' ? t('Auto') : th === 'light' ? t('Light') : t('Dark')}
               </button>
             ))}
           </div>
-          <span className={styles.appearanceLabel}>Accent</span>
-          <div className={ui.segmented} role="group" aria-label="Accent colour">
+          <span className={styles.appearanceLabel}>{t('Accent')}</span>
+          <div className={ui.segmented} role="group" aria-label={t('Accent colour')}>
             {(['seafoam', 'moss'] as const).map((a) => (
               <button
                 key={a}
@@ -220,7 +277,7 @@ function AppearanceMenu() {
                 aria-pressed={appearance.accent === a}
                 onClick={() => update({ accent: a })}
               >
-                {a === 'seafoam' ? 'Seafoam' : 'Moss'}
+                {a === 'seafoam' ? t('Seafoam') : t('Moss')}
               </button>
             ))}
           </div>

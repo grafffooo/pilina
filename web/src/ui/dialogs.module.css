@@ -1,0 +1,59 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80; /* above cut mode and other overlays */
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 0.4);
+}
+
+.dialog {
+  width: min(420px, 100%);
+  padding: 18px 20px 16px;
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 14px;
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.3);
+}
+
+.dialog form {
+  display: grid;
+  gap: 12px;
+}
+
+.title {
+  font-size: var(--text-md);
+  font-weight: 700;
+}
+
+.message {
+  margin: 0;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.actions button {
+  height: 36px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+.danger {
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--danger);
+  color: #fff;
+  font-weight: 600;
+}
+
+.danger:hover {
+  filter: brightness(1.08);
+}

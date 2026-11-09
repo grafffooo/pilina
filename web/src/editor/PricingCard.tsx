@@ -5,10 +5,12 @@ import { CloseIcon, PlusIcon } from '../ui/icons';
 import { NumberInput } from '../ui/NumberInput';
 import ui from '../ui/ui.module.css';
 import styles from './Editor.module.css';
+import { useTranslation } from 'react-i18next';
 
 const NEW_BAND = '__new__';
 
 export function PricingCard({ project }: { project: Project }) {
+  const { t } = useTranslation();
   const pricing = project.pricing;
   const bands = useStore((s) => s.edgeBands);
   const settings = useStore((s) => s.settings);
@@ -24,22 +26,24 @@ export function PricingCard({ project }: { project: Project }) {
   return (
     <section className={styles.card} aria-labelledby="costs-h">
       <div className={styles.cardHeader}>
-        <h2 id="costs-h">Costs</h2>
-        <span className={styles.cardMeta}>Prices in {settings.currency}</span>
+        <h2 id="costs-h">{t('Costs')}</h2>
+        <span className={styles.cardMeta}>
+          {t('Prices in {{currency}}', { currency: settings.currency })}
+        </span>
         <span className={styles.spacer} />
         <button
           type="button"
           className={ui.button}
           onClick={() => useStore.getState().setView('library')}
         >
-          Materials & prices
+          {t('Materials & prices')}
         </button>
       </div>
 
       <div className={styles.form}>
         <div className={styles.formRow}>
           <span className={styles.formLabel} id="mode-label">
-            Board is charged by
+            {t('Board is charged by')}
           </span>
           <div className={ui.segmented} role="group" aria-labelledby="mode-label">
             <button
@@ -47,33 +51,33 @@ export function PricingCard({ project }: { project: Project }) {
               aria-pressed={pricing.mode === 'sheets'}
               onClick={() => updatePricing({ mode: 'sheets' })}
             >
-              Whole sheets
+              {t('Whole sheets')}
             </button>
             <button
               type="button"
               aria-pressed={pricing.mode === 'area'}
               onClick={() => updatePricing({ mode: 'area' })}
             >
-              Area used
+              {t('Area used')}
             </button>
           </div>
         </div>
 
         {pricing.mode === 'area' ? (
           <label className={styles.formRow}>
-            <span className={styles.formLabel}>Waste allowance</span>
+            <span className={styles.formLabel}>{t('Waste allowance')}</span>
             <span className={styles.inline}>
               <NumberInput
                 className={`${ui.fieldInput} ${styles.shortInput}`}
                 value={pricing.wastePct}
                 onCommit={(v) => updatePricing({ wastePct: Math.max(0, v ?? 0) }, 'waste')}
               />
-              % on top of the parts’ area
+              {t('% on top of the parts’ area')}
             </span>
           </label>
         ) : (
           <label className={styles.formRow}>
-            <span className={styles.formLabel}>Leftovers</span>
+            <span className={styles.formLabel}>{t('Leftovers')}</span>
             <span className={styles.inline}>
               <input
                 type="checkbox"
@@ -81,14 +85,16 @@ export function PricingCard({ project }: { project: Project }) {
                 checked={pricing.offcutCredit}
                 onChange={(e) => updatePricing({ offcutCredit: e.target.checked })}
               />
-              Credit reusable leftovers (at least {settings.offcutMinLength} ×{' '}
-              {settings.offcutMinWidth} mm)
+              {t('Credit reusable leftovers (at least {{length}} × {{width}} mm)', {
+                length: settings.offcutMinLength,
+                width: settings.offcutMinWidth,
+              })}
             </span>
           </label>
         )}
 
         <label className={styles.formRow}>
-          <span className={styles.formLabel}>Edge band</span>
+          <span className={styles.formLabel}>{t('Edge band')}</span>
           <select
             className={`${ui.fieldInput} ${styles.bandSelect}`}
             value={project.defaultEdgeBandId ?? ''}
@@ -101,37 +107,37 @@ export function PricingCard({ project }: { project: Project }) {
               }
             }}
           >
-            <option value="">No band chosen</option>
+            <option value="">{t('No band chosen')}</option>
             {bands.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.name}
               </option>
             ))}
-            <option value={NEW_BAND}>+ New edge band…</option>
+            <option value={NEW_BAND}>{t('+ New edge band…')}</option>
           </select>
         </label>
       </div>
 
       <div className={styles.extras}>
-        <div className={styles.extrasTitle}>Extra costs</div>
+        <div className={styles.extrasTitle}>{t('Extra costs')}</div>
         {pricing.extras.length === 0 && (
           <p className={styles.hint}>
-            Hinges, runners, handles, labour… anything not cut from a sheet.
+            {t('Hinges, runners, handles, labour… anything not cut from a sheet.')}
           </p>
         )}
         {pricing.extras.map((x, i) => (
           <div key={x.id} className={styles.extraRow}>
             <input
               className={`${styles.cell} ${styles.cellText}`}
-              aria-label={`Description, extra cost ${i + 1}`}
-              placeholder="Description"
+              aria-label={t('Description, extra cost {{n}}', { n: i + 1 })}
+              placeholder={t('Description')}
               value={x.label}
               onChange={(e) => updateExtra(x.id, { label: e.target.value }, `${x.id}.label`)}
             />
             <NumberInput
               className={`${styles.cell} ${styles.extraQty}`}
-              aria-label={`Quantity, extra cost ${i + 1}`}
-              placeholder="Qty"
+              aria-label={t('Quantity, extra cost {{n}}', { n: i + 1 })}
+              placeholder={t('Qty')}
               value={x.qty}
               onCommit={(qty) => updateExtra(x.id, { qty }, `${x.id}.qty`)}
             />
@@ -140,15 +146,15 @@ export function PricingCard({ project }: { project: Project }) {
             </span>
             <NumberInput
               className={`${styles.cell} ${styles.extraPrice}`}
-              aria-label={`Price each, extra cost ${i + 1}`}
-              placeholder="Price"
+              aria-label={t('Price each, extra cost {{n}}', { n: i + 1 })}
+              placeholder={t('Price')}
               value={x.amount}
               onCommit={(amount) => updateExtra(x.id, { amount }, `${x.id}.amount`)}
             />
             <button
               type="button"
               className={ui.iconButton}
-              aria-label={`Remove extra cost ${i + 1}`}
+              aria-label={t('Remove extra cost {{n}}', { n: i + 1 })}
               onClick={() => setExtras(pricing.extras.filter((e) => e.id !== x.id))}
             >
               <CloseIcon size={16} />
@@ -161,7 +167,7 @@ export function PricingCard({ project }: { project: Project }) {
           onClick={() => setExtras([...pricing.extras, emptyExtra()])}
         >
           <PlusIcon size={16} />
-          Add a cost line
+          {t('Add a cost line')}
         </button>
       </div>
     </section>

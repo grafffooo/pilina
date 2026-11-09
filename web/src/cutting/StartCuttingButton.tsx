@@ -2,9 +2,11 @@ import { useStore } from '../store/store';
 import { PlayIcon } from '../ui/icons';
 import ui from '../ui/ui.module.css';
 import styles from './CutMode.module.css';
+import { useTranslation } from 'react-i18next';
 
 /** Opens cut mode for the current, up-to-date plan. */
 export function StartCuttingButton({ large }: { large?: boolean }) {
+  const { t } = useTranslation();
   const ready = useStore(
     (s) => s.result.status === 'ready' && (s.result.plan?.sheets.length ?? 0) > 0,
   );
@@ -13,11 +15,11 @@ export function StartCuttingButton({ large }: { large?: boolean }) {
       type="button"
       className={large ? styles.startLarge : ui.buttonPrimary}
       disabled={!ready}
-      title={ready ? undefined : 'Available once the plan is up to date'}
+      title={ready ? undefined : t('Available once the plan is up to date')}
       onClick={() => useStore.getState().setCutting(true)}
     >
       <PlayIcon size={16} />
-      Start cutting
+      {t('Start cutting')}
     </button>
   );
 }

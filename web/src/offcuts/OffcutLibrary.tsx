@@ -5,21 +5,22 @@ import type { Offcut, OffcutStatus } from '../model/offcut';
 import { useStore } from '../store/store';
 import { MenuIcon, MoreIcon, PlusIcon, SearchIcon } from '../ui/icons';
 import { NumberInput } from '../ui/NumberInput';
+import { confirmDialog } from '../ui/dialogs';
 import { Menu, Popover } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import editor from '../editor/Editor.module.css';
 import { MaterialSelect } from '../editor/MaterialSelect';
+import { locale, t as i18nT } from '../i18n';
 import styles from './Offcuts.module.css';
+import { useTranslation } from 'react-i18next';
 
-const STATUS_TEXT: Record<OffcutStatus, string> = {
-  available: 'Available',
-  reserved: 'Reserved',
-  used: 'Used',
-};
+const statusText = (s: OffcutStatus) =>
+  s === 'available' ? i18nT('Available') : s === 'reserved' ? i18nT('Reserved') : i18nT('Used');
 
-const dateFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
+const dateFormat = () => new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'short' });
 
 export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
+  const { t } = useTranslation();
   const offcuts = useStore((s) => s.offcuts);
   const materials = useStore((s) => s.materials);
   const settings = useStore((s) => s.settings);
@@ -32,7 +33,8 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
   const [showUsed, setShowUsed] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  const matName = (id: string | null) => materials.find((m) => m.id === id)?.name ?? 'No material';
+  const matName = (id: string | null) =>
+    materials.find((m) => m.id === id)?.name ?? t('No material');
   const matColor = (id: string | null) => materials.find((m) => m.id === id)?.color ?? '#C9CED6';
 
   const available = offcuts.filter((o) => o.status === 'available');
@@ -72,15 +74,20 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
     <div className={styles.screen}>
       <div className={styles.header}>
         {onMenu && (
-          <button type="button" className={ui.iconButton} aria-label="Projects" onClick={onMenu}>
+          <button
+            type="button"
+            className={ui.iconButton}
+            aria-label={t('Projects')}
+            onClick={onMenu}
+          >
             <MenuIcon size={22} />
           </button>
         )}
         <div className={styles.titleBlock}>
-          <h1 className={styles.title}>Offcut library</h1>
+          <h1 className={styles.title}>{t('Offcut library')}</h1>
           <span className={styles.meta}>
-            {available.length} available · {formatSquareMetres(area)} · {materialCount}{' '}
-            {materialCount === 1 ? 'material' : 'materials'}
+            {t('n_available', { count: available.length })} · {formatSquareMetres(area)} ·{' '}
+            {t('n_materials', { count: materialCount })}
           </span>
         </div>
         <AddOffcut />
@@ -90,16 +97,14 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
           disabled={queued.length === 0}
           onClick={() => setView('labels')}
         >
-          Print {queued.length} {queued.length === 1 ? 'label' : 'labels'}
+          {t('print_n_labels', { count: queued.length })}
         </button>
       </div>
 
       {queued.length > 0 && (
         <div className={styles.banner} role="status">
-          <strong>
-            {queued.length} {queued.length === 1 ? 'offcut is' : 'offcuts are'} waiting for a label.
-          </strong>{' '}
-          They print together on the next A4 sticker sheet.
+          <strong>{t('n_offcuts_waiting', { count: queued.length })}</strong>{' '}
+          {t('They print together on the next A4 sticker sheet.')}
         </div>
       )}
 
@@ -108,19 +113,19 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
           <SearchIcon size={16} />
           <input
             type="search"
-            placeholder="Search ID, material or place, or scan a label"
-            aria-label="Search offcuts"
+            placeholder={t('Search ID, material or place, or scan a label')}
+            aria-label={t('Search offcuts')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
         </label>
         <select
           className={ui.fieldInput}
-          aria-label="Material"
+          aria-label={t('Material')}
           value={materialId ?? ''}
           onChange={(e) => setMaterialId(e.target.value || null)}
         >
-          <option value="">All materials</option>
+          <option value="">{t('All materials')}</option>
           {materials.map((m) => (
             <option key={m.id} value={m.id}>
               {m.name}
@@ -128,19 +133,19 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
           ))}
         </select>
         <span className={styles.fits}>
-          Fits
+          {t('Fits')}
           <NumberInput
             className={`${ui.fieldInput} ${styles.fitInput}`}
-            aria-label="Must fit length, mm"
-            placeholder="L"
+            aria-label={t('Must fit length, mm')}
+            placeholder={t('L')}
             value={minL}
             onCommit={setMinL}
           />
           ×
           <NumberInput
             className={`${ui.fieldInput} ${styles.fitInput}`}
-            aria-label="Must fit width, mm"
-            placeholder="W"
+            aria-label={t('Must fit width, mm')}
+            placeholder={t('W')}
             value={minW}
             onCommit={setMinW}
           />
@@ -151,7 +156,7 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
             checked={showUsed}
             onChange={(e) => setShowUsed(e.target.checked)}
           />
-          Show used
+          {t('Show used')}
         </label>
         {selected.size > 0 && (
           <button
@@ -162,31 +167,31 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
               setSelected(new Set());
             }}
           >
-            Queue {selected.size} {selected.size === 1 ? 'label' : 'labels'}
+            {t('queue_n_labels', { count: selected.size })}
           </button>
         )}
       </div>
 
-      <section className={editor.card} aria-label="Offcuts">
+      <section className={editor.card} aria-label={t('Offcuts')}>
         <div className={editor.tableWrap}>
           <table className={`${editor.table} ${styles.table}`}>
             <thead>
               <tr>
                 <th className={styles.colSelect}>
-                  <span className="sr-only">Select</span>
+                  <span className="sr-only">{t('Select')}</span>
                 </th>
                 <th className={styles.colShape}>
-                  <span className="sr-only">Shape</span>
+                  <span className="sr-only">{t('Shape')}</span>
                 </th>
-                <th>ID</th>
-                <th>Size (mm)</th>
-                <th>Material</th>
-                <th>Place</th>
-                <th>Added</th>
-                <th>Status</th>
-                <th>Label</th>
+                <th>{t('ID')}</th>
+                <th>{t('Size (mm)')}</th>
+                <th>{t('Material')}</th>
+                <th>{t('Place')}</th>
+                <th>{t('Added')}</th>
+                <th>{t('Status')}</th>
+                <th>{t('Label')}</th>
                 <th className={editor.colMore}>
-                  <span className="sr-only">More</span>
+                  <span className="sr-only">{t('More')}</span>
                 </th>
               </tr>
             </thead>
@@ -195,8 +200,10 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
                 <tr>
                   <td colSpan={10} className={styles.empty}>
                     {offcuts.length === 0
-                      ? 'No offcuts yet. Keep leftovers when you finish a sheet in cut mode, or add one by hand.'
-                      : 'No offcuts match these filters.'}
+                      ? t(
+                          'No offcuts yet. Keep leftovers when you finish a sheet in cut mode, or add one by hand.',
+                        )
+                      : t('No offcuts match these filters.')}
                   </td>
                 </tr>
               )}
@@ -210,7 +217,7 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
                   <td className={styles.colSelect}>
                     <input
                       type="checkbox"
-                      aria-label={`Select ${o.code}`}
+                      aria-label={t('Select {{code}}', { code: o.code })}
                       checked={selected.has(o.id)}
                       onChange={() => toggle(o.id)}
                     />
@@ -226,27 +233,27 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
                     <span className={styles.material}>{matName(o.materialId)}</span>
                     <span className={styles.source}>
                       {o.usedInProjectName
-                        ? `Used in ${o.usedInProjectName}`
+                        ? t('Used in {{name}}', { name: o.usedInProjectName })
                         : o.sourceProjectName
-                          ? `From ${o.sourceProjectName}`
-                          : 'Added by hand'}
+                          ? t('From {{name}}', { name: o.sourceProjectName })
+                          : t('Added by hand')}
                     </span>
                   </td>
                   <td>
                     <input
                       className={`${editor.cell} ${editor.cellText} ${styles.place}`}
-                      aria-label={`Place of ${o.code}`}
+                      aria-label={t('Place of {{code}}', { code: o.code })}
                       list="offcut-places"
                       placeholder="—"
                       value={o.location}
                       onChange={(e) => updateOffcuts([o.id], { location: e.target.value })}
                     />
                   </td>
-                  <td className={styles.added}>{dateFormat.format(o.createdAt)}</td>
+                  <td className={styles.added}>{dateFormat().format(o.createdAt)}</td>
                   <td>
                     <select
                       className={`${styles.status} ${styles[o.status]}`}
-                      aria-label={`Status of ${o.code}`}
+                      aria-label={t('Status of {{code}}', { code: o.code })}
                       value={o.status}
                       onChange={(e) => {
                         const status = e.target.value as OffcutStatus;
@@ -258,45 +265,50 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
                     >
                       {(['available', 'reserved', 'used'] as const).map((s) => (
                         <option key={s} value={s}>
-                          {STATUS_TEXT[s]}
+                          {statusText(s)}
                         </option>
                       ))}
                     </select>
                   </td>
                   <td className={o.label === 'queued' ? styles.labelQueued : styles.labelDone}>
                     {o.label === 'queued'
-                      ? 'In print queue'
+                      ? t('In print queue')
                       : o.label === 'printed'
-                        ? 'Printed'
-                        : 'None'}
+                        ? t('Printed')
+                        : t('None')}
                   </td>
                   <td className={editor.colMore}>
                     <Menu
                       label={<MoreIcon />}
-                      ariaLabel={`More actions for ${o.code}`}
+                      ariaLabel={t('More actions for {{name}}', { name: o.code })}
                       triggerClassName={ui.iconButton}
                       items={[
                         ...(o.label !== 'queued'
                           ? [
                               {
-                                label: 'Print label again',
+                                label: t('Print label again'),
                                 onSelect: () => updateOffcuts([o.id], { label: 'queued' }),
                               },
                             ]
                           : [
                               {
-                                label: 'Remove from print queue',
+                                label: t('Remove from print queue'),
                                 onSelect: () => updateOffcuts([o.id], { label: 'none' }),
                               },
                             ]),
                         {
-                          label: 'Delete',
+                          label: t('Delete'),
                           danger: true,
-                          onSelect: () => {
-                            if (
-                              window.confirm(`Delete ${o.code}? Its label will no longer find it.`)
-                            )
-                              removeOffcut(o.id);
+                          onSelect: async () => {
+                            const ok = await confirmDialog({
+                              title: t('Delete offcut?'),
+                              message: t('Delete {{code}}? Its label will no longer find it.', {
+                                code: o.code,
+                              }),
+                              confirmLabel: t('Delete'),
+                              danger: true,
+                            });
+                            if (ok) removeOffcut(o.id);
                           },
                         },
                       ]}
@@ -338,6 +350,7 @@ function Shape({ offcut, color }: { offcut: Offcut; color: string }) {
 
 /** "Add offcut" form for leftovers that didn't come from a cut in this app. */
 function AddOffcut() {
+  const { t } = useTranslation();
   const [length, setLength] = useState<number | null>(null);
   const [width, setWidth] = useState<number | null>(null);
   const [materialId, setMaterialId] = useState<string | null>(null);
@@ -350,7 +363,7 @@ function AddOffcut() {
       label={
         <>
           <PlusIcon size={16} />
-          Add offcut
+          {t('Add offcut')}
         </>
       }
     >
@@ -368,20 +381,20 @@ function AddOffcut() {
             close();
           }}
         >
-          <span className={styles.addTitle}>Add an offcut by hand</span>
+          <span className={styles.addTitle}>{t('Add an offcut by hand')}</span>
           <div className={styles.addSize}>
             <NumberInput
               className={ui.fieldInput}
-              aria-label="Length, mm"
-              placeholder="Length"
+              aria-label={t('Length, mm')}
+              placeholder={t('Length')}
               value={length}
               onCommit={setLength}
             />
             ×
             <NumberInput
               className={ui.fieldInput}
-              aria-label="Width, mm"
-              placeholder="Width"
+              aria-label={t('Width, mm')}
+              placeholder={t('Width')}
               value={width}
               onCommit={setWidth}
             />
@@ -389,20 +402,20 @@ function AddOffcut() {
           </div>
           <MaterialSelect
             value={materialId}
-            anyLabel="No material"
-            ariaLabel="Material"
+            anyLabel={t('No material')}
+            ariaLabel={t('Material')}
             onChange={setMaterialId}
           />
           <input
             className={ui.fieldInput}
-            aria-label="Place"
-            placeholder="Place, e.g. Rack A"
+            aria-label={t('Place')}
+            placeholder={t('Place, e.g. Rack A')}
             list="offcut-places"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
           />
           <button type="submit" className={ui.buttonPrimary} disabled={!ok}>
-            Add and queue its label
+            {t('Add and queue its label')}
           </button>
         </form>
       )}

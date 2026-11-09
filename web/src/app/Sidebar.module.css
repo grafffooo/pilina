@@ -192,3 +192,16 @@
   font-weight: 600;
   color: var(--text-3);
 }
+
+.importButton {
+  height: 34px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.importButton:hover {
+  background: var(--chip);
+}

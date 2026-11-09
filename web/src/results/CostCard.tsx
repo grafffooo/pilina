@@ -4,9 +4,11 @@ import type { Project } from '../model/project';
 import { useStore } from '../store/store';
 import { WarningIcon } from '../ui/icons';
 import styles from './Results.module.css';
+import { useTranslation } from 'react-i18next';
 
 /** Project cost: board per material, offcut credit, edge banding and extra lines. */
 export function CostCard({ project }: { project: Project }) {
+  const { t } = useTranslation();
   const cost = useStore((s) => s.cost);
   const currency = useStore((s) => s.settings.currency);
   if (!cost) return null;
@@ -15,10 +17,10 @@ export function CostCard({ project }: { project: Project }) {
   const mode = project.pricing;
   const modeText =
     mode.mode === 'area'
-      ? `area used + ${formatNumber(mode.wastePct)}% waste`
+      ? t('Board charged by area used + {{pct}}% waste', { pct: formatNumber(mode.wastePct) })
       : mode.offcutCredit
-        ? 'whole sheets, leftovers credited'
-        : 'whole sheets';
+        ? t('Board charged by whole sheets, leftovers credited')
+        : t('Board charged by whole sheets');
   const missing = [
     ...cost.materials.filter((m) => !m.priced).map((m) => m.material),
     ...cost.edgeBands.filter((b) => !b.priced).map((b) => b.band),
@@ -30,13 +32,13 @@ export function CostCard({ project }: { project: Project }) {
       <div className={styles.costHead}>
         <div>
           <h3 id="cost-h" className={styles.costTitle}>
-            Cost
+            {t('Cost')}
           </h3>
-          <span className={styles.costMode}>Board charged by {modeText}</span>
+          <span className={styles.costMode}>{modeText}</span>
         </div>
         <span className={styles.costTotal}>
           {money(cost.total)}
-          {!cost.complete && <span className={styles.costPartial}> + unpriced</span>}
+          {!cost.complete && <span className={styles.costPartial}> {t('+ unpriced')}</span>}
         </span>
       </div>
 
@@ -47,15 +49,15 @@ export function CostCard({ project }: { project: Project }) {
               {m.material}
               <span className={styles.costNote}>
                 {mode.mode === 'area'
-                  ? `${formatSquareMetres(m.usedArea)} used`
-                  : `${m.sheets} ${m.sheets === 1 ? 'sheet' : 'sheets'}`}
+                  ? t('{{area}} used', { area: formatSquareMetres(m.usedArea) })
+                  : t('n_sheets', { count: m.sheets })}
               </span>
             </dt>
             <dd>{m.priced ? money(m.gross) : <NoPrice onClick={openLibrary} />}</dd>
             {m.credit > 0 && (
               <>
                 <dt className={styles.costCredit}>
-                  Leftovers credited
+                  {t('Leftovers credited')}
                   <span className={styles.costNote}>{formatSquareMetres(m.creditArea)}</span>
                 </dt>
                 <dd className={styles.costCredit}>−{money(m.credit)}</dd>
@@ -77,7 +79,7 @@ export function CostCard({ project }: { project: Project }) {
           .map((x) => (
             <div key={x.id} className={styles.costLine}>
               <dt>
-                {x.label || 'Extra cost'}
+                {x.label || t('Extra cost')}
                 {(x.qty ?? 1) !== 1 && <span className={styles.costNote}>×{x.qty}</span>}
               </dt>
               <dd>{money(x.amount! * (x.qty ?? 1))}</dd>
@@ -89,9 +91,11 @@ export function CostCard({ project }: { project: Project }) {
         <p className={styles.costMissing}>
           <WarningIcon size={14} />
           <span>
-            No price for {missing.join(', ')}, so the total is incomplete.{' '}
+            {t('No price for {{names}}, so the total is incomplete.', {
+              names: missing.join(', '),
+            })}{' '}
             <button type="button" className={styles.linkButton} onClick={openLibrary}>
-              Set prices
+              {t('Set prices')}
             </button>
           </span>
         </p>
@@ -101,9 +105,10 @@ export function CostCard({ project }: { project: Project }) {
 }
 
 function NoPrice({ onClick }: { onClick: () => void }) {
+  const { t } = useTranslation();
   return (
     <button type="button" className={styles.linkButton} onClick={onClick}>
-      Set price
+      {t('Set price')}
     </button>
   );
 }

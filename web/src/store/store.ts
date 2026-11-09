@@ -1,5 +1,6 @@
 // App state: projects (saved to IndexedDB), undo history of the open project, and its results.
 import { create } from 'zustand';
+import { t } from '../i18n';
 import * as storage from '../db/db';
 import type { CostBreakdown, Job, Plan } from '../engine/types';
 import type { CutRecord } from '../model/cutRecord';
@@ -37,7 +38,7 @@ export interface ResultState {
 export type SaveState = 'saved' | 'pending' | 'error';
 
 /** Main area: the open project, the material and price library, the offcut library or label printing. */
-export type MainView = 'project' | 'library' | 'offcuts' | 'labels';
+export type MainView = 'project' | 'library' | 'offcuts' | 'labels' | 'stats';
 
 interface AppState {
   ready: boolean;
@@ -77,6 +78,8 @@ interface AppState {
   updateOffcuts(ids: string[], patch: Partial<Offcut>): void;
   removeOffcut(id: string): void;
   setCutting(on: boolean): void;
+  /** Adds imported projects (replacing ones with the same id) plus any new materials and bands. */
+  importProjects(projects: Project[], materials: Material[], edgeBands: EdgeBand[]): void;
   /** Records a sheet as cut (for statistics); never blocks the workshop if saving fails. */
   recordCut(record: CutRecord): void;
 }
@@ -196,6 +199,8 @@ export const useStore = create<AppState>()((set, get) => {
   }
 
   async function load() {
+    // Local-only data: ask the browser not to evict it under storage pressure.
+    if (typeof navigator !== 'undefined') navigator.storage?.persist?.().catch(() => {});
     const [raw, library, offcuts] = await Promise.all([
       storage.loadRawProjects(),
       storage.loadLibrary(),
@@ -210,7 +215,7 @@ export const useStore = create<AppState>()((set, get) => {
     const outdated = raw.some((r) => r.schema !== projects[0]?.schema);
 
     if (projects.length === 0) {
-      const board = materials[0] ?? newMaterial('Chipboard 18mm');
+      const board = materials[0] ?? newMaterial(t('Chipboard 18mm'));
       if (!materials[0]) {
         board.sheetLength = 2800;
         board.sheetWidth = 2070;
@@ -288,7 +293,7 @@ export const useStore = create<AppState>()((set, get) => {
       const copy: Project = {
         ...structuredClone(src),
         id: newId(),
-        name: `${src.name} (copy)`,
+        name: t('{{name}} (copy)', { name: src.name || t('Untitled project') }),
         createdAt: now,
         updatedAt: now,
       };
@@ -403,6 +408,19 @@ export const useStore = create<AppState>()((set, get) => {
       scheduleOffcutSave();
     },
 
+    importProjects(imported, newMaterials, newBands) {
+      const ids = new Set(imported.map((p) => p.id));
+      set((s) => ({
+        projects: [...imported, ...s.projects.filter((p) => !ids.has(p.id))],
+        materials: [...s.materials, ...newMaterials],
+        edgeBands: [...s.edgeBands, ...newBands],
+      }));
+      imported.forEach((p) => dirty.add(p.id));
+      if (newMaterials.length || newBands.length) libraryDirty = true;
+      scheduleOffcutSave();
+      if (imported[0]) open(imported[0].id);
+    },
+
     setCutting(cutting) {
       set({ cutting });
     },
@@ -515,7 +533,9 @@ export function removeMaterial(id: string) {
 }
 
 export function addEdgeBand(): EdgeBand {
-  const b = newEdgeBand(useStore.getState().edgeBands.length === 0 ? 'ABS 2 mm' : 'New edge band');
+  const b = newEdgeBand(
+    useStore.getState().edgeBands.length === 0 ? 'ABS 2 mm' : t('New edge band'),
+  );
   editLibrary((l) => ({ ...l, edgeBands: [...l.edgeBands, b] }));
   return b;
 }

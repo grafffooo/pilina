@@ -120,11 +120,7 @@ export const DEFAULT_PRICING: ProjectPricing = {
 };
 
 /** A fresh project: one empty part row and a common 2800 × 2070 board. */
-export function newProject(
-  name = 'Untitled project',
-  now = Date.now(),
-  materialId: string | null = null,
-): Project {
+export function newProject(name = '', now = Date.now(), materialId: string | null = null): Project {
   return {
     schema: SCHEMA_VERSION,
     id: newId(),
@@ -166,10 +162,13 @@ export function countPieces(project: Project): number {
 
 /** Brings a stored project up to the current schema. */
 export function migrate(stored: Partial<Project> & { id: string }): Project {
-  const base = newProject(stored.name ?? 'Untitled project', stored.createdAt ?? Date.now());
+  // Older versions stored the English default name; an empty name shows it translated.
+  const name = stored.name === 'Untitled project' ? '' : (stored.name ?? '');
+  const base = newProject(name, stored.createdAt ?? Date.now());
   return {
     ...base,
     ...stored,
+    name,
     schema: SCHEMA_VERSION,
     parts: (stored.parts ?? base.parts).map((p) => ({ ...emptyPart(), ...p })),
     stock: (stored.stock ?? base.stock).map((s) => {

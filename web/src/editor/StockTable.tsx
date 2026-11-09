@@ -15,15 +15,17 @@ import { Menu } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import { MaterialSelect } from './MaterialSelect';
 import styles from './Editor.module.css';
+import { useTranslation } from 'react-i18next';
 
 export function StockTable({ project }: { project: Project }) {
+  const { t } = useTranslation();
   const materials = useStore((s) => s.materials);
   const nameOf = (id: string | null) => materials.find((m) => m.id === id)?.name;
   return (
     <section className={styles.card} aria-labelledby="stock-h">
       <div className={styles.cardHeader}>
-        <h2 id="stock-h">Stock sheets</h2>
-        <span className={styles.cardMeta}>Starred first, then largest</span>
+        <h2 id="stock-h">{t('Stock sheets')}</h2>
+        <span className={styles.cardMeta}>{t('Starred first, then largest')}</span>
         <span className={styles.spacer} />
         <button
           type="button"
@@ -39,7 +41,7 @@ export function StockTable({ project }: { project: Project }) {
             );
           }}
         >
-          Add sheet
+          {t('Add sheet')}
         </button>
       </div>
       <div className={styles.tableWrap}>
@@ -47,21 +49,21 @@ export function StockTable({ project }: { project: Project }) {
           <thead>
             <tr>
               <th className={styles.colCheck}>
-                <span className="sr-only">Use</span>
+                <span className="sr-only">{t('Use')}</span>
               </th>
-              <th className={styles.num}>Length</th>
-              <th className={styles.num}>Width</th>
-              <th className={`${styles.num} ${styles.colQty}`}>Qty</th>
-              <th>Material</th>
-              <th className={styles.colStar}>Priority</th>
+              <th className={styles.num}>{t('Length')}</th>
+              <th className={styles.num}>{t('Width')}</th>
+              <th className={`${styles.num} ${styles.colQty}`}>{t('Qty')}</th>
+              <th>{t('Material')}</th>
+              <th className={styles.colStar}>{t('Priority')}</th>
               <th className={styles.colMore}>
-                <span className="sr-only">More</span>
+                <span className="sr-only">{t('More')}</span>
               </th>
             </tr>
           </thead>
           <tbody>
             {project.stock.map((s, i) => {
-              const name = nameOf(s.materialId) || `Sheet ${i + 1}`;
+              const name = nameOf(s.materialId) || t('Sheet {{n}}', { n: i + 1 });
               const started = s.length !== null || s.width !== null;
               const bad = started && !stockIsComplete(s);
               return (
@@ -70,16 +72,16 @@ export function StockTable({ project }: { project: Project }) {
                     <input
                       type="checkbox"
                       checked={s.enabled}
-                      aria-label={`Use ${name}`}
+                      aria-label={t('Use {{name}}', { name })}
                       onChange={(e) => updateStock(s.id, { enabled: e.target.checked })}
                     />
                   </td>
                   <td className={styles.cLength}>
                     <NumberInput
                       className={styles.cell}
-                      aria-label={`Length, ${name}`}
+                      aria-label={t('Length, {{name}}', { name })}
                       aria-invalid={(bad && !s.length) || undefined}
-                      placeholder="Length"
+                      placeholder={t('Length')}
                       data-row={i}
                       value={s.length}
                       onCommit={(v) => updateStock(s.id, { length: v }, `${s.id}.length`)}
@@ -88,9 +90,9 @@ export function StockTable({ project }: { project: Project }) {
                   <td className={styles.cWidth}>
                     <NumberInput
                       className={styles.cell}
-                      aria-label={`Width, ${name}`}
+                      aria-label={t('Width, {{name}}', { name })}
                       aria-invalid={(bad && !s.width) || undefined}
-                      placeholder="Width"
+                      placeholder={t('Width')}
                       value={s.width}
                       onCommit={(v) => updateStock(s.id, { width: v }, `${s.id}.width`)}
                     />
@@ -98,8 +100,8 @@ export function StockTable({ project }: { project: Project }) {
                   <td className={`${styles.colQty} ${styles.cQty}`}>
                     <NumberInput
                       className={styles.cell}
-                      aria-label={`Quantity, ${name}. Leave empty for unlimited`}
-                      title="Leave empty for unlimited"
+                      aria-label={t('Quantity, {{name}}. Leave empty for unlimited', { name })}
+                      title={t('Leave empty for unlimited')}
                       placeholder="∞"
                       emptyText=""
                       value={s.qty}
@@ -109,7 +111,7 @@ export function StockTable({ project }: { project: Project }) {
                   <td className={styles.cMaterial}>
                     <MaterialSelect
                       value={s.materialId}
-                      ariaLabel={`Material, sheet ${i + 1}`}
+                      ariaLabel={t('Material, sheet {{n}}', { n: i + 1 })}
                       sheet={s.length && s.width ? { length: s.length, width: s.width } : undefined}
                       onChange={(materialId) => updateStock(s.id, { materialId })}
                     />
@@ -119,8 +121,8 @@ export function StockTable({ project }: { project: Project }) {
                       type="button"
                       className={s.priority ? styles.starOn : styles.star}
                       aria-pressed={s.priority}
-                      aria-label={`Use ${name} first`}
-                      title="Used before other sheets"
+                      aria-label={t('Use {{name}} first', { name })}
+                      title={t('Used before other sheets')}
                       onClick={() => updateStock(s.id, { priority: !s.priority })}
                     >
                       <StarIcon filled={s.priority} />
@@ -129,11 +131,11 @@ export function StockTable({ project }: { project: Project }) {
                   <td className={`${styles.colMore} ${styles.cMore}`}>
                     <Menu
                       label={<MoreIcon />}
-                      ariaLabel={`More actions for ${name}`}
+                      ariaLabel={t('More actions for {{name}}', { name })}
                       triggerClassName={ui.iconButton}
                       items={[
-                        { label: 'Duplicate', onSelect: () => duplicateStock(s.id) },
-                        { label: 'Delete', danger: true, onSelect: () => removeStock(s.id) },
+                        { label: t('Duplicate'), onSelect: () => duplicateStock(s.id) },
+                        { label: t('Delete'), danger: true, onSelect: () => removeStock(s.id) },
                       ]}
                     />
                   </td>
@@ -149,6 +151,7 @@ export function StockTable({ project }: { project: Project }) {
 }
 
 function OffcutsFooter({ project }: { project: Project }) {
+  const { t } = useTranslation();
   const offcuts = useStore((s) => s.offcuts);
   const matching = matchingOffcuts(project, offcuts).length;
   return (
@@ -161,11 +164,11 @@ function OffcutsFooter({ project }: { project: Project }) {
         onChange={(e) => updateProject({ useOffcuts: e.target.checked })}
       />
       <label htmlFor="use-offcuts" className={styles.offcutText}>
-        <span className={styles.offcutTitle}>Use matching library offcuts first</span>
+        <span className={styles.offcutTitle}>{t('Use matching library offcuts first')}</span>
         <span className={styles.cardMeta}>
           {matching === 0
-            ? 'No offcuts in these materials are in the library yet.'
-            : `${matching} ${matching === 1 ? 'offcut' : 'offcuts'} in these materials ${matching === 1 ? 'is' : 'are'} available.`}
+            ? t('No offcuts in these materials are in the library yet.')
+            : t('n_matching_offcuts', { count: matching })}
         </span>
       </label>
       <button
@@ -173,7 +176,7 @@ function OffcutsFooter({ project }: { project: Project }) {
         className={styles.addRow}
         onClick={() => useStore.getState().setView('offcuts')}
       >
-        Open library
+        {t('Open library')}
       </button>
     </div>
   );

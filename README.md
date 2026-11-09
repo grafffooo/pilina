@@ -7,6 +7,7 @@ crates/cutlist-core   optimizer, pricing, statistics (pure Rust)
 crates/cutlist-wasm   WebAssembly bindings used by the web app
 crates/cutlist-cli    `cutlist job.json` → plan JSON
 web/                  React + TypeScript + Vite PWA
+desktop/              Tauri shell: the web app as a standalone Mac app
 ```
 
 ## Prerequisites
@@ -31,3 +32,13 @@ npm test           # unit tests
 npm run lint
 npm run build      # production build (PWA) in web/dist
 ```
+
+## Mac app
+
+```bash
+cd web
+npm run app        # release build: target/release/bundle/macos/CutList.app and bundle/dmg/*.dmg
+npm run app:dev    # development: opens the app window on the Vite dev server, with live reload
+```
+
+The app is the same web app in a native window (Tauri, macOS WebKit), with no server. Its data lives in the app's own storage on the Mac, separate from any browser; move projects between them with "Export project file" and "Import projects…". Inside the app, files are saved through the native Save dialog and labels print through the native print panel.

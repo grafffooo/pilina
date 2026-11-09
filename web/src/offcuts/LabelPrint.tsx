@@ -14,17 +14,18 @@ import { updateSettings, useStore } from '../store/store';
 import { ChevronLeftIcon, MenuIcon, WarningIcon } from '../ui/icons';
 import ui from '../ui/ui.module.css';
 import { QrCode } from './QrCode';
+import { confirmDialog } from '../ui/dialogs';
+import { locale } from '../i18n';
 import styles from './Labels.module.css';
+import { useTranslation } from 'react-i18next';
 
-const dateFormat = new Intl.DateTimeFormat('en-GB', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
+const dateFormat = () =>
+  new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'short', year: 'numeric' });
 
 type PrintJob = 'labels' | 'outline' | null;
 
 export function LabelPrint({ onMenu }: { onMenu?: () => void }) {
+  const { t } = useTranslation();
   const offcuts = useStore((s) => s.offcuts);
   const materials = useStore((s) => s.materials);
   const settings = useStore((s) => s.settings);
@@ -38,27 +39,29 @@ export function LabelPrint({ onMenu }: { onMenu?: () => void }) {
     .sort((a, b) => a.code.localeCompare(b.code));
   const { pages, nextStart } = layoutLabels(queue, format, start);
 
-  const print = (job: Exclude<PrintJob, null>) => {
+  const print = async (job: Exclude<PrintJob, null>) => {
     setPrinting(job);
-    // Let React render the print sheet, then open the print dialog.
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
-        window.print();
-        setPrinting(null);
-        if (job === 'labels' && queue.length > 0) {
-          const ok = window.confirm(
-            `Did the ${queue.length} ${queue.length === 1 ? 'label' : 'labels'} print correctly? They'll be marked as printed, and the next print starts at sticker ${nextStart}.`,
-          );
-          if (ok) {
-            useStore.getState().updateOffcuts(
-              queue.map((o) => o.id),
-              { label: 'printed' },
-            );
-            updateSettings({ labelStart: nextStart });
-          }
-        }
-      }),
-    );
+    // Let React render the print sheet before printing.
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    // In the Mac app window.print() opens the native print panel and returns a promise.
+    await (window.print() as unknown as Promise<void> | undefined);
+    if (job === 'labels' && queue.length > 0) {
+      const ok = await confirmDialog({
+        title: t('Did the labels print correctly?'),
+        message: t('did_labels_print', { count: queue.length, next: nextStart }),
+        confirmLabel: t('Mark as printed'),
+        cancelLabel: t('Not yet'),
+      });
+      if (ok) {
+        useStore.getState().updateOffcuts(
+          queue.map((o) => o.id),
+          { label: 'printed' },
+        );
+        updateSettings({ labelStart: nextStart });
+      }
+    }
+    // Keep the print sheet until here, in case printing finishes after the call returns.
+    setPrinting(null);
   };
 
   const first = queue[0];
@@ -67,7 +70,12 @@ export function LabelPrint({ onMenu }: { onMenu?: () => void }) {
     <div className={styles.screen}>
       <div className={styles.header}>
         {onMenu && (
-          <button type="button" className={ui.iconButton} aria-label="Projects" onClick={onMenu}>
+          <button
+            type="button"
+            className={ui.iconButton}
+            aria-label={t('Projects')}
+            onClick={onMenu}
+          >
             <MenuIcon size={22} />
           </button>
         )}
@@ -77,32 +85,32 @@ export function LabelPrint({ onMenu }: { onMenu?: () => void }) {
           onClick={() => useStore.getState().setView('offcuts')}
         >
           <ChevronLeftIcon size={16} />
-          Offcut library
+          {t('Offcut library')}
         </button>
         <div className={styles.titleBlock}>
-          <h1 className={styles.title}>Print labels</h1>
+          <h1 className={styles.title}>{t('Print labels')}</h1>
           <span className={styles.meta}>
-            {queue.length} {queue.length === 1 ? 'label' : 'labels'} · A4 sticker sheet
-            {pages.length > 1 ? ` · ${pages.length} sheets` : ''}
+            {t('n_labels', { count: queue.length })} · {t('A4 sticker sheet')}
+            {pages.length > 1 ? ` · ${t('n_label_sheets', { count: pages.length })}` : ''}
           </span>
         </div>
-        <button type="button" className={ui.button} onClick={() => print('outline')}>
-          Print outline test page
+        <button type="button" className={ui.button} onClick={() => void print('outline')}>
+          {t('Print outline test page')}
         </button>
         <button
           type="button"
           className={ui.buttonPrimary}
           disabled={queue.length === 0}
-          onClick={() => print('labels')}
+          onClick={() => void print('labels')}
         >
-          Print {queue.length} {queue.length === 1 ? 'label' : 'labels'}
+          {t('print_n_labels', { count: queue.length })}
         </button>
       </div>
 
       <div className={styles.columns}>
-        <section className={styles.settings} aria-label="Print settings">
+        <section className={styles.settings} aria-label={t('Print settings')}>
           <fieldset className={styles.group}>
-            <legend>Sticker sheet</legend>
+            <legend>{t('Sticker sheet')}</legend>
             {LABEL_FORMATS.map((f) => (
               <label key={f.id} className={styles.radio}>
                 <input
@@ -113,19 +121,21 @@ export function LabelPrint({ onMenu }: { onMenu?: () => void }) {
                 />
                 <span>
                   <span className={styles.radioTitle}>A4 · {f.name}</span>
-                  <span className={styles.radioNote}>{f.cols * f.rows} per sheet</span>
+                  <span className={styles.radioNote}>
+                    {t('{{count}} per sheet', { count: f.cols * f.rows })}
+                  </span>
                 </span>
               </label>
             ))}
           </fieldset>
 
           <fieldset className={styles.group}>
-            <legend>Start at sticker</legend>
+            <legend>{t('Start at sticker')}</legend>
             <div
               className={styles.mini}
               style={{ gridTemplateColumns: `repeat(${format.cols}, 1fr)` }}
               role="group"
-              aria-label="Choose the first free sticker"
+              aria-label={t('Choose the first free sticker')}
             >
               {Array.from({ length: perSheet }, (_, i) => {
                 const n = i + 1;
@@ -137,7 +147,7 @@ export function LabelPrint({ onMenu }: { onMenu?: () => void }) {
                     className={
                       n < start ? styles.miniUsed : filled ? styles.miniFilled : styles.miniFree
                     }
-                    aria-label={`Start at sticker ${n}`}
+                    aria-label={t('Start at sticker {{n}}', { n })}
                     aria-pressed={n === start}
                     onClick={() => updateSettings({ labelStart: n })}
                   >
@@ -148,22 +158,24 @@ export function LabelPrint({ onMenu }: { onMenu?: () => void }) {
             </div>
             <p className={styles.hint}>
               {start > 1
-                ? `Stickers 1–${start - 1} are marked as used. Click the first free one.`
-                : 'A fresh sheet. If some stickers are used, click the first free one.'}
+                ? t('Stickers 1–{{last}} are marked as used. Click the first free one.', {
+                    last: start - 1,
+                  })
+                : t('A fresh sheet. If some stickers are used, click the first free one.')}
             </p>
           </fieldset>
 
           <fieldset className={styles.group}>
-            <legend>Show on label</legend>
+            <legend>{t('Show on label')}</legend>
             <label className={styles.checkRow}>
               <input type="checkbox" checked disabled />
-              ID, size and QR code (always)
+              {t('ID, size and QR code (always)')}
             </label>
             {(
               [
-                ['material', 'Material and thickness'],
-                ['location', 'Storage place'],
-                ['source', 'Source project and date'],
+                ['material', t('Material and thickness')],
+                ['location', t('Storage place')],
+                ['source', t('Source project and date')],
               ] as const
             ).map(([key, text]) => (
               <label key={key} className={styles.checkRow}>
@@ -184,13 +196,14 @@ export function LabelPrint({ onMenu }: { onMenu?: () => void }) {
           <p className={styles.warning}>
             <WarningIcon size={16} />
             <span>
-              Print at <strong>100% / actual size</strong> with “Fit to page” off and no margins, or
-              the labels drift off the stickers. Try the outline test page on plain paper first.
+              {t(
+                'Print at 100% / actual size with “Fit to page” off and no margins, or the labels drift off the stickers. Try the outline test page on plain paper first.',
+              )}
             </span>
           </p>
         </section>
 
-        <section className={styles.preview} aria-label="A4 preview">
+        <section className={styles.preview} aria-label={t('A4 preview')}>
           <div className={styles.paperFrame}>
             <div className={styles.paperScale}>
               <Sheet
@@ -204,15 +217,15 @@ export function LabelPrint({ onMenu }: { onMenu?: () => void }) {
             </div>
           </div>
           <span className={styles.meta}>
-            A4 preview · page 1 of {Math.max(1, pages.length)}
-            {queue.length > 0 && ` · next print starts at sticker ${nextStart}`}
+            {t('A4 preview · page 1 of {{total}}', { total: Math.max(1, pages.length) })}
+            {queue.length > 0 && ` · ${t('next print starts at sticker {{n}}', { n: nextStart })}`}
           </span>
         </section>
 
         {first && (
-          <section className={styles.zoom} aria-label="One label, enlarged">
+          <section className={styles.zoom} aria-label={t('One label, enlarged')}>
             <span className={styles.zoomTitle}>
-              One label, enlarged ({format.labelW} × {format.labelH} mm)
+              {t('One label, enlarged ({{w}} × {{h}} mm)', { w: format.labelW, h: format.labelH })}
             </span>
             <div
               className={styles.zoomFrame}
@@ -287,6 +300,7 @@ function Sheet({
   materials: Material[];
   settings: Settings;
 }) {
+  const { t } = useTranslation();
   const per = format.cols * format.rows;
   return (
     <div className={print ? 'print-page' : styles.page}>
@@ -306,7 +320,7 @@ function Sheet({
             }}
           >
             {numbers && <span className={styles.stickerNumber}>{i + 1}</span>}
-            {used && !numbers && <span className={styles.usedText}>used</span>}
+            {used && !numbers && <span className={styles.usedText}>{t('used')}</span>}
             {item && (
               <Label offcut={item} format={format} materials={materials} settings={settings} />
             )}
@@ -335,7 +349,7 @@ function Label({
   const material = m
     ? [m.name, m.thickness ? `${m.thickness} mm` : null].filter(Boolean).join(' · ')
     : null;
-  const source = [offcut.sourceProjectName, dateFormat.format(offcut.createdAt)]
+  const source = [offcut.sourceProjectName, dateFormat().format(offcut.createdAt)]
     .filter(Boolean)
     .join(' · ');
   return (

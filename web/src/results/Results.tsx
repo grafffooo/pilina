@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Job, Plan, SheetLayout } from '../engine/types';
 import { formatMetres, formatMm, formatNumber } from '../lib/format';
-import { CUT_KIND_LABEL, classifyOffcut, cutKind, isRipLike, sizeOf } from '../model/describe';
+import { classifyOffcut, cutKindLabel, isRipLike, sizeOf } from '../model/describe';
 import { unplacedReason, usedPercent } from '../model/job';
 import type { Project } from '../model/project';
 import { useStore } from '../store/store';
@@ -9,19 +9,22 @@ import { useView } from '../store/view';
 import { ChevronLeftIcon, ChevronRightIcon, MinusIcon, PlusIcon, WarningIcon } from '../ui/icons';
 import ui from '../ui/ui.module.css';
 import { CostCard } from './CostCard';
+import { t as i18nT } from '../i18n';
 import { ExportPdfButton } from './ExportPdfButton';
 import { StartCuttingButton } from '../cutting/StartCuttingButton';
 import { usePartInfo, type PartInfo } from './partInfo';
 import { SheetDrawing } from './SheetDrawing';
 import styles from './Results.module.css';
+import { useTranslation } from 'react-i18next';
 
 /** Desktop results column. */
 export function Results({ project }: { project: Project }) {
+  const { t } = useTranslation();
   const { plan, job, status } = useStore((s) => s.result);
   return (
     <section className={styles.results} aria-labelledby="results-h">
       <div className={styles.resultsHeader}>
-        <h2 id="results-h">Results</h2>
+        <h2 id="results-h">{t('Results')}</h2>
         <span className={styles.spacer} />
         <ExportPdfButton />
         <StartCuttingButton />
@@ -49,16 +52,18 @@ export function Results({ project }: { project: Project }) {
 }
 
 export function EmptyResults({ running }: { running: boolean }) {
+  const { t } = useTranslation();
   return (
     <div className={styles.empty}>
       {running ? (
-        <p>Optimizing…</p>
+        <p>{t('Optimizing…')}</p>
       ) : (
         <>
-          <p className={styles.emptyTitle}>No cutting plan yet</p>
+          <p className={styles.emptyTitle}>{t('No cutting plan yet')}</p>
           <p>
-            Enter at least one part with a length, width and quantity, and a stock sheet to cut it
-            from.
+            {t(
+              'Enter at least one part with a length, width and quantity, and a stock sheet to cut it from.',
+            )}
           </p>
         </>
       )}
@@ -67,21 +72,29 @@ export function EmptyResults({ running }: { running: boolean }) {
 }
 
 export function StatCards({ plan, job, compact }: { plan: Plan; job: Job; compact?: boolean }) {
-  const t = plan.totals;
+  const { t } = useTranslation();
+  const totals = plan.totals;
   const used = usedPercent(plan);
   const stockIds = new Set(plan.sheets.map((s) => s.stockId));
   const first = job.stock.find((s) => s.id === plan.sheets[0]?.stockId);
   const sheetNote =
     stockIds.size === 1 && first
       ? `${formatMm(first.length)} × ${formatMm(first.width)}${first.label ? ` · ${first.label}` : ''}`
-      : `${stockIds.size} sheet sizes`;
+      : t('{{count}} sheet sizes', { count: stockIds.size });
   const banded = job.parts.filter((p) => p.edges && Object.values(p.edges).some(Boolean));
   const bandedPieces = banded.reduce((n, p) => n + p.qty, 0);
 
   return (
     <div className={compact ? styles.statsCompact : styles.stats}>
-      <Stat label="Sheets" value={formatNumber(t.sheets)} note={compact ? undefined : sheetNote} />
-      <Stat label={compact ? 'Used' : 'Material used'} value={`${formatNumber(Math.round(used))}%`}>
+      <Stat
+        label={t('Sheets')}
+        value={formatNumber(totals.sheets)}
+        note={compact ? undefined : sheetNote}
+      />
+      <Stat
+        label={compact ? t('Used') : t('Material used')}
+        value={`${formatNumber(Math.round(used))}%`}
+      >
         {!compact && (
           <span className={styles.bar} aria-hidden="true">
             <span style={{ width: `${Math.min(100, used)}%` }} />
@@ -89,19 +102,19 @@ export function StatCards({ plan, job, compact }: { plan: Plan; job: Job; compac
         )}
       </Stat>
       <Stat
-        label="Cuts"
-        value={formatNumber(t.cuts)}
-        note={compact ? undefined : `${formatMetres(t.cutLength)} of sawing`}
+        label={t('Cuts')}
+        value={formatNumber(totals.cuts)}
+        note={
+          compact
+            ? undefined
+            : t('{{length}} of sawing', { length: formatMetres(totals.cutLength) })
+        }
       />
       {!compact && (
         <Stat
-          label="Edge banding"
-          value={formatMetres(t.edgeBandLength)}
-          note={
-            bandedPieces > 0
-              ? `${bandedPieces} ${bandedPieces === 1 ? 'part' : 'parts'} banded`
-              : 'none set'
-          }
+          label={t('Edge banding')}
+          value={formatMetres(totals.edgeBandLength)}
+          note={bandedPieces > 0 ? t('n_parts_banded', { count: bandedPieces }) : t('none set')}
         />
       )}
     </div>
@@ -130,6 +143,7 @@ function Stat({
 }
 
 export function UnplacedBanner({ plan, job, project }: { plan: Plan; job: Job; project: Project }) {
+  const { t } = useTranslation();
   const info = usePartInfo(project);
   if (plan.unplaced.length === 0) return null;
   const total = plan.unplaced.reduce((n, u) => n + u.count, 0);
@@ -137,9 +151,7 @@ export function UnplacedBanner({ plan, job, project }: { plan: Plan; job: Job; p
     <div className={styles.unplaced} role="alert">
       <WarningIcon size={18} />
       <div>
-        <p className={styles.unplacedTitle}>
-          {total} {total === 1 ? 'part doesn’t' : 'parts don’t'} fit
-        </p>
+        <p className={styles.unplacedTitle}>{t('n_parts_dont_fit', { count: total })}</p>
         <ul>
           {plan.unplaced.map((u) => {
             const spec = job.parts.find((p) => p.id === u.partId);
@@ -150,8 +162,8 @@ export function UnplacedBanner({ plan, job, project }: { plan: Plan; job: Job; p
                 <strong>{name}</strong> ×{u.count}
                 {spec && ` (${formatMm(spec.length)} × ${formatMm(spec.width)})`}:{' '}
                 {reason === 'too-big'
-                  ? 'bigger than every stock sheet (with grain and edge trim)'
-                  : 'not enough stock sheets'}
+                  ? t('bigger than every stock sheet (with grain and edge trim)')
+                  : t('not enough stock sheets')}
               </li>
             );
           })}
@@ -167,6 +179,7 @@ function sheetUsed(s: SheetLayout): number {
 }
 
 export function SheetPager({ plan }: { plan: Plan }) {
+  const { t } = useTranslation();
   const index = useView((s) => Math.min(s.sheet, plan.sheets.length - 1));
   const setSheet = useView((s) => s.setSheet);
   const sheet = plan.sheets[index]!;
@@ -174,25 +187,31 @@ export function SheetPager({ plan }: { plan: Plan }) {
   const before = plan.sheets.slice(0, index).reduce((n, s) => n + s.qty, 0);
   const total = plan.totals.sheets;
   const range =
-    sheet.qty > 1 ? `Sheets ${before + 1}–${before + sheet.qty}` : `Sheet ${before + 1}`;
+    sheet.qty > 1
+      ? t('Sheets {{from}}–{{to}} of {{total}}', {
+          from: before + 1,
+          to: before + sheet.qty,
+          total,
+        })
+      : t('Sheet {{n}} of {{total}}', { n: before + 1, total });
   return (
     <div className={styles.pager}>
       <button
         type="button"
         className={ui.iconButton}
-        aria-label="Previous sheet"
+        aria-label={t('Previous sheet')}
         disabled={index === 0}
         onClick={() => setSheet(index - 1)}
       >
         <ChevronLeftIcon size={16} />
       </button>
       <span className={styles.pagerLabel} aria-live="polite">
-        {range} of {total}
+        {range}
       </span>
       <button
         type="button"
         className={ui.iconButton}
-        aria-label="Next sheet"
+        aria-label={t('Next sheet')}
         disabled={index >= plan.sheets.length - 1}
         onClick={() => setSheet(index + 1)}
       >
@@ -212,6 +231,7 @@ export function SheetPanel({
   project: Project;
   withLegend?: boolean;
 }) {
+  const { t } = useTranslation();
   const view = useView();
   const parts = usePartInfo(project);
   const job = useStore((s) => s.result.job);
@@ -219,7 +239,13 @@ export function SheetPanel({
   const sheet = plan.sheets[index]!;
   const stock = job?.stock.find((s) => s.id === sheet.stockId);
   const used = sheetUsed(sheet);
-  const label = `Sheet ${index + 1}: ${sheet.placements.length} parts on a ${sheet.length} × ${sheet.width} mm board, ${Math.round(used)}% used`;
+  const label = t('sheet_drawing_label', {
+    n: index + 1,
+    count: sheet.placements.length,
+    length: sheet.length,
+    width: sheet.width,
+    pct: Math.round(used),
+  });
 
   return (
     <div className={styles.panel}>
@@ -227,38 +253,39 @@ export function SheetPanel({
         <SheetPager plan={plan} />
         <span className={styles.toolbarMeta}>
           {formatMm(sheet.length)} × {formatMm(sheet.width)}
-          {stock?.label ? ` · ${stock.label}` : ''} · {sheet.placements.length} parts ·{' '}
-          {formatNumber(Math.round(used))}% used
+          {stock?.label ? ` · ${stock.label}` : ''} ·{' '}
+          {t('n_parts', { count: sheet.placements.length })} ·{' '}
+          {t('{{pct}}% used', { pct: formatNumber(Math.round(used)) })}
         </span>
         <span className={styles.spacer} />
-        <div className={ui.segmented} role="group" aria-label="Show on drawing">
+        <div className={ui.segmented} role="group" aria-label={t('Show on drawing')}>
           <button
             type="button"
             aria-pressed={view.showCuts}
             onClick={() => view.toggle('showCuts')}
           >
-            Cuts
+            {t('Cuts')}
           </button>
           <button
             type="button"
             aria-pressed={view.showSizes}
             onClick={() => view.toggle('showSizes')}
           >
-            Sizes
+            {t('Sizes')}
           </button>
           <button
             type="button"
             aria-pressed={view.showEdges}
             onClick={() => view.toggle('showEdges')}
           >
-            Edges
+            {t('Edges')}
           </button>
         </div>
         <div className={styles.zoom}>
           <button
             type="button"
             className={ui.iconButton}
-            aria-label="Zoom out"
+            aria-label={t('Zoom out')}
             disabled={view.zoom <= 1}
             onClick={() => view.setZoom(view.zoom / 1.5)}
           >
@@ -268,14 +295,14 @@ export function SheetPanel({
             type="button"
             className={styles.fit}
             onClick={() => view.setZoom(1)}
-            aria-label="Fit sheet"
+            aria-label={t('Fit sheet')}
           >
-            {view.zoom === 1 ? 'Fit' : `${Math.round(view.zoom * 100)}%`}
+            {view.zoom === 1 ? t('Fit') : `${Math.round(view.zoom * 100)}%`}
           </button>
           <button
             type="button"
             className={ui.iconButton}
-            aria-label="Zoom in"
+            aria-label={t('Zoom in')}
             disabled={view.zoom >= 4}
             onClick={() => view.setZoom(view.zoom * 1.5)}
           >
@@ -296,16 +323,17 @@ export function SheetPanel({
 }
 
 function Legend({ sheet, parts }: { sheet: SheetLayout; parts: Map<string, PartInfo> }) {
+  const { t } = useTranslation();
   const counts = new Map<string, number>();
   sheet.placements.forEach((p) => counts.set(p.partId, (counts.get(p.partId) ?? 0) + 1));
   return (
     <div className={styles.legend}>
-      <div className={styles.legendTitle}>Legend</div>
+      <div className={styles.legendTitle}>{t('Legend')}</div>
       <div className={styles.legendRow}>
         <svg width="28" height="8" aria-hidden="true">
           <line x1="0" y1="4" x2="28" y2="4" stroke="#DD6B0B" strokeWidth="3" />
         </svg>
-        Rip cut (full length)
+        {t('Rip cut (full length)')}
       </div>
       <div className={styles.legendRow}>
         <svg width="28" height="8" aria-hidden="true">
@@ -319,16 +347,16 @@ function Legend({ sheet, parts }: { sheet: SheetLayout; parts: Map<string, PartI
             strokeDasharray="6 4"
           />
         </svg>
-        Cross cut
+        {t('Cross cut')}
       </div>
       <div className={styles.legendRow}>
         <svg width="28" height="14" aria-hidden="true">
           <rect width="28" height="14" fill="#E3E6EA" stroke="#B7BDC6" />
         </svg>
-        Leftover
+        {t('Leftover')}
       </div>
       <div className={styles.legendRule} />
-      <div className={styles.legendTitle}>Parts on this sheet</div>
+      <div className={styles.legendTitle}>{t('Parts on this sheet')}</div>
       {[...counts].map(([id, n]) => {
         const info = parts.get(id);
         return (
@@ -352,6 +380,7 @@ export function CutOrder({
   title?: boolean;
   fullHeight?: boolean;
 }) {
+  const { t } = useTranslation();
   const index = useView((s) => Math.min(s.sheet, plan.sheets.length - 1));
   const activeCut = useView((s) => s.activeCut);
   const setActiveCut = useView((s) => s.setActiveCut);
@@ -360,14 +389,14 @@ export function CutOrder({
   return (
     <div className={styles.listCard}>
       <div className={styles.listHeader}>
-        {title && <h3>Cut order</h3>}
+        {title && <h3>{t('Cut order')}</h3>}
         <span className={styles.spacer} />
         <span className={styles.listMeta}>
-          {sheet.cuts.length} cuts · {formatMetres(length)}
+          {t('n_cuts', { count: sheet.cuts.length })} · {formatMetres(length)}
         </span>
       </div>
       {sheet.cuts.length === 0 ? (
-        <p className={styles.listEmpty}>This sheet is used whole: no cuts needed.</p>
+        <p className={styles.listEmpty}>{t('This sheet is used whole: no cuts needed.')}</p>
       ) : (
         <ol className={fullHeight ? `${styles.cutList} ${styles.cutListFull}` : styles.cutList}>
           {sheet.cuts.map((c) => {
@@ -389,7 +418,7 @@ export function CutOrder({
                   <span className={styles.cutPos}>
                     {c.axis} = {formatMm(c.pos)}
                   </span>
-                  <span className={styles.cutKind}>{CUT_KIND_LABEL[cutKind(c)]}</span>
+                  <span className={styles.cutKind}>{cutKindLabel(c)}</span>
                   <span className={styles.cutLen}>{formatMm(c.length)} mm</span>
                 </button>
               </li>
@@ -401,10 +430,12 @@ export function CutOrder({
   );
 }
 
-const OFFCUT_TEXT = { usable: 'reusable', strip: 'strip', scrap: 'scrap' } as const;
+const offcutText = (k: 'usable' | 'strip' | 'scrap') =>
+  k === 'usable' ? i18nT('reusable') : k === 'strip' ? i18nT('strip') : i18nT('scrap');
 const MAX_OFFCUTS = 8;
 
 export function Offcuts({ plan }: { plan: Plan }) {
+  const { t } = useTranslation();
   const index = useView((s) => Math.min(s.sheet, plan.sheets.length - 1));
   const sheet = plan.sheets[index]!;
   const shown = sheet.waste.slice(0, MAX_OFFCUTS);
@@ -412,12 +443,12 @@ export function Offcuts({ plan }: { plan: Plan }) {
   return (
     <div className={`${styles.listCard} ${styles.offcutsCard}`}>
       <div className={styles.listHeader}>
-        <h3>Leftovers</h3>
+        <h3>{t('Leftovers')}</h3>
         <span className={styles.spacer} />
-        <span className={styles.listMeta}>largest first</span>
+        <span className={styles.listMeta}>{t('largest first')}</span>
       </div>
       {shown.length === 0 ? (
-        <p className={styles.listEmpty}>No leftovers on this sheet.</p>
+        <p className={styles.listEmpty}>{t('No leftovers on this sheet.')}</p>
       ) : (
         <ul className={styles.offcutList}>
           {shown.map((r, i) => {
@@ -429,12 +460,14 @@ export function Offcuts({ plan }: { plan: Plan }) {
                   {formatMm(s.long)} × {formatMm(s.short)}
                 </span>
                 <span className={kind === 'usable' ? styles.offcutKeep : styles.offcutKind}>
-                  {OFFCUT_TEXT[kind]}
+                  {offcutText(kind)}
                 </span>
               </li>
             );
           })}
-          {more > 0 && <li className={styles.offcutMore}>and {more} smaller</li>}
+          {more > 0 && (
+            <li className={styles.offcutMore}>{t('and {{count}} smaller', { count: more })}</li>
+          )}
         </ul>
       )}
     </div>

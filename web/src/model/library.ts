@@ -1,5 +1,6 @@
 // Materials, edge bands and app settings: shared by all projects, stored on this device.
 import type { PriceInput, StockPrice, StockSpec } from '../engine/types';
+import { locale as current, t } from '../i18n';
 import { newId, type Project } from './project';
 
 export type PriceUnit = 'sheet' | 'sqm';
@@ -98,7 +99,7 @@ export function stockPrice(
   width: number,
   material: Material | undefined,
 ): StockPrice {
-  const name = material?.name || 'Unnamed material';
+  const name = material?.name || t('Unnamed material');
   if (!material || material.price === null) return { stockId, material: name };
   if (material.priceUnit === 'sqm') return { stockId, material: name, perSqm: material.price };
   const refL = material.sheetLength;
@@ -136,12 +137,12 @@ export function buildPriceInput(
       // Library offcuts are free (paid for earlier) but grouped under their material.
       ...offcutStock.map((s) => ({
         stockId: s.id,
-        material: (s.material && mat.get(s.material)?.name) || 'Unnamed material',
+        material: (s.material && mat.get(s.material)?.name) || t('Unnamed material'),
       })),
     ],
     edgeBands: project.parts.map((p) => {
       const b = band.get(p.edgeBandId ?? project.defaultEdgeBandId ?? '');
-      return { partId: p.id, band: b?.name ?? 'Edge band', perMetre: b?.pricePerMetre ?? null };
+      return { partId: p.id, band: b?.name ?? t('Edge band'), perMetre: b?.pricePerMetre ?? null };
     }),
     edgeAllowance: settings.edgeAllowance,
     extras: project.pricing.extras
@@ -185,10 +186,18 @@ export function linkLegacyStockLabels(
   return created;
 }
 
-export function formatMoney(amount: number, currency: string, locale = 'en'): string {
+export function formatMoney(amount: number, currency: string, locale: string = current()): string {
   try {
     return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(amount);
   } catch {
     return `${amount.toFixed(2)} ${currency}`;
   }
+}
+
+/** A material's price per m² (from either unit), or `null` when unpriced. */
+export function pricePerSqm(m: Material | undefined): number | null {
+  if (!m || m.price === null) return null;
+  if (m.priceUnit === 'sqm') return m.price;
+  if (!m.sheetLength || !m.sheetWidth) return null;
+  return m.price / ((m.sheetLength * m.sheetWidth) / 1e6);
 }

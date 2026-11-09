@@ -1,5 +1,7 @@
 import { addMaterial, useStore } from '../store/store';
+import { promptDialog } from '../ui/dialogs';
 import styles from './Editor.module.css';
+import { useTranslation } from 'react-i18next';
 
 const NEW = '__new__';
 
@@ -21,6 +23,7 @@ export function MaterialSelect({
   /** Sheet size for a new material's per-sheet price. */
   sheet?: { length: number; width: number };
 }) {
+  const { t } = useTranslation();
   const materials = useStore((s) => s.materials);
   const known = value === null || materials.some((m) => m.id === value);
   return (
@@ -28,24 +31,30 @@ export function MaterialSelect({
       className={styles.select}
       aria-label={ariaLabel}
       value={value ?? ''}
-      onChange={(e) => {
+      onChange={async (e) => {
         const v = e.target.value;
         if (v !== NEW) {
           onChange(v || null);
           return;
         }
-        const name = window.prompt('Name of the new material, e.g. “DTD White 18mm”')?.trim();
+        const name = await promptDialog({
+          title: t('New material'),
+          label: t('Name of the new material, e.g. “DTD White 18mm”'),
+          confirmLabel: t('Add'),
+        });
         if (name) onChange(addMaterial(name, sheet).id);
       }}
     >
-      {(anyLabel || value === null) && <option value="">{anyLabel ?? 'Choose material…'}</option>}
-      {!known && <option value={value ?? ''}>Deleted material</option>}
+      {(anyLabel || value === null) && (
+        <option value="">{anyLabel ?? t('Choose material…')}</option>
+      )}
+      {!known && <option value={value ?? ''}>{t('Deleted material')}</option>}
       {materials.map((m) => (
         <option key={m.id} value={m.id}>
           {m.name}
         </option>
       ))}
-      <option value={NEW}>+ New material…</option>
+      <option value={NEW}>{t('+ New material…')}</option>
     </select>
   );
 }

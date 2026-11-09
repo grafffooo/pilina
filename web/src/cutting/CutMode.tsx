@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Rect, SheetLayout } from '../engine/types';
 import { formatMm } from '../lib/format';
-import { CUT_KIND_LABEL, cutKind, isRipLike } from '../model/describe';
+import { cutKindLabel, isRipLike } from '../model/describe';
 import { jobKey } from '../model/job';
 import { stockPrice } from '../model/library';
 import { keepAdvice, offcutIdFromStock } from '../model/offcut';
@@ -12,9 +12,13 @@ import { SheetDrawing } from '../results/SheetDrawing';
 import { CheckIcon, CloseIcon } from '../ui/icons';
 import ui from '../ui/ui.module.css';
 import { cutSentence, loadSession, saveSession, steps, type CutSession } from './session';
+import { locale, t as i18nT } from '../i18n';
+import { promptDialog } from '../ui/dialogs';
 import styles from './CutMode.module.css';
+import { useTranslation } from 'react-i18next';
 
 export function CutMode() {
+  const { t } = useTranslation();
   const project = useCurrentProject()!;
   const result = useStore((s) => s.result);
   const materials = useStore((s) => s.materials);
@@ -76,7 +80,7 @@ export function CutMode() {
             location,
             label: queueLabels ? 'queued' : 'none',
             sourceProjectId: project.id,
-            sourceProjectName: project.name || 'Untitled project',
+            sourceProjectName: project.name || t('Untitled project'),
           })),
         )
       : [];
@@ -89,7 +93,7 @@ export function CutMode() {
       store.updateOffcuts([usedOffcut], {
         status: 'used',
         usedAt: Date.now(),
-        usedInProjectName: project.name || 'Untitled project',
+        usedInProjectName: project.name || t('Untitled project'),
       });
     }
     const price = usedOffcut
@@ -100,9 +104,9 @@ export function CutMode() {
       id: crypto.randomUUID(),
       at: Date.now(),
       projectId: project.id,
-      projectName: project.name || 'Untitled project',
+      projectName: project.name || t('Untitled project'),
       materialId: stock?.material ?? null,
-      materialName: material?.name ?? stock?.label ?? 'Unnamed material',
+      materialName: material?.name ?? stock?.label ?? t('Unnamed material'),
       sheetLength: sheet.length,
       sheetWidth: sheet.width,
       usedArea: sheet.placements.reduce((a, p) => a + p.rect.w * p.rect.h, 0),
@@ -144,8 +148,8 @@ export function CutMode() {
   if (finished) {
     return (
       <Shell
-        title="All sheets are cut"
-        subtitle={project.name || 'Untitled project'}
+        title={t('All sheets are cut')}
+        subtitle={project.name || t('Untitled project')}
         onClose={close}
         progress={1}
       >
@@ -154,13 +158,14 @@ export function CutMode() {
             <CheckIcon size={40} />
           </span>
           <p className={styles.finishedTitle}>
-            {all.length} {all.length === 1 ? 'sheet' : 'sheets'}, {totalCuts} cuts done.
+            {t('n_sheets_cuts_done', { count: all.length, cuts: totalCuts })}
           </p>
           {session.keptCodes.length > 0 && (
             <p>
-              Kept {session.keptCodes.length}{' '}
-              {session.keptCodes.length === 1 ? 'offcut' : 'offcuts'}:{' '}
-              {session.keptCodes.join(', ')}.
+              {t('kept_offcuts', {
+                count: session.keptCodes.length,
+                codes: session.keptCodes.join(', '),
+              })}
             </p>
           )}
         </div>
@@ -173,7 +178,7 @@ export function CutMode() {
               close();
             }}
           >
-            Close
+            {t('Close')}
           </button>
           {session.keptCodes.length > 0 && (
             <button
@@ -185,7 +190,7 @@ export function CutMode() {
                 useStore.getState().setView('labels');
               }}
             >
-              Print labels
+              {t('Print labels')}
             </button>
           )}
         </div>
@@ -193,7 +198,7 @@ export function CutMode() {
     );
   }
 
-  const sheetTitle = `Sheet ${session.sheet + 1} of ${all.length}`;
+  const sheetTitle = t('Sheet {{n}} of {{total}}', { n: session.sheet + 1, total: all.length });
   const sheetSub = [
     stock?.label || material?.name,
     `${formatMm(sheet.length)} × ${formatMm(sheet.width)}`,
@@ -204,8 +209,8 @@ export function CutMode() {
   if (sheetDone) {
     return (
       <Shell
-        title={`${sheetTitle} is cut`}
-        subtitle={`${cuts.length} of ${cuts.length} cuts · ${project.name || 'Untitled project'}`}
+        title={t('{{sheet}} is cut', { sheet: sheetTitle })}
+        subtitle={`${t('{{done}} of {{total}} cuts', { done: cuts.length, total: cuts.length })} · ${project.name || t('Untitled project')}`}
         onClose={close}
         progress={(cutsBefore + cuts.length) / Math.max(1, totalCuts)}
       >
@@ -222,14 +227,16 @@ export function CutMode() {
   const following = cuts[session.cut + 1];
   const rip = isRipLike(cut);
   const speak = () => {
-    const text = `Cut ${cut.number}. ${CUT_KIND_LABEL[cutKind(cut)]}. ${cutSentence(cut.axis, cut.pos)}.`;
+    const text = `${t('Cut {{n}}', { n: cut.number })}. ${cutKindLabel(cut)}. ${cutSentence(cut.axis, cut.pos)}.`;
     window.speechSynthesis?.cancel();
-    window.speechSynthesis?.speak(new SpeechSynthesisUtterance(text));
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = locale();
+    window.speechSynthesis?.speak(utterance);
   };
 
   return (
     <Shell
-      title={`Cut ${session.cut + 1} of ${cuts.length}`}
+      title={t('Cut {{n}} of {{total}}', { n: session.cut + 1, total: cuts.length })}
       subtitle={`${sheetTitle} · ${sheetSub}`}
       onClose={close}
       progress={(cutsBefore + session.cut) / Math.max(1, totalCuts)}
@@ -239,11 +246,13 @@ export function CutMode() {
         <div className={styles.cutCard}>
           <span className={rip ? styles.kindRip : styles.kindCross}>
             <span className={styles.kindNumber}>{cut.number}</span>
-            {CUT_KIND_LABEL[cutKind(cut)]}
+            {cutKindLabel(cut)}
           </span>
           <div className={styles.position}>
             <span className={styles.positionLabel}>
-              Cut line from the {cut.axis === 'x' ? 'left' : 'top'} edge of the sheet
+              {cut.axis === 'x'
+                ? t('Cut line from the left edge of the sheet')
+                : t('Cut line from the top edge of the sheet')}
             </span>
             <span className={styles.positionValue}>
               {formatMm(cut.pos)} <span className={styles.unit}>mm</span>
@@ -251,15 +260,19 @@ export function CutMode() {
           </div>
           <div className={styles.facts}>
             <div>
-              <span>Cut length</span>
+              <span>{t('Cut length')}</span>
               <strong>{formatMm(cut.length)} mm</strong>
             </div>
             <div>
-              <span>Then</span>
+              <span>{t('Then')}</span>
               <strong>
                 {following
-                  ? `${CUT_KIND_LABEL[cutKind(following)].toLowerCase()} at ${following.axis} = ${formatMm(following.pos)}`
-                  : 'sheet done'}
+                  ? t('{{kind}} at {{axis}} = {{pos}}', {
+                      kind: cutKindLabel(following).toLowerCase(),
+                      axis: following.axis,
+                      pos: formatMm(following.pos),
+                    })
+                  : t('sheet done')}
               </strong>
             </div>
           </div>
@@ -269,7 +282,12 @@ export function CutMode() {
             sheet={sheet}
             parts={parts}
             cutStep={cut.number}
-            label={`${sheetTitle} with cut ${cut.number} highlighted at ${cut.axis} = ${cut.pos} mm`}
+            label={t('{{sheet}} with cut {{n}} highlighted at {{axis}} = {{pos}} mm', {
+              sheet: sheetTitle,
+              n: cut.number,
+              axis: cut.axis,
+              pos: cut.pos,
+            })}
           />
         </div>
       </div>
@@ -280,10 +298,10 @@ export function CutMode() {
           onClick={back}
           disabled={session.sheet === 0 && session.cut === 0}
         >
-          Back
+          {t('Back')}
         </button>
         <button type="button" className={styles.primary} onClick={next}>
-          {following ? 'Done, next cut' : 'Done, sheet finished'}
+          {following ? t('Done, next cut') : t('Done, sheet finished')}
         </button>
       </div>
     </Shell>
@@ -305,13 +323,14 @@ function Shell({
   onSpeak?: () => void;
   children: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   return (
-    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="Cut mode">
+    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label={t('Cut mode')}>
       <header className={styles.header}>
         <button
           type="button"
           className={styles.headerButton}
-          aria-label="Close cut mode"
+          aria-label={t('Close cut mode')}
           onClick={onClose}
         >
           <CloseIcon size={22} />
@@ -326,7 +345,7 @@ function Shell({
           <button
             type="button"
             className={styles.headerButton}
-            aria-label="Read this cut aloud"
+            aria-label={t('Read this cut aloud')}
             onClick={onSpeak}
           >
             <SpeakerIcon />
@@ -358,7 +377,12 @@ function SpeakerIcon() {
   );
 }
 
-const ADVICE_TEXT = { suggested: 'Suggested', strip: 'Narrow strip', small: 'Too small' } as const;
+const adviceText = (a: 'suggested' | 'strip' | 'small') =>
+  a === 'suggested'
+    ? i18nT('Suggested')
+    : a === 'strip'
+      ? i18nT('Narrow strip')
+      : i18nT('Too small');
 
 /** After a sheet: pick leftovers to keep, where they go, and whether to queue labels. */
 function KeepOffcuts({
@@ -370,6 +394,7 @@ function KeepOffcuts({
   onBack?: () => void;
   onDone: (keep: Rect[], location: string, queueLabels: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const settings = useStore((s) => s.settings);
   const queued = useStore(
     (s) => s.offcuts.filter((o) => o.label === 'queued' && o.status !== 'used').length,
@@ -389,13 +414,16 @@ function KeepOffcuts({
     <>
       <div className={styles.keepBody}>
         <div>
-          <p className={styles.keepTitle}>Keep any offcuts?</p>
+          <p className={styles.keepTitle}>{t('Keep any offcuts?')}</p>
           <p className={styles.keepHint}>
-            Suggested: pieces at least {settings.offcutMinLength} × {settings.offcutMinWidth} mm.
+            {t('Suggested: pieces at least {{length}} × {{width}} mm.', {
+              length: settings.offcutMinLength,
+              width: settings.offcutMinWidth,
+            })}
           </p>
         </div>
         {listed.length === 0 ? (
-          <p className={styles.keepHint}>Nothing big enough to keep on this sheet.</p>
+          <p className={styles.keepHint}>{t('Nothing big enough to keep on this sheet.')}</p>
         ) : (
           <div className={styles.keepPieces}>
             <MiniSheet sheet={sheet} highlight={keep} />
@@ -420,7 +448,7 @@ function KeepOffcuts({
                         {formatMm(Math.max(p.r.w, p.r.h))} × {formatMm(Math.min(p.r.w, p.r.h))}
                       </span>
                       <span className={p.advice === 'suggested' ? styles.tagGood : styles.tag}>
-                        {ADVICE_TEXT[p.advice]}
+                        {adviceText(p.advice)}
                       </span>
                     </span>
                   </label>
@@ -430,16 +458,12 @@ function KeepOffcuts({
           </div>
         )}
         {hidden > 0 && (
-          <p className={styles.keepHint}>
-            {hidden} more {hidden === 1 ? 'piece is' : 'pieces are'} too small to list.
-          </p>
+          <p className={styles.keepHint}>{t('n_more_too_small', { count: hidden })}</p>
         )}
         {keep.length > 0 && (
           <>
             <div>
-              <p className={styles.keepLabel}>
-                Where will you store {keep.length === 1 ? 'it' : 'them'}?
-              </p>
+              <p className={styles.keepLabel}>{t('where_store', { count: keep.length })}</p>
               <div className={styles.places}>
                 {settings.locations.map((l) => (
                   <button
@@ -453,26 +477,28 @@ function KeepOffcuts({
                 ))}
                 <button
                   type="button"
-                  onClick={() => {
-                    const name = window.prompt('New storage place, e.g. “Rack C, bottom”')?.trim();
+                  onClick={async () => {
+                    const name = await promptDialog({
+                      title: t('New storage place'),
+                      label: t('New storage place, e.g. “Rack C, bottom”'),
+                      confirmLabel: t('Add'),
+                    });
                     if (!name) return;
                     if (!settings.locations.includes(name))
                       updateSettings({ locations: [...settings.locations, name] });
                     setLocation(name);
                   }}
                 >
-                  + New place
+                  {t('+ New place')}
                 </button>
               </div>
             </div>
             <label className={styles.switchRow}>
               <span>
                 <span className={styles.keepLabel}>
-                  Add {keep.length === 1 ? 'its label' : 'their labels'} to the print queue
+                  {t('add_labels_to_queue', { count: keep.length })}
                 </span>
-                <span className={styles.keepHint}>
-                  {waiting} {waiting === 1 ? 'label' : 'labels'} will wait for the next A4 sheet
-                </span>
+                <span className={styles.keepHint}>{t('n_labels_waiting', { count: waiting })}</span>
               </span>
               <input
                 type="checkbox"
@@ -487,11 +513,11 @@ function KeepOffcuts({
       <div className={styles.actions}>
         {onBack && (
           <button type="button" className={styles.back} onClick={onBack}>
-            Back
+            {t('Back')}
           </button>
         )}
         <button type="button" className={ui.button} onClick={() => onDone([], location, labels)}>
-          Skip
+          {t('Skip')}
         </button>
         <button
           type="button"
@@ -499,7 +525,7 @@ function KeepOffcuts({
           disabled={keep.length === 0}
           onClick={() => onDone(keep, location, labels)}
         >
-          Keep {keep.length} {keep.length === 1 ? 'offcut' : 'offcuts'}
+          {t('keep_n_offcuts', { count: keep.length })}
         </button>
       </div>
     </>
@@ -507,13 +533,14 @@ function KeepOffcuts({
 }
 
 function MiniSheet({ sheet, highlight }: { sheet: SheetLayout; highlight: Rect[] }) {
+  const { t } = useTranslation();
   const m = Math.max(sheet.width, sheet.length);
   return (
     <svg
       className={styles.mini}
       viewBox={`${-m * 0.02} ${-m * 0.02} ${sheet.width + m * 0.04} ${sheet.length + m * 0.04}`}
       role="img"
-      aria-label={`The sheet with ${highlight.length} offcuts selected`}
+      aria-label={t('The sheet with {{count}} offcuts selected', { count: highlight.length })}
     >
       <rect
         width={sheet.width}

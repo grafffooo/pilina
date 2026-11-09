@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Full-bleed background; the mark stays inside the 80% safe zone for maskable icons. -->
+  <rect width="512" height="512" fill="#127A6E"/>
+  <g transform="translate(256 256) scale(0.62) translate(-256 -256)">
+    <path d="M136 120h108v272H136zM268 120h108v112H268zM268 256h108v136H268z" fill="#FFFFFF"/>
+  </g>
+</svg>

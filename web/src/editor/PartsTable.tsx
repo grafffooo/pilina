@@ -10,16 +10,20 @@ import { NumberInput } from '../ui/NumberInput';
 import { Menu } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import { EdgePicker } from './EdgePicker';
+import { t as i18nT } from '../i18n';
 import { MaterialSelect } from './MaterialSelect';
 import styles from './Editor.module.css';
+import { useTranslation } from 'react-i18next';
 
 const GRAIN_NEXT: Record<Grain, Grain> = { none: 'length', length: 'width', width: 'none' };
-const GRAIN_TEXT: Record<Grain, string> = { none: 'Any', length: 'Length', width: 'Width' };
-const GRAIN_HELP: Record<Grain, string> = {
-  none: 'Grain: any direction (the part may be rotated)',
-  length: 'Grain: along the sheet length',
-  width: 'Grain: across the sheet (along its width)',
-};
+const grainText = (g: Grain) =>
+  g === 'none' ? i18nT('Any') : g === 'length' ? i18nT('Length') : i18nT('Width');
+const grainHelp = (g: Grain) =>
+  g === 'none'
+    ? i18nT('Grain: any direction (the part may be rotated)')
+    : g === 'length'
+      ? i18nT('Grain: along the sheet length')
+      : i18nT('Grain: across the sheet (along its width)');
 
 /** Moves focus to the same column in another row (Enter / Shift+Enter). */
 function focusCell(table: HTMLElement | null, row: number, col: string) {
@@ -27,6 +31,7 @@ function focusCell(table: HTMLElement | null, row: number, col: string) {
 }
 
 export function PartsTable({ project }: { project: Project }) {
+  const { t } = useTranslation();
   const parts = project.parts;
   const pieces = countPieces(project);
   const rowsWithData = parts.filter((p) => !isBlankPart(p)).length;
@@ -64,14 +69,13 @@ export function PartsTable({ project }: { project: Project }) {
   return (
     <section className={styles.card} aria-labelledby="parts-h">
       <div className={styles.cardHeader}>
-        <h2 id="parts-h">Parts</h2>
+        <h2 id="parts-h">{t('Parts')}</h2>
         <span className={styles.cardMeta}>
-          {pieces} {pieces === 1 ? 'piece' : 'pieces'} in {rowsWithData}{' '}
-          {rowsWithData === 1 ? 'row' : 'rows'}
+          {t('n_pieces', { count: pieces })} · {t('n_rows', { count: rowsWithData })}
         </span>
         <span className={styles.spacer} />
         <button type="button" className={ui.buttonPrimary} onClick={() => addRow()}>
-          Add part
+          {t('Add part')}
         </button>
       </div>
       <div className={styles.tableWrap}>
@@ -79,24 +83,24 @@ export function PartsTable({ project }: { project: Project }) {
           <thead>
             <tr>
               <th className={styles.colCheck}>
-                <span className="sr-only">Use</span>
+                <span className="sr-only">{t('Use')}</span>
               </th>
-              <th className={styles.num}>Length</th>
-              <th className={styles.num}>Width</th>
-              <th className={`${styles.num} ${styles.colQty}`}>Qty</th>
-              <th>Label</th>
-              {showMaterial && <th>Material</th>}
-              <th className={styles.colGrain}>Grain</th>
-              <th className={styles.colEdges}>Edges</th>
+              <th className={styles.num}>{t('Length')}</th>
+              <th className={styles.num}>{t('Width')}</th>
+              <th className={`${styles.num} ${styles.colQty}`}>{t('Qty')}</th>
+              <th>{t('Label')}</th>
+              {showMaterial && <th>{t('Material')}</th>}
+              <th className={styles.colGrain}>{t('Grain')}</th>
+              <th className={styles.colEdges}>{t('Edges')}</th>
               <th className={styles.colMore}>
-                <span className="sr-only">More</span>
+                <span className="sr-only">{t('More')}</span>
               </th>
             </tr>
           </thead>
           <tbody>
             {parts.map((p, i) => {
               const missing = missingPartFields(p);
-              const name = p.label || `Part ${i + 1}`;
+              const name = p.label || t('Part {{n}}', { n: i + 1 });
               const cell = (col: 'length' | 'width' | 'qty', label: string) => (
                 <NumberInput
                   className={styles.cell}
@@ -118,7 +122,7 @@ export function PartsTable({ project }: { project: Project }) {
                       <input
                         type="checkbox"
                         checked={p.enabled}
-                        aria-label={`Include ${name}`}
+                        aria-label={t('Include {{name}}', { name })}
                         onChange={(e) => updatePart(p.id, { enabled: e.target.checked })}
                       />
                       <span
@@ -128,14 +132,14 @@ export function PartsTable({ project }: { project: Project }) {
                       />
                     </span>
                   </td>
-                  <td className={styles.cLength}>{cell('length', 'Length')}</td>
-                  <td className={styles.cWidth}>{cell('width', 'Width')}</td>
-                  <td className={`${styles.colQty} ${styles.cQty}`}>{cell('qty', 'Qty')}</td>
+                  <td className={styles.cLength}>{cell('length', t('Length'))}</td>
+                  <td className={styles.cWidth}>{cell('width', t('Width'))}</td>
+                  <td className={`${styles.colQty} ${styles.cQty}`}>{cell('qty', t('Qty'))}</td>
                   <td className={styles.cLabel}>
                     <input
                       className={`${styles.cell} ${styles.cellText}`}
-                      aria-label={`Label, part ${i + 1}`}
-                      placeholder="Label"
+                      aria-label={t('Label, part {{n}}', { n: i + 1 })}
+                      placeholder={t('Label')}
                       data-row={i}
                       data-col="label"
                       value={p.label}
@@ -148,8 +152,8 @@ export function PartsTable({ project }: { project: Project }) {
                     <td className={styles.cMaterial}>
                       <MaterialSelect
                         value={p.materialId}
-                        anyLabel="Any board"
-                        ariaLabel={`Material, ${name}`}
+                        anyLabel={t('Any board')}
+                        ariaLabel={t('Material, {{name}}', { name })}
                         onChange={(materialId) => updatePart(p.id, { materialId })}
                       />
                     </td>
@@ -158,11 +162,11 @@ export function PartsTable({ project }: { project: Project }) {
                     <button
                       type="button"
                       className={p.grain === 'none' ? styles.grain : styles.grainSet}
-                      aria-label={`${GRAIN_HELP[p.grain]}. Change`}
-                      title={GRAIN_HELP[p.grain]}
+                      aria-label={t('{{help}}. Change', { help: grainHelp(p.grain) })}
+                      title={grainHelp(p.grain)}
                       onClick={() => updatePart(p.id, { grain: GRAIN_NEXT[p.grain] })}
                     >
-                      {GRAIN_TEXT[p.grain]}
+                      {grainText(p.grain)}
                     </button>
                   </td>
                   <td className={`${styles.colEdges} ${styles.cEdges}`}>
@@ -177,11 +181,11 @@ export function PartsTable({ project }: { project: Project }) {
                   <td className={`${styles.colMore} ${styles.cMore}`}>
                     <Menu
                       label={<MoreIcon />}
-                      ariaLabel={`More actions for ${name}`}
+                      ariaLabel={t('More actions for {{name}}', { name })}
                       triggerClassName={ui.iconButton}
                       items={[
-                        { label: 'Duplicate', onSelect: () => duplicatePart(p.id) },
-                        { label: 'Delete', danger: true, onSelect: () => removePart(p.id) },
+                        { label: t('Duplicate'), onSelect: () => duplicatePart(p.id) },
+                        { label: t('Delete'), danger: true, onSelect: () => removePart(p.id) },
                       ]}
                     />
                   </td>
@@ -194,7 +198,7 @@ export function PartsTable({ project }: { project: Project }) {
       <div className={styles.cardFooter}>
         <button type="button" className={styles.addRow} onClick={() => addRow()}>
           <PlusIcon size={16} />
-          Add a part, or paste rows from a spreadsheet
+          {t('Add a part, or paste rows from a spreadsheet')}
         </button>
       </div>
     </section>

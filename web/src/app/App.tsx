@@ -19,17 +19,23 @@ import { CutMode } from '../cutting/CutMode';
 import { StartCuttingButton } from '../cutting/StartCuttingButton';
 import { LabelPrint } from '../offcuts/LabelPrint';
 import { OffcutLibrary } from '../offcuts/OffcutLibrary';
+import { StatsScreen } from '../stats/StatsScreen';
 import { useCurrentProject, useStore } from '../store/store';
 import { useMediaQuery } from '../ui/hooks';
 import { CloseIcon, MenuIcon, PartsIcon, SawIcon, SheetIcon } from '../ui/icons';
 import ui from '../ui/ui.module.css';
 import { ProjectHeader, RunStatus } from './ProjectHeader';
 import { Sidebar } from './Sidebar';
+import { PwaNotices } from './Pwa';
+import { isDesktopApp } from '../lib/platform';
+import { DialogHost } from '../ui/dialogs';
 import { useOptimizer } from './useOptimizer';
 import { usePricing } from './usePricing';
 import styles from './App.module.css';
+import { useTranslation } from 'react-i18next';
 
 export function App() {
+  const { t } = useTranslation();
   const ready = useStore((s) => s.ready);
   const project = useCurrentProject();
   const phone = useMediaQuery('(max-width: 767px)');
@@ -49,7 +55,7 @@ export function App() {
   useUndoShortcuts();
 
   if (!ready || !project) {
-    return <div className={styles.loading}>Loading…</div>;
+    return <div className={styles.loading}>{t('Loading…')}</div>;
   }
 
   const openDrawer = wide ? undefined : () => setDrawer(true);
@@ -66,6 +72,7 @@ export function App() {
             <OffcutLibrary onMenu={wide ? undefined : () => setDrawer(true)} />
           )}
           {view === 'labels' && <LabelPrint onMenu={wide ? undefined : () => setDrawer(true)} />}
+          {view === 'stats' && <StatsScreen onMenu={wide ? undefined : () => setDrawer(true)} />}
         </div>
       ) : phone ? (
         <PhoneLayout project={project} onMenu={() => setDrawer(true)} />
@@ -85,6 +92,8 @@ export function App() {
       )}
       {drawer && !wide && <Drawer onClose={() => setDrawer(false)} />}
       {cutting && <CutMode />}
+      {!isDesktopApp() && <PwaNotices />}
+      <DialogHost />
     </>
   );
 }
@@ -92,12 +101,13 @@ export function App() {
 type Tab = 'parts' | 'sheets' | 'cut';
 
 function PhoneLayout({ project, onMenu }: { project: Project; onMenu: () => void }) {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>('parts');
   const { plan, job, status } = useStore((s) => s.result);
   const tabs: { id: Tab; label: string; icon: ReactNode }[] = [
-    { id: 'parts', label: 'Parts', icon: <PartsIcon size={22} /> },
-    { id: 'sheets', label: 'Sheets', icon: <SheetIcon size={22} /> },
-    { id: 'cut', label: 'Cut', icon: <SawIcon size={22} /> },
+    { id: 'parts', label: t('Parts'), icon: <PartsIcon size={22} /> },
+    { id: 'sheets', label: t('Sheets'), icon: <SheetIcon size={22} /> },
+    { id: 'cut', label: t('Cut'), icon: <SawIcon size={22} /> },
   ];
 
   return (
@@ -113,10 +123,15 @@ function PhoneLayout({ project, onMenu }: { project: Project; onMenu: () => void
         )}
         {tab !== 'parts' && (
           <div className={styles.phoneTop}>
-            <button type="button" className={ui.iconButton} aria-label="Projects" onClick={onMenu}>
+            <button
+              type="button"
+              className={ui.iconButton}
+              aria-label={t('Projects')}
+              onClick={onMenu}
+            >
               <MenuIcon size={22} />
             </button>
-            <span className={styles.phoneTitle}>{project.name || 'Untitled project'}</span>
+            <span className={styles.phoneTitle}>{project.name || t('Untitled project')}</span>
             <RunStatus />
             <ExportPdfButton compact />
           </div>
@@ -143,7 +158,7 @@ function PhoneLayout({ project, onMenu }: { project: Project; onMenu: () => void
             <EmptyResults running={status === 'running'} />
           ))}
       </div>
-      <nav className={styles.tabs} aria-label="Sections">
+      <nav className={styles.tabs} aria-label={t('Sections')}>
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -161,6 +176,7 @@ function PhoneLayout({ project, onMenu }: { project: Project; onMenu: () => void
 }
 
 function Drawer({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const panel = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -178,12 +194,12 @@ function Drawer({ onClose }: { onClose: () => void }) {
         ref={panel}
         role="dialog"
         aria-modal="true"
-        aria-label="Projects"
+        aria-label={t('Projects')}
       >
         <button
           type="button"
           className={`${ui.iconButton} ${styles.drawerClose}`}
-          aria-label="Close"
+          aria-label={t('Close')}
           onClick={onClose}
         >
           <CloseIcon />

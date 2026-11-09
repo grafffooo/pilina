@@ -1,0 +1,16 @@
+[package]
+name = "cutlist-desktop"
+description = "CutList as a standalone Mac app (Tauri shell around the web app)."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+serde_json.workspace = true

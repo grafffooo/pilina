@@ -147,3 +147,8 @@ export const PlayIcon = (p: IconProps) => (
     <path d="M7 4v16l13-8z" />
   </Icon>
 );
+export const ChartIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+  </Icon>
+);

@@ -1,6 +1,7 @@
 // Loaded on demand (dynamic import) so pdf-lib and the fonts stay out of the startup bundle.
 import regularUrl from '@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf?url';
 import semiboldUrl from '@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf?url';
+import { downloadBlob } from '../lib/download';
 import { buildPdf, type PdfInput } from './buildPdf';
 
 async function load(url: string): Promise<ArrayBuffer> {
@@ -23,12 +24,9 @@ export function pdfFileName(name: string): string {
 export async function exportPdf(input: PdfInput): Promise<void> {
   const [regular, semibold] = await Promise.all([load(regularUrl), load(semiboldUrl)]);
   const bytes = await buildPdf(input, { regular, semibold });
-  const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: 'application/pdf' }));
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = pdfFileName(input.project.name);
-  document.body.append(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  await downloadBlob(
+    new Blob([bytes as BlobPart], { type: 'application/pdf' }),
+    pdfFileName(input.project.name),
+    { name: 'PDF', extensions: ['pdf'] },
+  );
 }

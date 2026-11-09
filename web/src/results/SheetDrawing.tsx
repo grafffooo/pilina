@@ -7,6 +7,7 @@ import { formatMm } from '../lib/format';
 import { useView } from '../store/view';
 import type { PartInfo } from './partInfo';
 import styles from './Results.module.css';
+import { useTranslation } from 'react-i18next';
 
 const INK = '#1B2029';
 const INK_2 = '#4A5260';
@@ -47,6 +48,7 @@ export function SheetDrawing({
   /** Cut mode: highlight this cut, dim the ones before it, and ignore the view toggles. */
   cutStep?: number;
 }) {
+  const { t } = useTranslation();
   const view = useView();
   const controlled = cutStep !== undefined;
   const activeCut = controlled ? cutStep : view.activeCut;
@@ -95,7 +97,7 @@ export function SheetDrawing({
         .filter((r) => classifyOffcut(r) === 'usable')
         .map((r, i) => {
           const s = sizeOf(r);
-          const lines = ['Offcut', `${formatMm(s.long)} × ${formatMm(s.short)}`];
+          const lines = [t('Offcut'), `${formatMm(s.long)} × ${formatMm(s.short)}`];
           const fit = fitText(lines, r.w, r.h, m * 0.024, m * 0.012);
           return (
             fit && (

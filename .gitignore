@@ -16,3 +16,6 @@ web/src/engine/pkg/
 
 # Tauri generated schemas
 desktop/gen
+
+# Local icon previews
+.preview/

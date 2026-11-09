@@ -8,6 +8,7 @@ import { NumberInput } from '../ui/NumberInput';
 import { confirmDialog } from '../ui/dialogs';
 import { Menu, Popover } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
+import { BackButton } from '../ui/BackButton';
 import editor from '../editor/Editor.module.css';
 import { MaterialSelect } from '../editor/MaterialSelect';
 import { locale, t as i18nT } from '../i18n';
@@ -84,7 +85,10 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
           </button>
         )}
         <div className={styles.titleBlock}>
-          <h1 className={styles.title}>{t('Offcut library')}</h1>
+          <div className={ui.titleRow}>
+            <h1 className={styles.title}>{t('Offcut library')}</h1>
+            <BackButton />
+          </div>
           <span className={styles.meta}>
             {t('n_available', { count: available.length })} · {formatSquareMetres(area)} ·{' '}
             {t('n_materials', { count: materialCount })}

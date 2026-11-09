@@ -273,6 +273,7 @@ export const useStore = create<AppState>()((set, get) => {
 
     select(id) {
       if (id !== get().currentId) open(id);
+      else set({ view: 'project' });
     },
 
     createProject() {

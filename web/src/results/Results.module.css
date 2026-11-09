@@ -529,3 +529,72 @@
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+/* Full screen: the sheet fills the app window, with the cut order beside it. */
+.fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg);
+  outline: none;
+}
+
+.fullscreen .panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.fullscreen .paper {
+  flex: 1;
+  min-height: 0;
+  flex-wrap: nowrap;
+}
+
+.fullscreen .canvas {
+  align-self: stretch;
+  max-height: none;
+}
+
+.fullscreen .drawing {
+  max-height: calc(100dvh - 32px - 49px - 40px);
+  margin: 0 auto;
+}
+
+.fullscreen .canvas[data-zoomed] .drawing {
+  max-height: none;
+}
+
+.fullscreen .listCard {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.fullscreen .cutList {
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 767px) {
+  .fullscreen {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 40%);
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .fullscreen .paper {
+    flex-wrap: wrap;
+    overflow: auto;
+  }
+
+  /* The top 60% of the screen, less the wrapped toolbar and the paper's padding. */
+  .fullscreen .drawing {
+    max-height: calc(60dvh - 170px);
+  }
+}

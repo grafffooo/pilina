@@ -146,3 +146,11 @@
   font-weight: 600;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
 }
+
+/* A screen title with its back button right next to it. */
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}

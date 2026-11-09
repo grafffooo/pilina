@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import type { Job, Plan, SheetLayout } from '../engine/types';
 import { formatMetres, formatMm, formatNumber } from '../lib/format';
 import { classifyOffcut, cutKindLabel, isRipLike, sizeOf } from '../model/describe';
@@ -6,7 +7,15 @@ import { unplacedReason, usedPercent } from '../model/job';
 import type { Project } from '../model/project';
 import { useStore } from '../store/store';
 import { useView } from '../store/view';
-import { ChevronLeftIcon, ChevronRightIcon, MinusIcon, PlusIcon, WarningIcon } from '../ui/icons';
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CollapseIcon,
+  ExpandIcon,
+  MinusIcon,
+  PlusIcon,
+  WarningIcon,
+} from '../ui/icons';
 import ui from '../ui/ui.module.css';
 import { CostCard } from './CostCard';
 import { t as i18nT } from '../i18n';
@@ -226,12 +235,16 @@ export function SheetPanel({
   plan,
   project,
   withLegend,
+  onExitFullscreen,
 }: {
   plan: Plan;
   project: Project;
   withLegend?: boolean;
+  /** Set when this panel is the one shown in full screen. */
+  onExitFullscreen?: () => void;
 }) {
   const { t } = useTranslation();
+  const [fullscreen, setFullscreen] = useState(false);
   const view = useView();
   const parts = usePartInfo(project);
   const job = useStore((s) => s.result.job);
@@ -309,6 +322,27 @@ export function SheetPanel({
             <PlusIcon size={16} />
           </button>
         </div>
+        {onExitFullscreen ? (
+          <button
+            type="button"
+            className={ui.iconButton}
+            aria-label={t('Exit full screen')}
+            title={t('Exit full screen')}
+            onClick={onExitFullscreen}
+          >
+            <CollapseIcon size={16} />
+          </button>
+        ) : (
+          <button
+            type="button"
+            className={ui.iconButton}
+            aria-label={t('Full screen')}
+            title={t('Full screen')}
+            onClick={() => setFullscreen(true)}
+          >
+            <ExpandIcon size={16} />
+          </button>
+        )}
       </div>
       <div className={styles.paper}>
         <div className={styles.canvas} data-zoomed={view.zoom > 1 || undefined}>
@@ -318,6 +352,57 @@ export function SheetPanel({
         </div>
         {withLegend && <Legend sheet={sheet} parts={parts} />}
       </div>
+      {fullscreen &&
+        createPortal(
+          <SheetFullscreen plan={plan} project={project} onClose={() => setFullscreen(false)} />,
+          document.body,
+        )}
+    </div>
+  );
+}
+
+/** The sheet drawing over the whole app window, with the cut order beside it. */
+function SheetFullscreen({
+  plan,
+  project,
+  onClose,
+}: {
+  plan: Plan;
+  project: Project;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const box = useRef<HTMLDivElement>(null);
+  // The latest onClose, so the effect below runs only on open and close.
+  const close = useRef(onClose);
+  useEffect(() => {
+    close.current = onClose;
+  });
+
+  useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null;
+    box.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close.current();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      opener?.focus();
+    };
+  }, []);
+
+  return (
+    <div
+      ref={box}
+      className={styles.fullscreen}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('Sheet in full screen')}
+      tabIndex={-1}
+    >
+      <SheetPanel plan={plan} project={project} withLegend onExitFullscreen={onClose} />
+      <CutOrder plan={plan} fullHeight />
     </div>
   );
 }

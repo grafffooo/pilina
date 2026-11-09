@@ -78,6 +78,16 @@ export const MinusIcon = (p: IconProps) => (
     <path d="M5 12h14" />
   </Icon>
 );
+export const ExpandIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+  </Icon>
+);
+export const CollapseIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
+  </Icon>
+);
 export const MenuIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="M4 7h16M4 12h16M4 17h16" />
@@ -130,6 +140,12 @@ export const PriceIcon = (p: IconProps) => (
 export const DownloadIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="M12 3v12M7 10l5 5 5-5M4 21h16" />
+  </Icon>
+);
+export const ImportIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z" />
+    <path d="M14 3v5h5M12 11v6M9 14l3 3 3-3" />
   </Icon>
 );
 export const OffcutsIcon = (p: IconProps) => (

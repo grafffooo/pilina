@@ -524,5 +524,8 @@
   "… and {{count}} more cuts (numbered on the drawing)_one": "… a ještě 1 řez (očíslovaný na výkresu)",
   "… and {{count}} more cuts (numbered on the drawing)_few": "… a ještě {{count}} řezy (očíslované na výkresu)",
   "… and {{count}} more cuts (numbered on the drawing)_many": "… a ještě {{count}} řezů (očíslované na výkresu)",
-  "… and {{count}} more cuts (numbered on the drawing)_other": "… a ještě {{count}} řezů (očíslované na výkresu)"
+  "… and {{count}} more cuts (numbered on the drawing)_other": "… a ještě {{count}} řezů (očíslované na výkresu)",
+  "Full screen": "Celá obrazovka",
+  "Exit full screen": "Zavřít celou obrazovku",
+  "Sheet in full screen": "Deska na celé obrazovce"
 }

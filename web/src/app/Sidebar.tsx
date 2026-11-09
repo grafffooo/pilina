@@ -5,6 +5,7 @@ import { useNow } from '../ui/hooks';
 import {
   ChartIcon,
   CheckIcon,
+  ImportIcon,
   LogoIcon,
   OffcutsIcon,
   PlusIcon,
@@ -110,47 +111,6 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         {t('New project')}
       </button>
 
-      <button
-        type="button"
-        className={styles.libraryLink}
-        aria-current={view === 'offcuts' || view === 'labels' ? 'page' : undefined}
-        onClick={() => {
-          useStore.getState().setView('offcuts');
-          onNavigate?.();
-        }}
-      >
-        <OffcutsIcon />
-        <span>{t('Offcut library')}</span>
-        <span className={styles.count}>{offcutCount}</span>
-      </button>
-
-      <button
-        type="button"
-        className={styles.libraryLink}
-        aria-current={view === 'library' ? 'page' : undefined}
-        onClick={() => {
-          useStore.getState().setView('library');
-          onNavigate?.();
-        }}
-      >
-        <PriceIcon />
-        <span>{t('Materials & prices')}</span>
-        <span className={styles.count}>{materialCount}</span>
-      </button>
-
-      <button
-        type="button"
-        className={styles.libraryLink}
-        aria-current={view === 'stats' ? 'page' : undefined}
-        onClick={() => {
-          useStore.getState().setView('stats');
-          onNavigate?.();
-        }}
-      >
-        <ChartIcon />
-        <span>{t('Statistics')}</span>
-      </button>
-
       <div className={styles.sectionTitle}>
         <span>{t('Projects')}</span>
         <span>{projects.length}</span>
@@ -190,10 +150,54 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className={styles.spacerV} />
 
-      {!isDesktopApp() && <InstallButton className={styles.importButton} />}
-      <button type="button" className={styles.importButton} onClick={() => setImporting(true)}>
-        {t('Import projects…')}
-      </button>
+      <div className={styles.footerNav}>
+        <button
+          type="button"
+          className={styles.libraryLink}
+          aria-current={view === 'offcuts' || view === 'labels' ? 'page' : undefined}
+          onClick={() => {
+            useStore.getState().setView('offcuts');
+            onNavigate?.();
+          }}
+        >
+          <OffcutsIcon />
+          <span>{t('Offcut library')}</span>
+          <span className={styles.count}>{offcutCount}</span>
+        </button>
+
+        <button
+          type="button"
+          className={styles.libraryLink}
+          aria-current={view === 'library' ? 'page' : undefined}
+          onClick={() => {
+            useStore.getState().setView('library');
+            onNavigate?.();
+          }}
+        >
+          <PriceIcon />
+          <span>{t('Materials & prices')}</span>
+          <span className={styles.count}>{materialCount}</span>
+        </button>
+
+        <button
+          type="button"
+          className={styles.libraryLink}
+          aria-current={view === 'stats' ? 'page' : undefined}
+          onClick={() => {
+            useStore.getState().setView('stats');
+            onNavigate?.();
+          }}
+        >
+          <ChartIcon />
+          <span>{t('Statistics')}</span>
+        </button>
+
+        <button type="button" className={styles.libraryLink} onClick={() => setImporting(true)}>
+          <ImportIcon />
+          <span>{t('Import projects…')}</span>
+        </button>
+        {!isDesktopApp() && <InstallButton className={styles.libraryLink} />}
+      </div>
       {importing && <ImportDialog onClose={() => setImporting(false)} />}
 
       <div className={styles.saveState} role="status">

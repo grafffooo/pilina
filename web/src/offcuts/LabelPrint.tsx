@@ -11,7 +11,8 @@ import {
 } from '../model/offcut';
 import type { Material, Settings } from '../model/library';
 import { updateSettings, useStore } from '../store/store';
-import { ChevronLeftIcon, MenuIcon, WarningIcon } from '../ui/icons';
+import { MenuIcon, WarningIcon } from '../ui/icons';
+import { BackButton } from '../ui/BackButton';
 import ui from '../ui/ui.module.css';
 import { QrCode } from './QrCode';
 import { confirmDialog } from '../ui/dialogs';
@@ -79,16 +80,11 @@ export function LabelPrint({ onMenu }: { onMenu?: () => void }) {
             <MenuIcon size={22} />
           </button>
         )}
-        <button
-          type="button"
-          className={ui.button}
-          onClick={() => useStore.getState().setView('offcuts')}
-        >
-          <ChevronLeftIcon size={16} />
-          {t('Offcut library')}
-        </button>
         <div className={styles.titleBlock}>
-          <h1 className={styles.title}>{t('Print labels')}</h1>
+          <div className={ui.titleRow}>
+            <h1 className={styles.title}>{t('Print labels')}</h1>
+            <BackButton to="offcuts" label={t('Offcut library')} />
+          </div>
           <span className={styles.meta}>
             {t('n_labels', { count: queue.length })} · {t('A4 sticker sheet')}
             {pages.length > 1 ? ` · ${t('n_label_sheets', { count: pages.length })}` : ''}

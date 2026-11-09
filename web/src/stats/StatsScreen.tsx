@@ -8,6 +8,7 @@ import { computeStats, type Range } from '../model/stats';
 import { useStore } from '../store/store';
 import { MenuIcon } from '../ui/icons';
 import ui from '../ui/ui.module.css';
+import { BackButton } from '../ui/BackButton';
 import { BarList, ColumnChart, LineChart, TableView, type Point } from './Charts';
 import { locale, t as i18nT } from '../i18n';
 import { useTranslation } from 'react-i18next';
@@ -89,7 +90,10 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
           </button>
         )}
         <div className={styles.titleBlock}>
-          <h1 className={styles.title}>{t('Statistics')}</h1>
+          <div className={ui.titleRow}>
+            <h1 className={styles.title}>{t('Statistics')}</h1>
+            <BackButton />
+          </div>
           <span className={styles.meta}>{t('From sheets marked as cut in cut mode')}</span>
         </div>
       </div>

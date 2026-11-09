@@ -10,7 +10,8 @@ import {
   updateSettings,
   useStore,
 } from '../store/store';
-import { ChevronLeftIcon, MenuIcon, MoreIcon } from '../ui/icons';
+import { MenuIcon, MoreIcon } from '../ui/icons';
+import { BackButton } from '../ui/BackButton';
 import { NumberInput } from '../ui/NumberInput';
 import { confirmDialog } from '../ui/dialogs';
 import { Menu } from '../ui/Popover';
@@ -25,7 +26,6 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
   const bands = useStore((s) => s.edgeBands);
   const settings = useStore((s) => s.settings);
   const projects = useStore((s) => s.projects);
-  const back = () => useStore.getState().setView('project');
 
   const usage = (id: string) =>
     projects.filter(
@@ -45,11 +45,10 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
             <MenuIcon size={22} />
           </button>
         )}
-        <button type="button" className={ui.button} onClick={back}>
-          <ChevronLeftIcon size={16} />
-          {t('Back to project')}
-        </button>
-        <h1 className={styles.title}>{t('Materials & prices')}</h1>
+        <div className={ui.titleRow}>
+          <h1 className={styles.title}>{t('Materials & prices')}</h1>
+          <BackButton />
+        </div>
       </div>
 
       <section className={editor.card} aria-labelledby="materials-h">

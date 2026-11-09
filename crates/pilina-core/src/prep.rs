@@ -98,8 +98,9 @@ pub(crate) fn compatible(part: &PartSpec, stock: &StockSpec) -> bool {
 }
 
 /// Orientations of a part that fit a `usable_w` × `usable_h` area in the real sheet frame
-/// (`w` along the stock width, `h` along the stock length).
-pub(crate) fn orientations(part: &PartSpec, usable_w: f64, usable_h: f64) -> Vec<Orient> {
+/// (`w` along the stock width, `h` along the stock length), on a sheet whose grain runs
+/// `sheet_grain`.
+pub(crate) fn orientations(part: &PartSpec, sheet_grain: Grain, usable_w: f64, usable_h: f64) -> Vec<Orient> {
     let along = Orient {
         w: part.width,
         h: part.length,
@@ -111,11 +112,18 @@ pub(crate) fn orientations(part: &PartSpec, usable_w: f64, usable_h: f64) -> Vec
         rotated: true,
     };
     let fits = |o: &Orient| o.w <= usable_w && o.h <= usable_h;
-    let candidates: &[Orient] = match part.grain {
-        Grain::Length => &[along],
-        Grain::Width => &[across],
-        Grain::None if part.length == part.width => &[along],
-        Grain::None => &[along, across],
+    // Which of the part's sides has to run along the sheet's length. A sheet without grain
+    // (or a part without one) leaves both ways open.
+    let part_length_along_sheet_length = match (part.grain, sheet_grain) {
+        (Grain::None, _) | (_, Grain::None) => None,
+        (Grain::Length, Grain::Length) | (Grain::Width, Grain::Width) => Some(true),
+        (Grain::Length, Grain::Width) | (Grain::Width, Grain::Length) => Some(false),
+    };
+    let candidates: &[Orient] = match part_length_along_sheet_length {
+        Some(true) => &[along],
+        Some(false) => &[across],
+        None if part.length == part.width => &[along],
+        None => &[along, across],
     };
     candidates.iter().copied().filter(fits).collect()
 }

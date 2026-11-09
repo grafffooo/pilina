@@ -33,6 +33,8 @@ export interface StockSpec {
   offcut?: boolean;
   material?: string | null;
   label?: string;
+  /** Which way the sheet's grain runs; 'none' lets every part rotate. Default 'length'. */
+  grain?: Grain;
 }
 
 export interface Options {

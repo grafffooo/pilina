@@ -82,7 +82,7 @@ pilina/
 
 ### 3. Data model (stored on the device)
 
-- **Material:** name, thickness, grain, colour, price per sheet *or* per m², currency.
+- **Material:** name, thickness, grain (along the sheet's length, along its width, or none), colour, price per sheet *or* per m², currency. A part's grain setting says which of its sides must follow the board's grain; on a board without grain, parts rotate freely. Offcuts remember which way their grain runs.
 - **Stock sheet:** material + size + quantity (or unlimited) + priority.
 - **Edge band:** name, price per metre.
 - **Project:**

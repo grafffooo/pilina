@@ -530,5 +530,12 @@
   "Sheet in full screen": "Deska na celé obrazovce",
   "This device": "Toto zařízení",
   "Workshop": "Dílna",
-  "Done": "Hotovo"
+  "Done": "Hotovo",
+  "Along the length": "Po délce",
+  "Along the width": "Po šířce",
+  "No grain": "Bez vlákna",
+  "Grain of {{name}}": "Vlákno: {{name}}",
+  "Grain along the length": "Vlákno po délce",
+  "Grain along the width": "Vlákno po šířce",
+  "Set for the material in Materials & prices": "Nastavuje se u materiálu v Materiálech a cenách"
 }

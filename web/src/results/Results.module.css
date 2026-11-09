@@ -598,3 +598,11 @@
     max-height: calc(60dvh - 170px);
   }
 }
+
+.legendRow svg path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

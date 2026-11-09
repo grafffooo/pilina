@@ -5,7 +5,7 @@ import { formatMm } from '../lib/format';
 import { cutKindLabel, isRipLike } from '../model/describe';
 import { jobKey } from '../model/job';
 import { stockPrice } from '../model/library';
-import { keepAdvice, offcutIdFromStock } from '../model/offcut';
+import { keepAdvice, leftoverGrain, offcutIdFromStock } from '../model/offcut';
 import { updateProject, updateSettings, useCurrentProject, useStore } from '../store/store';
 import { usePartInfo } from '../results/partInfo';
 import { SheetDrawing } from '../results/SheetDrawing';
@@ -76,6 +76,7 @@ export function CutMode() {
           keep.map((r) => ({
             length: r.w,
             width: r.h,
+            grain: leftoverGrain(r, stock?.grain ?? 'length'),
             materialId: stock?.material ?? null,
             location,
             label: queueLabels ? 'queued' : 'none',

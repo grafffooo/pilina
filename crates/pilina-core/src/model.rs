@@ -9,17 +9,28 @@
 
 use serde::{Deserialize, Serialize};
 
-/// Which way a part's grain must run relative to the stock's length.
+/// Grain direction.
+///
+/// - On a part: which of the part's sides must run along the grain of the board
+///   (`Length`: its length side, `Width`: its width side, `None`: either way).
+/// - On a stock sheet: which way the board's grain runs (`Length`: along the sheet's length,
+///   `Width`: along its width, `None`: no grain, so every part may rotate freely).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Grain {
     /// Free rotation.
     #[default]
     None,
-    /// The part's length runs along the stock's length.
     Length,
-    /// The part's length runs along the stock's width.
     Width,
+}
+
+impl Grain {
+    /// A stock sheet's grain when the job doesn't say: along the sheet's length, which is
+    /// how most grained boards are made (and how the engine behaved before sheet grain).
+    pub fn sheet_default() -> Self {
+        Grain::Length
+    }
 }
 
 /// Edge banding per part edge. Top/bottom are the length edges, left/right the width edges.
@@ -72,6 +83,10 @@ pub struct StockSpec {
     pub material: Option<String>,
     #[serde(default)]
     pub label: String,
+    /// Which way the sheet's grain runs (see `Grain`). Parts with a grain are only placed so
+    /// their grain side runs along it; on a sheet without grain they rotate freely.
+    #[serde(default = "Grain::sheet_default")]
+    pub grain: Grain,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

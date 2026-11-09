@@ -1,6 +1,7 @@
 import { stockIsComplete } from '../model/job';
 import { emptyStock, type Project } from '../model/project';
 import { matchingOffcuts } from '../model/offcut';
+import { materialGrain } from '../model/library';
 import {
   addStock,
   duplicateStock,
@@ -16,6 +17,7 @@ import ui from '../ui/ui.module.css';
 import { MaterialSelect } from './MaterialSelect';
 import styles from './Editor.module.css';
 import { useTranslation } from 'react-i18next';
+import type { Grain } from '../engine/types';
 
 export function StockTable({ project }: { project: Project }) {
   const { t } = useTranslation();
@@ -55,6 +57,7 @@ export function StockTable({ project }: { project: Project }) {
               <th className={styles.num}>{t('Width')}</th>
               <th className={`${styles.num} ${styles.colQty}`}>{t('Qty')}</th>
               <th>{t('Material')}</th>
+              <th className={styles.colSheetGrain}>{t('Grain')}</th>
               <th className={styles.colStar}>{t('Priority')}</th>
               <th className={styles.colMore}>
                 <span className="sr-only">{t('More')}</span>
@@ -114,6 +117,11 @@ export function StockTable({ project }: { project: Project }) {
                       ariaLabel={t('Material, sheet {{n}}', { n: i + 1 })}
                       sheet={s.length && s.width ? { length: s.length, width: s.width } : undefined}
                       onChange={(materialId) => updateStock(s.id, { materialId })}
+                    />
+                  </td>
+                  <td className={`${styles.colSheetGrain} ${styles.cSheetGrain}`}>
+                    <SheetGrain
+                      grain={materialGrain(materials.find((m) => m.id === s.materialId))}
                     />
                   </td>
                   <td className={`${styles.colStar} ${styles.cStar}`}>
@@ -179,5 +187,31 @@ function OffcutsFooter({ project }: { project: Project }) {
         {t('Open library')}
       </button>
     </div>
+  );
+}
+
+/** The sheet's grain, from its material (set in Materials & prices). */
+function SheetGrain({ grain }: { grain: Grain }) {
+  const { t } = useTranslation();
+  const text =
+    grain === 'length'
+      ? t('Along the length')
+      : grain === 'width'
+        ? t('Along the width')
+        : t('No grain');
+  return (
+    <span className={styles.sheetGrain} title={t('Set for the material in Materials & prices')}>
+      {grain !== 'none' && (
+        // The sheet drawing has the sheet's length running down the page.
+        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+          {grain === 'length' ? (
+            <path d="M7 1v12M4.5 3.5 7 1l2.5 2.5M4.5 10.5 7 13l2.5-2.5" />
+          ) : (
+            <path d="M1 7h12M3.5 4.5 1 7l2.5 2.5M10.5 4.5 13 7l-2.5 2.5" />
+          )}
+        </svg>
+      )}
+      {text}
+    </span>
   );
 }

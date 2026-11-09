@@ -294,6 +294,7 @@ mod tests {
                 offcut: false,
                 material: None,
                 label: "DTD Black 18mm".into(),
+                grain: Grain::Length,
             }],
             kerf: 4.0,
             trim: 0.0,
@@ -393,6 +394,7 @@ mod tests {
             offcut: true,
             material: None,
             label: "Offcut".into(),
+            grain: Grain::Length,
         });
         let plan = optimize(&job);
         assert!(plan.unplaced.is_empty());
@@ -425,6 +427,7 @@ mod tests {
             offcut: true,
             material: None,
             label: String::new(),
+            grain: Grain::Length,
         });
         let plan = optimize(&job);
         assert_eq!(plan.sheets[0].stock_id, "off");
@@ -450,6 +453,76 @@ mod tests {
         assert_eq!(plan.totals.sheets, 2);
         assert_eq!(plan.sheets.len(), 1);
         assert_eq!(plan.sheets[0].qty, 2);
+    }
+
+    /// One 600 × 300 part on a 1000 × 700 sheet: how it lies for each sheet grain.
+    fn grain_job(part_grain: Grain, sheet_grain: Grain) -> Job {
+        let mut job = skrinky();
+        job.parts = vec![PartSpec {
+            id: "door".into(),
+            length: 600.0,
+            width: 300.0,
+            qty: 1,
+            label: String::new(),
+            grain: part_grain,
+            material: None,
+            edges: Edges::default(),
+        }];
+        job.stock[0].length = 1000.0;
+        job.stock[0].width = 700.0;
+        job.stock[0].grain = sheet_grain;
+        job
+    }
+
+    /// Whether the placed part's length runs along the sheet's length.
+    fn length_along_sheet_length(plan: &Plan) -> bool {
+        let r = plan.sheets[0].placements[0].rect;
+        (r.h - 600.0).abs() < 1e-6 && (r.w - 300.0).abs() < 1e-6
+    }
+
+    #[test]
+    fn part_grain_follows_the_sheet_grain() {
+        // Sheet grain along its length: a "length" part lies along the sheet's length.
+        assert!(length_along_sheet_length(&optimize(&grain_job(
+            Grain::Length,
+            Grain::Length
+        ))));
+        assert!(!length_along_sheet_length(&optimize(&grain_job(
+            Grain::Width,
+            Grain::Length
+        ))));
+        // Sheet grain along its width: the same parts turn a quarter.
+        assert!(!length_along_sheet_length(&optimize(&grain_job(
+            Grain::Length,
+            Grain::Width
+        ))));
+        assert!(length_along_sheet_length(&optimize(&grain_job(
+            Grain::Width,
+            Grain::Width
+        ))));
+    }
+
+    #[test]
+    fn a_sheet_without_grain_lets_parts_rotate() {
+        // 600 × 300 fits a 650 × 320 sheet only with its length across the sheet's width.
+        let mut job = grain_job(Grain::Length, Grain::None);
+        job.stock[0].length = 320.0;
+        job.stock[0].width = 650.0;
+        let plan = optimize(&job);
+        assert!(plan.unplaced.is_empty());
+        assert!(!length_along_sheet_length(&plan));
+        // With grain along the sheet's length, the same part doesn't fit.
+        job.stock[0].grain = Grain::Length;
+        assert_eq!(optimize(&job).unplaced.len(), 1);
+    }
+
+    #[test]
+    fn sheet_grain_defaults_to_length_in_json() {
+        let stock: StockSpec = serde_json::from_str(r#"{"id":"s","length":2800,"width":2070}"#).unwrap();
+        assert_eq!(stock.grain, Grain::Length);
+        let stock: StockSpec =
+            serde_json::from_str(r#"{"id":"s","length":2800,"width":2070,"grain":"none"}"#).unwrap();
+        assert_eq!(stock.grain, Grain::None);
     }
 
     #[test]

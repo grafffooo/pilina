@@ -1,6 +1,6 @@
 // Offcut library: leftovers kept for later, each with an OC-0001 style ID and a QR label.
-import type { Rect, StockSpec } from '../engine/types';
-import type { Material, Settings } from './library';
+import type { Grain, Rect, StockSpec } from '../engine/types';
+import { materialGrain, type Material, type Settings } from './library';
 import { newId, type Project } from './project';
 
 export type OffcutStatus = 'available' | 'reserved' | 'used';
@@ -15,6 +15,11 @@ export interface Offcut {
   /** mm, always length ≥ width. */
   length: number;
   width: number;
+  /**
+   * Which way the grain runs on this piece: along its length or its width ('none' for boards
+   * without grain). Missing on offcuts kept before grain existed, which means 'length'.
+   */
+  grain?: Grain;
   location: string;
   status: OffcutStatus;
   label: LabelState;
@@ -83,8 +88,20 @@ export function matchingOffcuts(project: Project, offcuts: Offcut[]): Offcut[] {
 }
 
 /** Library offcuts as one-sheet engine stock, used before any full sheet. */
+/**
+ * The grain of a leftover cut from a sheet, relative to the offcut's own length (its longer
+ * side). `rect` is in the sheet's frame: `w` across the sheet's width, `h` along its length.
+ */
+export function leftoverGrain(rect: Rect, sheetGrain: Grain): Grain {
+  if (sheetGrain === 'none') return 'none';
+  // Same tie-break as `newOffcut`: with equal sides, the offcut's length is `rect.w`.
+  const longSide = rect.w >= rect.h ? 'width' : 'length';
+  return longSide === sheetGrain ? 'length' : 'width';
+}
+
 export function offcutStock(offcuts: Offcut[], materials: Material[]): StockSpec[] {
   const names = new Map(materials.map((m) => [m.id, m.name]));
+  const byId = new Map(materials.map((m) => [m.id, m]));
   return offcuts.map((o) => ({
     id: `${OFFCUT_STOCK_PREFIX}${o.id}`,
     length: o.length,
@@ -93,6 +110,11 @@ export function offcutStock(offcuts: Offcut[], materials: Material[]): StockSpec
     offcut: true,
     material: o.materialId,
     label: `${o.code} · ${(o.materialId && names.get(o.materialId)) || 'offcut'}`,
+    // A material without grain frees every offcut of it, whatever was recorded.
+    grain:
+      o.materialId && materialGrain(byId.get(o.materialId)) === 'none'
+        ? 'none'
+        : (o.grain ?? 'length'),
   }));
 }
 

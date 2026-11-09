@@ -8,6 +8,8 @@ import {
   updateMaterial,
   useStore,
 } from '../store/store';
+import type { Grain } from '../engine/types';
+import { materialGrain } from '../model/library';
 import { MenuIcon, MoreIcon } from '../ui/icons';
 import { BackButton } from '../ui/BackButton';
 import { NumberInput } from '../ui/NumberInput';
@@ -80,6 +82,7 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                 </th>
                 <th>{t('Name')}</th>
                 <th className={editor.num}>{t('Thickness')}</th>
+                <th>{t('Grain')}</th>
                 <th className={editor.num}>{t('Price')}</th>
                 <th>{t('Per')}</th>
                 <th>{t('For sheet size')}</th>
@@ -91,7 +94,7 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
             <tbody>
               {materials.length === 0 && (
                 <tr>
-                  <td colSpan={7} className={styles.empty}>
+                  <td colSpan={8} className={styles.empty}>
                     {t('No boards yet. Add the sheet materials you buy, with their prices.')}
                   </td>
                 </tr>
@@ -131,6 +134,18 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                         />
                         mm
                       </span>
+                    </td>
+                    <td>
+                      <select
+                        className={editor.select}
+                        aria-label={t('Grain of {{name}}', { name: m.name })}
+                        value={materialGrain(m)}
+                        onChange={(e) => updateMaterial(m.id, { grain: e.target.value as Grain })}
+                      >
+                        <option value="length">{t('Along the length')}</option>
+                        <option value="width">{t('Along the width')}</option>
+                        <option value="none">{t('No grain')}</option>
+                      </select>
                     </td>
                     <td className={styles.colNum}>
                       <NumberInput

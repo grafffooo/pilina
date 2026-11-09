@@ -409,6 +409,9 @@ function SheetFullscreen({
 
 function Legend({ sheet, parts }: { sheet: SheetLayout; parts: Map<string, PartInfo> }) {
   const { t } = useTranslation();
+  const grain = useStore(
+    (s) => s.result.job?.stock.find((x) => x.id === sheet.stockId)?.grain ?? 'length',
+  );
   const counts = new Map<string, number>();
   sheet.placements.forEach((p) => counts.set(p.partId, (counts.get(p.partId) ?? 0) + 1));
   return (
@@ -440,6 +443,19 @@ function Legend({ sheet, parts }: { sheet: SheetLayout; parts: Map<string, PartI
         </svg>
         {t('Leftover')}
       </div>
+      {grain !== 'none' && (
+        <div className={styles.legendRow}>
+          {/* The drawing has the sheet's length running down the page. */}
+          <svg width="28" height="14" viewBox="0 0 28 14" aria-hidden="true">
+            {grain === 'length' ? (
+              <path d="M14 1v12M10.5 4.5 14 1l3.5 3.5M10.5 9.5 14 13l3.5-3.5" />
+            ) : (
+              <path d="M3 7h22M6.5 3.5 3 7l3.5 3.5M21.5 3.5 25 7l-3.5 3.5" />
+            )}
+          </svg>
+          {grain === 'length' ? t('Grain along the length') : t('Grain along the width')}
+        </div>
+      )}
       <div className={styles.legendRule} />
       <div className={styles.legendTitle}>{t('Parts on this sheet')}</div>
       {[...counts].map(([id, n]) => {

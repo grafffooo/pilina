@@ -1,6 +1,6 @@
 // Project → engine job, plus checks the editor uses to flag incomplete rows.
 import type { Job, PartSpec, Plan, StockSpec } from '../engine/types';
-import type { Material } from './library';
+import { materialGrain, type Material } from './library';
 import type { PartRow, Project, StockRow } from './project';
 
 const positive = (v: number | null): v is number => v !== null && Number.isFinite(v) && v > 0;
@@ -36,6 +36,7 @@ export function projectToJob(
   timeBudgetMs = 600,
 ): Job | null {
   const names = new Map(materials.map((m) => [m.id, m.name]));
+  const byId = new Map(materials.map((m) => [m.id, m]));
   const parts: PartSpec[] = project.parts
     .filter((p) => p.enabled && partIsComplete(p))
     .map((p) => ({
@@ -58,6 +59,8 @@ export function projectToJob(
       priority: s.priority,
       material: s.materialId,
       label: (s.materialId && names.get(s.materialId)) || '',
+      // Stock without a material keeps the old rule: grain along the sheet's length.
+      grain: s.materialId ? materialGrain(byId.get(s.materialId)) : 'length',
     }));
   if (parts.length === 0 || stock.length === 0) return null;
   return {
@@ -84,9 +87,11 @@ export function unplacedReason(part: PartSpec, job: Job): UnplacedReason {
     const l = s.length - 2 * t;
     const along = part.width <= w && part.length <= l;
     const across = part.length <= w && part.width <= l;
-    if (part.grain === 'length') return along;
-    if (part.grain === 'width') return across;
-    return along || across;
+    const sheetGrain = s.grain ?? 'length';
+    const grain = part.grain ?? 'none';
+    if (sheetGrain === 'none' || grain === 'none') return along || across;
+    // The part's grain side has to run along the sheet's grain.
+    return grain === sheetGrain ? along : across;
   });
   return fits ? 'out-of-stock' : 'too-big';
 }

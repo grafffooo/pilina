@@ -53,9 +53,10 @@ fn stock(i: usize) -> impl Strategy<Value = StockSpec> {
         any::<bool>(),
         prop::bool::weighted(0.25),
         material(),
+        grain(),
     )
         .prop_map(
-            move |(length, width, qty, priority, offcut, material)| StockSpec {
+            move |(length, width, qty, priority, offcut, material, grain)| StockSpec {
                 id: format!("s{i}"),
                 length: f64::from(length),
                 width: f64::from(width),
@@ -64,6 +65,7 @@ fn stock(i: usize) -> impl Strategy<Value = StockSpec> {
                 offcut,
                 material,
                 label: String::new(),
+                grain,
             },
         )
 }
@@ -131,9 +133,19 @@ fn check(job: &Job, plan: &Plan) -> Result<(), String> {
             if !along && !across {
                 return Err(format!("sheet {si}: {} has the wrong size {r:?}", p.part_id));
             }
-            match spec.grain {
-                Grain::Length if !along => return Err(format!("{} breaks length grain", p.part_id)),
-                Grain::Width if !across => return Err(format!("{} breaks width grain", p.part_id)),
+            // The part's grain side runs along the sheet's grain (unless either has none).
+            let length_along_grain = match stock.grain {
+                Grain::Length => Some(along),
+                Grain::Width => Some(across),
+                Grain::None => None,
+            };
+            match (spec.grain, length_along_grain) {
+                (Grain::Length, Some(false)) => {
+                    return Err(format!("{} breaks length grain", p.part_id));
+                }
+                (Grain::Width, Some(true)) => {
+                    return Err(format!("{} breaks width grain", p.part_id));
+                }
                 _ => {}
             }
             if p.rotated == along && spec.length != spec.width {

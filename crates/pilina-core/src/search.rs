@@ -75,7 +75,7 @@ fn pack_sheet_candidates(
     }
     let real: Vec<_> = eligible
         .iter()
-        .map(|&g| prep::orientations(ctx.groups[g].spec, usable_w, usable_h))
+        .map(|&g| prep::orientations(ctx.groups[g].spec, stock.spec.grain, usable_w, usable_h))
         .collect();
     if real.iter().all(Vec::is_empty) {
         return Vec::new();

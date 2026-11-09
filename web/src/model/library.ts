@@ -1,5 +1,5 @@
 // Materials, edge bands and app settings: shared by all projects, stored on this device.
-import type { PriceInput, StockPrice, StockSpec } from '../engine/types';
+import type { Grain, PriceInput, StockPrice, StockSpec } from '../engine/types';
 import { locale as current, t } from '../i18n';
 import { newId, type Project } from './project';
 
@@ -17,6 +17,17 @@ export interface Material {
   /** Sheet size a per-sheet price refers to (mm). Other sizes are priced by area. */
   sheetLength: number | null;
   sheetWidth: number | null;
+  /**
+   * Which way the board's grain runs: along the sheet's length, along its width, or 'none'
+   * (MDF, chipboard without décor…), where parts may rotate freely. Missing on materials
+   * saved before grain existed, which means 'length'.
+   */
+  grain?: Grain;
+}
+
+/** A material's grain, with the default for materials saved before grain existed. */
+export function materialGrain(m: Pick<Material, 'grain'> | undefined | null): Grain {
+  return m?.grain ?? 'length';
 }
 
 export interface EdgeBand {
@@ -76,6 +87,7 @@ export function newMaterial(name: string, index = 0): Material {
     priceUnit: 'sheet',
     sheetLength: null,
     sheetWidth: null,
+    grain: 'length',
   };
 }
 

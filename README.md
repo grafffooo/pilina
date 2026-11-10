@@ -63,13 +63,13 @@ crates/pilina-core   optimizer, pricing, statistics (pure Rust)
 crates/pilina-wasm   WebAssembly bindings used by the web app
 crates/pilina-cli    `pilina job.json` → plan JSON
 web/                 React + TypeScript + Vite PWA
-desktop/             Tauri shell: the web app as a standalone Mac app
+desktop/             Tauri shell: standalone desktop app (macOS, Windows, Linux)
 ```
 
 ### Prerequisites
 - Rust (stable) with the `wasm32-unknown-unknown` target, plus `wasm-pack`
 - Node.js 22+
-- For the Mac app: Xcode Command Line Tools (`xcode-select --install`)
+- For the desktop app: Xcode Command Line Tools on macOS (`xcode-select --install`), Visual Studio C++ Build Tools on Windows, or WebKitGTK packages on Linux
 
 ### Commands
 
@@ -95,12 +95,19 @@ npm run lint
 npm run build        # production build (PWA) in web/dist
 ```
 
-### Mac App
+### Desktop App (macOS, Windows, Linux)
+
+Prebuilt binaries are available on the [**GitHub Releases**](https://github.com/grafffooo/pilina/releases) page:
+- **macOS:** Universal `.dmg` (runs on both Apple Silicon M1/M2/M3/M4 and Intel)
+- **Windows:** `.exe` installer (NSIS setup)
+- **Linux:** `.AppImage` and `.deb`
+
+To build the desktop app locally:
 
 ```bash
 cd web
-npm run app        # release build: target/release/bundle/macos/Pilina.app and bundle/dmg/*.dmg
+npm run app        # builds the web frontend and bundles native desktop packages
 npm run app:dev    # development: opens the native window on the Vite dev server with live reload
 ```
 
-The Mac app wraps the web app in a native window (Tauri + macOS WebKit) with no external server. Inside the Mac app, project files use the native macOS Save dialog and sticker sheets print directly through the native print panel.
+The desktop app wraps the web app in a native window (Tauri) with no external server. Project files use the native Save dialog and sticker sheets print directly through the native print panel.

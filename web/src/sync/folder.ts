@@ -50,9 +50,10 @@ const PATH_KEY = 'cutlist.folder.path';
 
 function macFolder(path: string): Folder {
   const fs = () => import('@tauri-apps/plugin-fs');
-  const at = (name: string) => `${path}/${name}`;
+  const normalized = path.replace(/\\/g, '/');
+  const at = (name: string) => `${normalized.replace(/\/+$/, '')}/${name}`;
   return {
-    name: path.split('/').filter(Boolean).pop() ?? path,
+    name: normalized.split('/').filter(Boolean).pop() ?? path,
     async list() {
       const { readDir, readTextFile } = await fs();
       const entries = await readDir(path);

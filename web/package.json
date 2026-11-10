@@ -16,7 +16,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "app": "cd ../desktop && node ../web/node_modules/@tauri-apps/cli/tauri.js build",
+    "app": "npm run build && cd ../desktop && node ../web/node_modules/@tauri-apps/cli/tauri.js build",
     "app:dev": "cd ../desktop && node ../web/node_modules/@tauri-apps/cli/tauri.js dev"
   },
   "dependencies": {

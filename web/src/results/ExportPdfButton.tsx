@@ -22,7 +22,15 @@ export function ExportPdfButton({ compact }: { compact?: boolean }) {
     try {
       const { exportPdf } = await import('../pdf/exportPdf');
       const { cost, materials, settings } = useStore.getState();
-      await exportPdf({ project, plan, job, cost, materials, currency: settings.currency });
+      await exportPdf({
+        project,
+        plan,
+        job,
+        cost,
+        materials,
+        currency: settings.currency,
+        edgeAllowance: settings.edgeAllowance,
+      });
     } catch (e) {
       console.error('PDF export failed', e);
       setError(t('Couldn’t create the PDF. Try again.'));

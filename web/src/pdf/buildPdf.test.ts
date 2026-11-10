@@ -127,6 +127,28 @@ describe('buildPdf', () => {
   });
 });
 
+it('continues a long parts list on the next page', async () => {
+  const { project, job, plan, cost } = sample();
+  project.parts = Array.from({ length: 40 }, (_, i) => ({
+    ...emptyPart(),
+    id: `p${i}`,
+    length: 300 + i * 10,
+    width: 200,
+    qty: 1,
+    label: `Diel ${i + 1}`,
+    edges: { top: i % 2 === 0, bottom: false, left: i % 3 === 0, right: false },
+  }));
+  const bytes = await buildPdf(
+    { project, job, plan, cost, materials: [], currency: 'EUR', edgeAllowance: 20 },
+    {
+      regular: font('400Regular/Inter_400Regular'),
+      semibold: font('600SemiBold/Inter_600SemiBold'),
+    },
+  );
+  // 40 rows at 38 pt: the summary page, two more pages of parts, then the sheet.
+  expect((await PDFDocument.load(bytes)).getPageCount()).toBe(4);
+});
+
 it('makes a plain file name', () => {
   expect(pdfFileName('Skrinky do dielne')).toBe('skrinky-do-dielne.pdf');
   expect(pdfFileName('Kuchynská linka – Žilina')).toBe('kuchynska-linka-zilina.pdf');

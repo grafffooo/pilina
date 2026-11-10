@@ -2,91 +2,37 @@
 // order. Inter is embedded, so Slovak and Czech text prints correctly.
 import fontkit from '@pdf-lib/fontkit';
 import { PDFDocument, degrees, rgb, type PDFFont, type PDFPage, type RGB } from 'pdf-lib';
-import type { CostBreakdown, Job, Plan, SheetLayout } from '../engine/types';
+import type { SheetLayout } from '../engine/types';
 import { formatNumber } from '../lib/format';
-import { formatArea, formatLength, formatLengthUnit, formatLong } from '../lib/units';
+import { formatLength, formatLengthUnit } from '../lib/units';
 import { cutKindLabel, classifyOffcut, isRipLike, sizeOf, swatch } from '../model/describe';
-import { unplacedReason, usedPercent } from '../model/job';
-import { formatMoney, type Material } from '../model/library';
 import type { Project } from '../model/project';
-import { locale, t as tr } from '../i18n';
+import { t as tr } from '../i18n';
+import {
+  BOARD,
+  CROSS,
+  H,
+  INK,
+  INK_2,
+  INK_3,
+  M,
+  PART_STROKE,
+  RIP,
+  W,
+  clip,
+  hex,
+  rule,
+  text,
+  type Ctx,
+  type PdfInput,
+} from './draw';
+import { summaryPage } from './summaryPage';
 
-export interface PdfInput {
-  project: Project;
-  plan: Plan;
-  job: Job;
-  cost: CostBreakdown | null;
-  materials: Material[];
-  currency: string;
-  /** For the header; injectable so tests are stable. */
-  date?: Date;
-}
+export type { PdfInput };
 
 export interface PdfFonts {
   regular: ArrayBuffer | Uint8Array;
   semibold: ArrayBuffer | Uint8Array;
-}
-
-// A4 portrait, points.
-const W = 595.28;
-const H = 841.89;
-const M = 40;
-
-const INK = hex('#2A2119');
-const INK_2 = hex('#5E5040');
-const INK_3 = hex('#7A6A57');
-const RULE = hex('#DCCFBB');
-const BOARD = hex('#EEE6D9');
-const PART_STROKE = hex('#6A5B4A');
-const RIP = hex('#DD6B0B');
-const CROSS = hex('#B42318');
-const ACCENT = hex('#8A5A34');
-const WARN = hex('#8A4300');
-
-function hex(h: string): RGB {
-  const n = parseInt(h.slice(1), 16);
-  return rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
-}
-
-interface Ctx {
-  doc: PDFDocument;
-  regular: PDFFont;
-  bold: PDFFont;
-  input: PdfInput;
-  partIndex: Map<string, number>;
-}
-
-/** Text helper with the y axis pointing down from the top of the page, like the screen. */
-function text(
-  page: PDFPage,
-  font: PDFFont,
-  s: string,
-  x: number,
-  top: number,
-  size: number,
-  color: RGB = INK,
-  align: 'left' | 'right' | 'center' = 'left',
-) {
-  const w = font.widthOfTextAtSize(s, size);
-  const dx = align === 'right' ? -w : align === 'center' ? -w / 2 : 0;
-  page.drawText(s, { x: x + dx, y: H - top - size * 0.8, size, font, color });
-}
-
-/** Shortens `s` with "…" until it fits `maxWidth`. */
-function clip(font: PDFFont, s: string, size: number, maxWidth: number): string {
-  if (font.widthOfTextAtSize(s, size) <= maxWidth) return s;
-  let t = s;
-  while (t.length > 1 && font.widthOfTextAtSize(`${t}…`, size) > maxWidth) t = t.slice(0, -1);
-  return `${t}…`;
-}
-
-function rule(page: PDFPage, top: number, x1 = M, x2 = W - M) {
-  page.drawLine({
-    start: { x: x1, y: H - top },
-    end: { x: x2, y: H - top },
-    thickness: 0.5,
-    color: RULE,
-  });
 }
 
 export async function buildPdf(input: PdfInput, fonts: PdfFonts): Promise<Uint8Array> {
@@ -108,289 +54,23 @@ export async function buildPdf(input: PdfInput, fonts: PdfFonts): Promise<Uint8A
     partIndex: new Map(input.project.parts.map((p, i) => [p.id, i])),
   };
 
-  summaryPages(ctx);
+  summaryPage(ctx);
   input.plan.sheets.forEach((sheet, i) => sheetPage(ctx, sheet, i));
 
   // Footers once the page count is known.
   const pages = doc.getPages();
   const name = input.project.name || tr('Untitled project');
+  const setup = tr('kerf {{kerf}} · edge trim {{trim}}', {
+    kerf: formatLengthUnit(input.job.kerf),
+    trim: formatLengthUnit(input.job.trim ?? 0),
+  });
   pages.forEach((page, i) => {
-    text(page, regular, clip(regular, name, 8, 300), M, H - 28, 8, INK_3);
+    rule(page, H - 34);
+    text(page, regular, clip(regular, `${name} · ${setup}`, 8, 400), M, H - 28, 8, INK_3);
     text(page, regular, `${i + 1} / ${pages.length}`, W - M, H - 28, 8, INK_3, 'right');
   });
 
   return doc.save();
-}
-
-// ---- Summary ----
-
-function summaryPages(ctx: Ctx) {
-  const { input, regular, bold } = ctx;
-  const { project, plan, job, cost, currency } = input;
-  let page = ctx.doc.addPage([W, H]);
-  let y = M;
-
-  const date = (input.date ?? new Date()).toLocaleDateString(locale(), {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-  text(page, bold, clip(bold, project.name || tr('Untitled project'), 22, W - 2 * M), M, y, 22);
-  y += 30;
-  text(
-    page,
-    regular,
-    tr('Cutting plan · {{date}} · kerf {{kerf}} · edge trim {{trim}}', {
-      date,
-      kerf: formatLengthUnit(job.kerf),
-      trim: formatLengthUnit(job.trim ?? 0),
-    }),
-    M,
-    y,
-    9,
-    INK_2,
-  );
-  y += 26;
-
-  // Key numbers
-  const t = plan.totals;
-  const stats: [string, string][] = [
-    [tr('Sheets'), formatNumber(t.sheets)],
-    [tr('Material used'), `${formatNumber(Math.round(usedPercent(plan)))}%`],
-    [tr('Cuts'), formatNumber(t.cuts)],
-    [tr('Sawing'), formatLong(t.cutLength)],
-    [tr('Edge banding'), formatLong(t.edgeBandLength)],
-  ];
-  if (cost) stats.push([tr('Cost'), formatMoney(cost.total, currency)]);
-  const colW = (W - 2 * M) / stats.length;
-  stats.forEach(([label, value], i) => {
-    text(page, regular, label, M + i * colW, y, 8, INK_3);
-    text(page, bold, value, M + i * colW, y + 12, 15);
-  });
-  y += 42;
-  rule(page, y);
-  y += 16;
-
-  // Cost
-  if (cost) {
-    const costTitle = tr('Cost');
-    text(page, bold, costTitle, M, y, 12);
-    const modeText =
-      project.pricing.mode === 'area'
-        ? tr('Board charged by area used + {{pct}}% waste', {
-            pct: formatNumber(project.pricing.wastePct),
-          })
-        : project.pricing.offcutCredit
-          ? tr('Board charged by whole sheets, leftovers credited')
-          : tr('Board charged by whole sheets');
-    text(
-      page,
-      regular,
-      modeText,
-      M + bold.widthOfTextAtSize(costTitle, 12) + 12,
-      y + 2,
-      8.5,
-      INK_3,
-    );
-    y += 20;
-    const line = (label: string, note: string, amount: string, color: RGB = INK) => {
-      text(page, regular, clip(regular, label, 9.5, 260), M, y, 9.5, color);
-      if (note) text(page, regular, note, M + 270, y, 9.5, INK_3);
-      text(page, regular, amount, W - M, y, 9.5, color, 'right');
-      y += 15;
-    };
-    for (const m of cost.materials) {
-      const note =
-        project.pricing.mode === 'area'
-          ? tr('{{area}} used', { area: formatArea(m.usedArea) })
-          : tr('n_sheets', { count: m.sheets });
-      line(
-        m.material,
-        note,
-        m.priced ? formatMoney(m.gross, currency) : tr('no price'),
-        m.priced ? INK : WARN,
-      );
-      if (m.credit > 0) {
-        line(
-          tr('Reusable leftovers credited'),
-          formatArea(m.creditArea),
-          `−${formatMoney(m.credit, currency)}`,
-          ACCENT,
-        );
-      }
-    }
-    for (const b of cost.edgeBands) {
-      line(
-        b.band,
-        formatLong(b.length),
-        b.priced ? formatMoney(b.cost, currency) : tr('no price'),
-        b.priced ? INK : WARN,
-      );
-    }
-    for (const x of project.pricing.extras.filter((e) => e.amount !== null)) {
-      const qty = x.qty ?? 1;
-      line(
-        x.label || tr('Extra cost'),
-        qty !== 1 ? `${formatNumber(qty)} × ${formatMoney(x.amount!, currency)}` : '',
-        formatMoney(x.amount! * qty, currency),
-      );
-    }
-    rule(page, y - 3, M + 270);
-    y += 4;
-    text(page, bold, tr('Total'), M + 270, y, 11);
-    text(page, bold, formatMoney(cost.total, currency), W - M, y, 11, INK, 'right');
-    y += 18;
-    if (!cost.complete) {
-      text(
-        page,
-        regular,
-        tr('Some materials or edge bands have no price, so the total is incomplete.'),
-        M,
-        y,
-        8.5,
-        WARN,
-      );
-      y += 14;
-    }
-    y += 10;
-  }
-
-  // Parts that didn't fit
-  if (plan.unplaced.length > 0) {
-    const n = plan.unplaced.reduce((a, u) => a + u.count, 0);
-    text(page, bold, tr('n_parts_dont_fit', { count: n }), M, y, 11, WARN);
-    y += 16;
-    for (const u of plan.unplaced) {
-      const spec = job.parts.find((p) => p.id === u.partId);
-      const why =
-        spec && unplacedReason(spec, job) === 'too-big'
-          ? tr('bigger than every stock sheet')
-          : tr('not enough stock');
-      const label = spec?.label || tr('Part');
-      text(
-        page,
-        regular,
-        `${label} ×${u.count}${spec ? ` (${formatLength(spec.length)} × ${formatLength(spec.width)})` : ''}: ${why}`,
-        M,
-        y,
-        9,
-        WARN,
-      );
-      y += 13;
-    }
-    y += 10;
-  }
-
-  // Parts table
-  const materialName = new Map(input.materials.map((m) => [m.id, m.name]));
-  const showMaterial = project.parts.some((p) => p.materialId);
-  const cols = [
-    { title: '', w: 14 },
-    { title: tr('Label'), w: showMaterial ? 125 : 195 },
-    { title: tr('Length'), w: 52, right: true },
-    { title: tr('Width'), w: 52, right: true },
-    { title: tr('Qty'), w: 34, right: true },
-    { title: tr('Grain'), w: 50 },
-    { title: tr('Edges'), w: 95 },
-    ...(showMaterial ? [{ title: tr('Material'), w: 93 }] : []),
-  ];
-  const header = (p: PDFPage, top: number) => {
-    text(p, bold, tr('Parts'), M, top, 12);
-    let x = M;
-    for (const c of cols) {
-      text(
-        p,
-        bold,
-        c.title.toUpperCase(),
-        c.right ? x + c.w - 4 : x,
-        top + 20,
-        7,
-        INK_3,
-        c.right ? 'right' : 'left',
-      );
-      x += c.w;
-    }
-    rule(p, top + 31);
-    return top + 36;
-  };
-  y = header(page, y);
-  const rows = project.parts.filter((p) => p.enabled && p.length && p.width && p.qty);
-  rows.forEach((p) => {
-    if (y > H - M - 40) {
-      page = ctx.doc.addPage([W, H]);
-      y = header(page, M);
-    }
-    const i = ctx.partIndex.get(p.id) ?? 0;
-    const e = p.edges;
-    const long = Number(e.top) + Number(e.bottom);
-    const short = Number(e.left) + Number(e.right);
-    const edges =
-      long + short === 0
-        ? '—'
-        : long + short === 4
-          ? tr('all 4')
-          : tr('{{long}} long, {{short}} short', { long, short });
-    const grain =
-      p.grain === 'none' ? tr('any') : p.grain === 'length' ? tr('length') : tr('width');
-    const cells = [
-      '',
-      p.label || tr('Part {{n}}', { n: i + 1 }),
-      formatLength(p.length!),
-      formatLength(p.width!),
-      formatNumber(p.qty!),
-      grain,
-      edges,
-      ...(showMaterial ? [(p.materialId && materialName.get(p.materialId)) || tr('any')] : []),
-    ];
-    page.drawRectangle({
-      x: M,
-      y: H - y - 9,
-      width: 8,
-      height: 8,
-      color: hex(swatch(i)),
-      borderColor: PART_STROKE,
-      borderWidth: 0.4,
-    });
-    let x = M;
-    cells.forEach((c, ci) => {
-      const col = cols[ci]!;
-      if (ci > 0) {
-        const s = clip(regular, c, 9, col.w - 8);
-        text(
-          page,
-          regular,
-          s,
-          col.right ? x + col.w - 4 : x,
-          y,
-          9,
-          INK,
-          col.right ? 'right' : 'left',
-        );
-      }
-      x += col.w;
-    });
-    y += 15;
-  });
-  y += 12;
-
-  // Stock used
-  if (y > H - M - 80) {
-    page = ctx.doc.addPage([W, H]);
-    y = M;
-  }
-  text(page, bold, tr('Stock sheets used'), M, y, 12);
-  y += 20;
-  const used = new Map<string, number>();
-  plan.sheets.forEach((s) => used.set(s.stockId, (used.get(s.stockId) ?? 0) + s.qty));
-  for (const s of job.stock) {
-    const n = used.get(s.id) ?? 0;
-    if (n === 0) continue;
-    const name = s.label || tr('Unnamed material');
-    text(page, regular, `${formatLength(s.length)} × ${formatLength(s.width)}`, M, y, 9.5);
-    text(page, regular, clip(regular, name, 9.5, 300), M + 110, y, 9.5);
-    text(page, bold, tr('n_sheets', { count: n }), W - M, y, 9.5, INK, 'right');
-    y += 15;
-  }
 }
 
 // ---- One sheet layout per page ----

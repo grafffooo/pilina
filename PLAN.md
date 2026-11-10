@@ -130,7 +130,11 @@ Parts get a material field. The current app assumes a single material, but furni
 | 3 ✅ | **Materials, pricing, PDF** | Costs show in Results and the PDF; Slovak/Czech text prints correctly |
 | 4 ✅ | **Workshop flow:** cut mode, keep offcuts, offcut library, A4 QR labels, offcuts used first | The canvas flows work end to end; printed labels scan |
 | 5 ✅ | **Statistics, import, PWA, EN/SK/CS** | Installs, works offline, imports old projects |
-| 6 | **Later:** AR (WebXR), native apps through UniFFI, CNC nesting, more languages | Separate plans |
+| 6 ✅ | **PDF overview page:** page 1 as on the canvas ("Cutting plan PDF, page 1"): header with the total, a to-scale thumbnail of the first sheet, a board-use bar (parts / reusable leftovers / waste), key facts with icons, materials and cost with use bars and a cost split, and a parts list with to-scale silhouettes showing banded edges and a tick box per part | The exported PDF matches the canvas page in English, Slovak and Czech, and long part lists continue on the next page |
+| 7 | **Sharing and cloud folders:** `.md` export the old app can read; the phone's share sheet; a link/QR code holding a small project; and a linked folder kept in a cloud drive (Google Drive, OneDrive, iCloud Drive) used as file storage, one project file per project, not as a database | A project saved on the Mac shows up on another device through the cloud folder; a link opens the project on a phone |
+| 8 | **Small gaps:** cut mode positions measured from the last cut edge (what a track saw, table saw fence or panel saw needs), with the sheet edge as an option; grain for hand-added offcuts; full-width Statistics; custom sticker sizes; scanning labels with the phone camera | Each works in the browser, with tests where there's logic |
+| 9 | **End-to-end tests (Playwright)** on desktop and phone sizes: enter parts, cut mode with keep offcuts, labels, import/export, units, cut status | Run with one command, pass on a clean checkout |
+| 10 | **Later:** AR (WebXR), native apps through UniFFI, CNC nesting, more languages | Separate plans |
 
 Each milestone ends with tests passing and a short demo in the browser.
 
@@ -138,9 +142,9 @@ Each milestone ends with tests passing and a short demo in the browser.
 
 - **Engine speed on big jobs:** about 10 ms per greedy pass for 40 part types (≈12,000 strip simulations), so very large jobs get fewer lookahead passes within the budget. Fine for furniture; revisit if needed.
 - **TypeScript types** are kept in sync with `model.rs` by hand; generating them (e.g. `ts-rs`) once the model settles.
-- **End-to-end tests (Playwright)** aren't set up yet; milestone 2 was checked by unit tests (model, store with an in-memory IndexedDB) and by hand in the browser at desktop, tablet and phone sizes. Worth adding before milestone 4's cut-mode flow.
+- **End-to-end tests (Playwright)** aren't set up yet (milestone 9); so far everything is checked by unit tests (model, store with an in-memory IndexedDB) and by hand in the browser at desktop, tablet and phone sizes.
+- **Cloud folders on phones:** a phone browser can't keep a synced folder open. On desktop the linked folder works with any cloud drive whose app syncs a local folder (iCloud Drive, Google Drive for desktop, OneDrive), from the Mac app or Chromium. On phones the options are the Google Drive and OneDrive web APIs (sign-in in the browser, files in an app folder, still no server of ours) and, for iCloud, the share sheet / Files app until the native iOS app. To decide at milestone 7.
 - **PDF size:** pdf-lib's font subsetting drops glyphs from the Inter TTFs, so both weights are embedded whole (~370 KB per PDF). Revisit if a fixed fontkit appears or with a different subsetter.
-- **Cut mode positions** are measured from the sheet's left/top edge. Measuring from the edge of the piece being cut (what a panel saw fence needs) would be a useful option.
 - **Label printing** was checked on screen (layout in millimetres, QR codes decode with the browser's barcode reader); a real print on sticker sheets still needs a try, using the outline test page first. Custom sticker sizes aren't in yet.
 - **Scanning labels** works with a hardware scanner typing into the library search; scanning with the phone camera (BarcodeDetector) is a natural next step.
 - **Interface languages:** English, Slovak and Czech via i18next, with English sentences as keys. `src/i18n/i18n.test.ts` fails if a Slovak or Czech translation (or a plural form) is missing, so new text can't slip through untranslated. More languages: add a JSON file and one line in `LANGUAGES`.

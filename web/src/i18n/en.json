@@ -71,5 +71,9 @@
   "{{count}} sheet sizes_other": "{{count}} sheet sizes",
   "… and {{count}} more cuts (numbered on the drawing)_one": "… and 1 more cut (numbered on the drawing)",
   "… and {{count}} more cuts (numbered on the drawing)_other": "… and {{count}} more cuts (numbered on the drawing)",
-  "status_cut": "Cut"
+  "status_cut": "Cut",
+  "more_layouts_one": "and 1 more layout on the next pages",
+  "more_layouts_other": "and {{count}} more layouts on the next pages",
+  "n_edges_each_one": "1 edge each",
+  "n_edges_each_other": "{{count}} edges each"
 }

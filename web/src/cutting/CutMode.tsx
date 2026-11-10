@@ -4,6 +4,7 @@ import type { Rect, SheetLayout } from '../engine/types';
 import { formatLength, formatLengthUnit, unitLabel } from '../lib/units';
 import { cutKindLabel, isRipLike } from '../model/describe';
 import { cutPosition, measureFromPiece } from '../model/cutMeasure';
+import { cutPhase, type CutPhase } from '../model/cutPhase';
 import { jobKey } from '../model/job';
 import { stockPrice } from '../model/library';
 import { keepAdvice, leftoverGrain, offcutIdFromStock } from '../model/offcut';
@@ -235,8 +236,11 @@ export function CutMode() {
   const rip = isRipLike(cut);
   const measure = measures.get(cut.number);
   const where = (c: typeof cut) => cutPosition(c, measureFrom, measures);
+  const phase = cutPhase(sheet, session.cut);
+  const strip = phase?.kind === 'strip' && phase.strips > 1 ? phase : null;
+  const pickUp = strip?.first ? pickUpText(strip) : null;
   const speak = () => {
-    const text = `${t('Cut {{n}}', { n: cut.number })}. ${cutKindLabel(cut)}. ${cutSentence(cut.axis, where(cut), measureFrom)}.`;
+    const text = `${pickUp ? `${pickUp.title}, ${pickUp.size}. ` : ''}${t('Cut {{n}}', { n: cut.number })}. ${cutKindLabel(cut)}. ${cutSentence(cut.axis, where(cut), measureFrom)}.`;
     window.speechSynthesis?.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = locale();
@@ -253,6 +257,13 @@ export function CutMode() {
     >
       <div className={styles.cutBody}>
         <div className={styles.cutCard}>
+          {pickUp && (
+            <div className={styles.pickUp} role="note">
+              <strong>{pickUp.title}</strong>
+              <span>{pickUp.size}</span>
+            </div>
+          )}
+          {phase && <span className={styles.phase}>{phaseText(phase)}</span>}
           <span className={rip ? styles.kindRip : styles.kindCross}>
             <span className={styles.kindNumber}>{cut.number}</span>
             {cutKindLabel(cut)}
@@ -301,6 +312,7 @@ export function CutMode() {
             sheet={sheet}
             parts={parts}
             cutStep={cut.number}
+            focus={strip?.rect}
             label={t('{{sheet}} with cut {{n}} highlighted at {{axis}} = {{pos}}', {
               sheet: sheetTitle,
               n: cut.number,
@@ -325,6 +337,25 @@ export function CutMode() {
       </div>
     </Shell>
   );
+}
+
+/** The line above each cut: which phase of the sheet it belongs to. */
+function phaseText(p: CutPhase): string {
+  if (p.kind === 'trim') return i18nT('Edge trims');
+  if (p.kind === 'rip') return i18nT('Rip cuts · {{n}} of {{total}}', { n: p.rip, total: p.rips });
+  if (p.strips < 2) return i18nT('Cross cuts');
+  return i18nT('Strip {{n}} of {{total}} · cross cuts', { n: p.strip, total: p.strips });
+}
+
+/** Before a strip's first cut: which strip to take from the stack. */
+function pickUpText(p: Extract<CutPhase, { kind: 'strip' }>) {
+  return {
+    title: i18nT('Pick up strip {{n}} of {{total}}', { n: p.strip, total: p.strips }),
+    size: i18nT('{{width}} wide, {{length}} long', {
+      width: formatLengthUnit(p.width),
+      length: formatLengthUnit(p.length),
+    }),
+  };
 }
 
 function Shell({

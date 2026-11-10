@@ -27,6 +27,8 @@ export interface Offcut {
   sourceProjectId: string | null;
   sourceProjectName: string | null;
   createdAt: number;
+  /** Last change, for syncing (missing on offcuts not changed since this was added). */
+  updatedAt?: number;
   /** Set when a project cut it. */
   usedInProjectName: string | null;
   usedAt: number | null;

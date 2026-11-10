@@ -97,6 +97,30 @@
   align-self: flex-start;
 }
 
+.pickUp {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--info-bg);
+  color: var(--info-text);
+  font-size: 14px;
+}
+
+.pickUp strong {
+  font-size: 17px;
+}
+
+.phase {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: -8px;
+}
+
 .kindRip,
 .kindCross {
   display: inline-flex;

@@ -143,6 +143,28 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
               ))}
             </div>
           </div>
+          <div className={styles.row}>
+            <span className={styles.label} id="order-label">
+              {t('Cut order')}
+            </span>
+            <div className={ui.segmented} role="group" aria-labelledby="order-label">
+              {(['ripsFirst', 'stripByStrip'] as const).map((o) => (
+                <button
+                  key={o}
+                  type="button"
+                  aria-pressed={settings.cutOrder === o}
+                  title={
+                    o === 'ripsFirst'
+                      ? t('Every rip on the whole sheet first, then each strip’s cross cuts')
+                      : t('Each rip followed by its strip’s cross cuts, as on a panel saw')
+                  }
+                  onClick={() => updateSettings({ cutOrder: o })}
+                >
+                  {o === 'ripsFirst' ? t('Rips first') : t('Strip by strip')}
+                </button>
+              ))}
+            </div>
+          </div>
           <label className={styles.row}>
             <span className={styles.label}>{t('Currency')}</span>
             <select

@@ -1,6 +1,6 @@
 //! Turns packed strips into real sheet geometry: placements, numbered cuts and leftovers.
 
-use crate::model::{Axis, Cut, Placement, Rect, SheetLayout, StockSpec};
+use crate::model::{Axis, Cut, CutOrder, Placement, Rect, SheetLayout, StockSpec};
 use crate::pack::Strip;
 use crate::prep::Group;
 
@@ -17,6 +17,7 @@ struct FrameCut {
     y2: f64,
     length: f64,
     stage: u8,
+    strip: u32,
 }
 
 #[derive(Clone)]
@@ -51,9 +52,10 @@ pub(crate) fn build(
     };
     let half = kerf / 2.0;
 
-    let mut parts: Vec<(usize, Rect)> = Vec::new();
+    let mut parts: Vec<(usize, Rect, bool)> = Vec::new();
     let mut waste: Vec<Rect> = Vec::new();
     let mut cuts: Vec<FrameCut> = Vec::new();
+    let mut strip_rects: Vec<Rect> = Vec::new();
 
     // Cut centre half a kerf past `edge`, or the middle of a sliver thinner than a kerf.
     let cut_pos = |edge: f64, limit: f64| round2(edge + half.min((limit - edge) / 2.0));
@@ -63,6 +65,13 @@ pub(crate) fn build(
     for (s_idx, strip) in strips.iter().enumerate() {
         let strip_x = cur_x;
         let strip_w = strip.col_w;
+        let strip_no = s_idx as u32 + 1;
+        strip_rects.push(Rect {
+            x: strip_x,
+            y: 0.0,
+            w: strip_w,
+            h: fh,
+        });
         let prev_cut_x = if s_idx == 0 { 0.0 } else { prev_rip };
         let right_has_cut = strip_x + strip_w < fw;
         let next_cut_x = if right_has_cut {
@@ -81,6 +90,7 @@ pub(crate) fn build(
                 y2: fh,
                 length: fh,
                 stage: 1,
+                strip: strip_no,
             });
         }
 
@@ -105,6 +115,7 @@ pub(crate) fn build(
                     y2: row_bottom,
                     length: round2(next_cut_x - prev_cut_x),
                     stage: 2,
+                    strip: strip_no,
                 });
             }
 
@@ -127,6 +138,7 @@ pub(crate) fn build(
                         y2: row_bottom,
                         length: round2(row_bottom - row_top),
                         stage: 3,
+                        strip: strip_no,
                     });
                 }
                 prev_part_cut = seg_right;
@@ -140,6 +152,7 @@ pub(crate) fn build(
                         y2: ty,
                         length: round2(seg_right - seg_left),
                         stage: 4,
+                        strip: strip_no,
                     });
                     let wh = row.h - rp.o.h - kerf;
                     if wh > 0.0 {
@@ -159,6 +172,7 @@ pub(crate) fn build(
                         w: rp.o.w,
                         h: rp.o.h,
                     },
+                    rp.o.rotated,
                 ));
                 px += rp.o.w + kerf;
             }
@@ -224,32 +238,34 @@ pub(crate) fn build(
     };
 
     let mut all_cuts: Vec<Cut> = Vec::with_capacity(cuts.len() + 4);
-    let mut push_cut = |axis: Axis, x1: f64, y1: f64, x2: f64, y2: f64, length: f64, stage: u8| {
-        let number = all_cuts.len() as u32 + 1;
-        all_cuts.push(Cut {
-            number,
-            stage,
-            axis,
-            pos: if axis == Axis::X { x1 } else { y1 },
-            x1,
-            y1,
-            x2,
-            y2,
-            length,
-        });
-    };
+    let mut push_cut =
+        |axis: Axis, x1: f64, y1: f64, x2: f64, y2: f64, length: f64, stage: u8, strip: u32| {
+            let number = all_cuts.len() as u32 + 1;
+            all_cuts.push(Cut {
+                number,
+                stage,
+                strip,
+                axis,
+                pos: if axis == Axis::X { x1 } else { y1 },
+                x1,
+                y1,
+                x2,
+                y2,
+                length,
+            });
+        };
 
     // Edge trims come first in the sawing order. The blade runs inside the trimmed margin
     // (its centre half a kerf short of the usable area), so it never eats into a part; a
     // trim thinner than the kerf gets the blade in its middle.
     if trim > 0.0 {
         let t = round2(trim - half.min(trim / 2.0));
-        push_cut(Axis::Y, 0.0, t, sheet_w, t, sheet_w, 0);
+        push_cut(Axis::Y, 0.0, t, sheet_w, t, sheet_w, 0, 0);
         let bottom = round2(sheet_h - t);
-        push_cut(Axis::Y, 0.0, bottom, sheet_w, bottom, sheet_w, 0);
-        push_cut(Axis::X, t, t, t, bottom, sheet_h - 2.0 * t, 0);
+        push_cut(Axis::Y, 0.0, bottom, sheet_w, bottom, sheet_w, 0, 0);
+        push_cut(Axis::X, t, t, t, bottom, sheet_h - 2.0 * t, 0, 0);
         let right = round2(sheet_w - t);
-        push_cut(Axis::X, right, t, right, bottom, sheet_h - 2.0 * t, 0);
+        push_cut(Axis::X, right, t, right, bottom, sheet_h - 2.0 * t, 0, 0);
     }
     for c in &cuts {
         let (axis, x1, y1, x2, y2) = if transposed {
@@ -266,6 +282,7 @@ pub(crate) fn build(
             round2(y2 + trim),
             c.length,
             c.stage,
+            c.strip,
         );
     }
 
@@ -273,7 +290,7 @@ pub(crate) fn build(
     let mut edge_length = 0.0;
     let placements = parts
         .into_iter()
-        .map(|(gi, r)| {
+        .map(|(gi, r, rotated)| {
             let group = &groups[gi];
             let spec = group.spec;
             let rect = map_rect(r);
@@ -285,8 +302,8 @@ pub(crate) fn build(
                 part_id: spec.id.clone(),
                 instance,
                 rect,
-                // In the sheet frame `h` runs along the stock length.
-                rotated: spec.length != spec.width && (rect.h - spec.length).abs() > 0.005,
+                // Also set for a square part, where it says which way its grain runs.
+                rotated,
             }
         })
         .collect();
@@ -307,8 +324,25 @@ pub(crate) fn build(
             placements,
             cuts: all_cuts,
             waste,
+            strips: strip_rects.into_iter().map(map_rect).collect(),
         },
         used_area,
         edge_length,
+    }
+}
+
+/// Puts a sheet's cuts in sawing order and numbers them 1, 2, 3… `build` makes them strip
+/// by strip; "rips first" moves every rip (left to right) ahead of the strips' cross cuts.
+pub(crate) fn order_cuts(cuts: &mut [Cut], order: CutOrder) {
+    if order == CutOrder::RipsFirst {
+        // A stable sort keeps rips left to right and each strip's cuts in their order.
+        cuts.sort_by_key(|c| match c.stage {
+            0 => 0,
+            1 => 1,
+            _ => 2,
+        });
+    }
+    for (i, c) in cuts.iter_mut().enumerate() {
+        c.number = i as u32 + 1;
     }
 }

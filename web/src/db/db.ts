@@ -86,3 +86,12 @@ export async function saveOffcuts(changed: Offcut[], removedIds: string[]): Prom
 export async function addCutRecord(record: CutRecord): Promise<void> {
   await db.cutRecords.put(record);
 }
+
+export async function loadCutRecords(): Promise<CutRecord[]> {
+  return db.cutRecords.toArray();
+}
+
+/** Records cut on other devices, from the linked folder. */
+export async function addCutRecords(records: CutRecord[]): Promise<void> {
+  if (records.length) await db.cutRecords.bulkPut(records);
+}

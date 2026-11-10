@@ -1,7 +1,7 @@
 // SVG drawing of one sheet in millimetres: parts, leftovers, cuts and edge banding.
 // Colours are fixed (not themed) because the sheet always sits on light "paper".
 import { useId } from 'react';
-import type { SheetLayout } from '../engine/types';
+import type { Rect, SheetLayout } from '../engine/types';
 import { classifyOffcut, edgeSides, isRipLike, sizeOf } from '../model/describe';
 import { formatLength } from '../lib/units';
 import { useView } from '../store/view';
@@ -41,12 +41,15 @@ export function SheetDrawing({
   parts,
   label,
   cutStep,
+  focus,
 }: {
   sheet: SheetLayout;
   parts: Map<string, PartInfo>;
   label: string;
   /** Cut mode: highlight this cut, dim the ones before it, and ignore the view toggles. */
   cutStep?: number;
+  /** Cut mode: the strip being cut; the rest of the sheet is faded. */
+  focus?: Rect;
 }) {
   const { t } = useTranslation();
   const view = useView();
@@ -174,6 +177,26 @@ export function SheetDrawing({
             </g>
           );
         })}
+
+      {focus && (
+        <g pointerEvents="none">
+          <path
+            d={`M0 0H${w}V${l}H0Z M${focus.x} ${focus.y}v${focus.h}h${focus.w}v${-focus.h}Z`}
+            fill="#FFFFFF"
+            fillOpacity={0.6}
+            fillRule="evenodd"
+          />
+          <rect
+            x={focus.x}
+            y={focus.y}
+            width={focus.w}
+            height={focus.h}
+            fill="none"
+            stroke="#3A2E22"
+            strokeWidth={m * 0.004}
+          />
+        </g>
+      )}
 
       {showCuts &&
         sheet.cuts

@@ -37,9 +37,14 @@ export interface StockSpec {
   grain?: Grain;
 }
 
+/** Sawing order of a sheet's cuts: every rip first, or each rip with its strip's cuts. */
+export type CutOrder = 'ripsFirst' | 'stripByStrip';
+
 export interface Options {
   timeBudgetMs: number;
   seed: number;
+  /** Only renumbers the cuts; default 'ripsFirst'. */
+  cutOrder?: CutOrder;
 }
 
 export interface Job {
@@ -68,6 +73,9 @@ export interface Cut {
   number: number;
   /** 0 edge trim, 1 rip, 2 cross cut, 3 split a row, 4 trim a part to length */
   stage: 0 | 1 | 2 | 3 | 4;
+  /** 1-based strip the cut belongs to (a rip: the strip on its left/top); 0 for edge trims.
+   *  Missing in plans from before cut orders. */
+  strip?: number;
   axis: 'x' | 'y';
   pos: number;
   x1: number;
@@ -85,6 +93,8 @@ export interface SheetLayout {
   placements: Placement[];
   cuts: Cut[];
   waste: Rect[];
+  /** The strips the rips make, in order (strip n is strips[n - 1]). */
+  strips?: Rect[];
 }
 
 export interface Unplaced {

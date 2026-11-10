@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { cutPosition, measureFromPiece } from '../model/cutMeasure';
+import { cutGroupTitle } from '../model/cutPhase';
 import { createPortal } from 'react-dom';
 import type { Job, Plan, SheetLayout } from '../engine/types';
 import { formatNumber } from '../lib/format';
@@ -504,11 +505,13 @@ export function CutOrder({
         <p className={styles.listEmpty}>{t('This sheet is used whole: no cuts needed.')}</p>
       ) : (
         <ol className={fullHeight ? `${styles.cutList} ${styles.cutListFull}` : styles.cutList}>
-          {sheet.cuts.map((c) => {
+          {sheet.cuts.map((c, i) => {
             const rip = isRipLike(c);
             const active = c.number === activeCut;
+            const group = cutGroupTitle(sheet, i);
             return (
               <li key={c.number}>
+                {group && <span className={styles.cutGroup}>{group}</span>}
                 <button
                   type="button"
                   className={styles.cutRow}

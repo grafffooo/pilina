@@ -1,5 +1,5 @@
 // Project → engine job, plus checks the editor uses to flag incomplete rows.
-import type { Job, PartSpec, Plan, StockSpec } from '../engine/types';
+import type { CutOrder, Job, PartSpec, Plan, StockSpec } from '../engine/types';
 import { materialGrain, type Material } from './library';
 import type { PartRow, Project, StockRow } from './project';
 
@@ -33,7 +33,10 @@ export function projectToJob(
   materials: Material[] = [],
   /** Library offcuts to use first (see `offcutStock`). */
   offcuts: StockSpec[] = [],
-  timeBudgetMs = 600,
+  {
+    timeBudgetMs = 600,
+    cutOrder = 'ripsFirst',
+  }: { timeBudgetMs?: number; cutOrder?: CutOrder } = {},
 ): Job | null {
   const names = new Map(materials.map((m) => [m.id, m.name]));
   const byId = new Map(materials.map((m) => [m.id, m]));
@@ -68,7 +71,7 @@ export function projectToJob(
     stock: project.useOffcuts ? [...offcuts, ...stock] : stock,
     kerf: Math.max(0, project.kerf || 0),
     trim: Math.max(0, project.trim || 0),
-    options: { timeBudgetMs, seed: 1234567 },
+    options: { timeBudgetMs, seed: 1234567, cutOrder },
   };
 }
 

@@ -87,6 +87,12 @@ interface AppState {
     remove: string[];
     library: { materials: Material[]; edgeBands: EdgeBand[] } | null;
   }): void;
+  /** Offcuts and workshop settings from the linked folder (see sync/workshop.ts). */
+  applyWorkshopSync(change: {
+    settings: Settings | null;
+    offcutUpserts: Offcut[];
+    offcutRemoves: string[];
+  }): void;
   /** Records a sheet as cut (for statistics); never blocks the workshop if saving fails. */
   recordCut(record: CutRecord): void;
 }
@@ -98,6 +104,12 @@ export interface Library {
 }
 
 const LAST_PROJECT = 'cutlist.currentProject';
+
+/** Called after a cut record is saved (the folder sync listens; records aren't in the store). */
+let onRecordAdded: (() => void) | undefined;
+export function setRecordListener(fn: () => void) {
+  onRecordAdded = fn;
+}
 const SAVE_DELAY_MS = 400;
 
 const dirty = new Set<string>();
@@ -405,7 +417,9 @@ export const useStore = create<AppState>()((set, get) => {
 
     updateOffcuts(ids, patch) {
       set((s) => ({
-        offcuts: s.offcuts.map((o) => (ids.includes(o.id) ? { ...o, ...patch } : o)),
+        offcuts: s.offcuts.map((o) =>
+          ids.includes(o.id) ? { ...o, ...patch, updatedAt: Date.now() } : o,
+        ),
       }));
       ids.forEach((id) => offcutsChanged.add(id));
       scheduleOffcutSave();
@@ -466,6 +480,29 @@ export const useStore = create<AppState>()((set, get) => {
       }
     },
 
+    applyWorkshopSync({ settings, offcutUpserts, offcutRemoves }) {
+      if (!settings && !offcutUpserts.length && !offcutRemoves.length) return;
+      const gone = new Set(offcutRemoves);
+      const incoming = new Map(offcutUpserts.map((o) => [o.id, o]));
+      set((s) => {
+        const known = new Set(s.offcuts.map((o) => o.id));
+        return {
+          offcuts: [
+            ...s.offcuts.filter((o) => !gone.has(o.id)).map((o) => incoming.get(o.id) ?? o),
+            ...offcutUpserts.filter((o) => !known.has(o.id)),
+          ],
+          ...(settings ? { settings } : {}),
+        };
+      });
+      offcutUpserts.forEach((o) => offcutsChanged.add(o.id));
+      for (const id of offcutRemoves) {
+        offcutsChanged.delete(id);
+        offcutsRemoved.add(id);
+      }
+      if (settings) libraryDirty = true;
+      scheduleOffcutSave();
+    },
+
     setCutting(cutting) {
       set({ cutting });
     },
@@ -473,6 +510,7 @@ export const useStore = create<AppState>()((set, get) => {
     recordCut(rec) {
       storage
         .addCutRecord(rec)
+        .then(() => onRecordAdded?.())
         .catch((e: unknown) => console.error('Could not save the cut record', e));
     },
 

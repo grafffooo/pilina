@@ -102,7 +102,7 @@ pub fn optimize_with(job: &Job, control: &mut dyn Control) -> Plan {
     };
     let n = ctx.groups.len();
     if n == 0 {
-        return finish(&ctx, None);
+        return finish(&ctx, None, job.options.cut_order);
     }
 
     let mut search = Search {
@@ -155,7 +155,7 @@ pub fn optimize_with(job: &Job, control: &mut dyn Control) -> Plan {
     }
 
     let best = search.best.map(|b| b.0);
-    finish(&ctx, best)
+    finish(&ctx, best, job.options.cut_order)
 }
 
 struct Search<'s, 'a> {
@@ -205,7 +205,7 @@ impl Search<'_, '_> {
 }
 
 /// Merges identical consecutive sheets and adds up the totals.
-fn finish(ctx: &Ctx<'_>, pass: Option<search::Pass>) -> Plan {
+fn finish(ctx: &Ctx<'_>, pass: Option<search::Pass>, order: CutOrder) -> Plan {
     let remaining: Vec<u32> = match &pass {
         Some(p) => p.remaining.clone(),
         None => ctx.groups.iter().map(|g| g.qty).collect(),
@@ -224,7 +224,8 @@ fn finish(ctx: &Ctx<'_>, pass: Option<search::Pass>) -> Plan {
     let mut sheets: Vec<SheetLayout> = Vec::new();
     let mut totals = Totals::default();
     for sheet in pass.map(|p| p.sheets).unwrap_or_default() {
-        let built = sheet.built;
+        let mut built = sheet.built;
+        layout::order_cuts(&mut built.layout.cuts, order);
         let l = &built.layout;
         totals.sheets += 1;
         if ctx.stocks[sheet.stock].tier == 0 {
@@ -558,5 +559,83 @@ mod tests {
             };
             assert!(hi <= 10.0 + 1e-9 || lo >= size - 10.0 - 1e-9, "{c:?}");
         }
+    }
+
+    /// Stage of each cut in numbered order.
+    fn stages(sheet: &SheetLayout) -> Vec<(u8, u32)> {
+        let mut cuts = sheet.cuts.clone();
+        cuts.sort_by_key(|c| c.number);
+        cuts.iter().map(|c| (c.stage, c.strip)).collect()
+    }
+
+    #[test]
+    fn rips_come_first_then_each_strip() {
+        let mut job = skrinky();
+        job.trim = 10.0;
+        let plan = optimize(&job);
+        let sheet = &plan.sheets[0];
+        let order = stages(sheet);
+        assert!(sheet.strips.len() > 1, "need several strips: {order:?}");
+        // Numbers run 1..n in list order.
+        assert!(
+            sheet
+                .cuts
+                .iter()
+                .enumerate()
+                .all(|(i, c)| c.number == i as u32 + 1)
+        );
+        // Trims, then rips, then the rest; strips never go backwards after the rips.
+        let phase = |s: u8| match s {
+            0 => 0,
+            1 => 1,
+            _ => 2,
+        };
+        assert!(
+            order.windows(2).all(|w| phase(w[0].0) <= phase(w[1].0)),
+            "{order:?}"
+        );
+        let rest: Vec<u32> = order.iter().filter(|c| c.0 >= 2).map(|c| c.1).collect();
+        assert!(rest.windows(2).all(|w| w[0] <= w[1]), "{rest:?}");
+        // Rips run left to right along the sheet (or top to bottom when transposed).
+        let rips: Vec<f64> = sheet
+            .cuts
+            .iter()
+            .filter(|c| c.stage == 1)
+            .map(|c| c.pos)
+            .collect();
+        assert!(rips.windows(2).all(|w| w[0] < w[1]), "{rips:?}");
+        // Each strip lies inside the sheet and holds its strip's parts.
+        for r in &sheet.strips {
+            assert!(r.x >= 0.0 && r.y >= 0.0);
+            assert!(r.x + r.w <= sheet.width + 1e-9 && r.y + r.h <= sheet.length + 1e-9);
+        }
+    }
+
+    #[test]
+    fn strip_by_strip_keeps_each_rip_with_its_strip() {
+        let mut job = skrinky();
+        job.options.cut_order = CutOrder::StripByStrip;
+        let by_strip = optimize(&job);
+        job.options.cut_order = CutOrder::RipsFirst;
+        let rips_first = optimize(&job);
+        // Same layout, only numbered differently.
+        assert_eq!(by_strip.sheets[0].placements, rips_first.sheets[0].placements);
+        assert_eq!(by_strip.totals, rips_first.totals);
+        let order = stages(&by_strip.sheets[0]);
+        let strips: Vec<u32> = order.iter().map(|c| c.1).collect();
+        assert!(strips.windows(2).all(|w| w[0] <= w[1]), "{order:?}");
+        assert_ne!(order, stages(&rips_first.sheets[0]));
+    }
+
+    #[test]
+    fn cut_order_defaults_to_rips_first_in_json() {
+        let job: Job = serde_json::from_str(
+            r#"{"parts":[],"stock":[],"kerf":3,"options":{"timeBudgetMs":10,"seed":1}}"#,
+        )
+        .unwrap();
+        assert_eq!(job.options.cut_order, CutOrder::RipsFirst);
+        let o: Options =
+            serde_json::from_str(r#"{"timeBudgetMs":10,"seed":1,"cutOrder":"stripByStrip"}"#).unwrap();
+        assert_eq!(o.cut_order, CutOrder::StripByStrip);
     }
 }

@@ -17,6 +17,17 @@ describe('measuring from the last cut edge', () => {
     }
   });
 
+  it('measures the same pieces when every rip comes first', () => {
+    // The fixture is numbered strip by strip; renumber it rips first, as the engine now does.
+    const phase = (stage: number) => Math.min(stage, 2);
+    const cuts = [...sheet.cuts]
+      .sort((a, b) => phase(a.stage) - phase(b.stage) || a.number - b.number)
+      .map((c, i) => ({ ...c, number: i + 1, was: c.number }));
+    const ripsFirst = measureFromPiece({ ...sheet, cuts }, fixture.kerf);
+    expect([...ripsFirst.values()].filter((x) => x.fromSheet)).toEqual([]);
+    for (const c of cuts) expect(ripsFirst.get(c.number)).toEqual(m.get(c.was));
+  });
+
   it('gives the size of the piece coming off, not the distance from the sheet edge', () => {
     const cut = (n: number) => sheet.cuts.find((c) => c.number === n)!;
     // First rip: 760 shelf width from the trimmed edge (the sheet edge would say 772).

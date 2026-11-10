@@ -654,5 +654,17 @@
   "Top margin, mm": "Horní okraj, mm",
   "These stickers run {{x}} mm past the page’s width and {{y}} mm past its height. Check the measurements.": "Samolepky přesahují šířku strany o {{x}} mm a výšku o {{y}} mm. Zkontrolujte rozměry.",
   "These stickers run {{x}} mm past the page’s width. Check the measurements.": "Samolepky přesahují šířku strany o {{x}} mm. Zkontrolujte rozměry.",
-  "These stickers run {{y}} mm past the page’s height. Check the measurements.": "Samolepky přesahují výšku strany o {{y}} mm. Zkontrolujte rozměry."
+  "These stickers run {{y}} mm past the page’s height. Check the measurements.": "Samolepky přesahují výšku strany o {{y}} mm. Zkontrolujte rozměry.",
+  "Rips first": "Nejdřív podélné",
+  "Strip by strip": "Pás po pásu",
+  "Every rip on the whole sheet first, then each strip’s cross cuts": "Nejdřív všechny podélné řezy na celé desce, potom příčné řezy každého pásu",
+  "Each rip followed by its strip’s cross cuts, as on a panel saw": "Po každém podélném řezu hned příčné řezy jeho pásu, jako na formátovací pile",
+  "Edge trims": "Ořez okrajů",
+  "Rip cuts · {{n}} of {{total}}": "Podélné řezy · {{n}} z {{total}}",
+  "Cross cuts": "Příčné řezy",
+  "Strip {{n}} of {{total}} · cross cuts": "Pás {{n}} z {{total}} · příčné řezy",
+  "Pick up strip {{n}} of {{total}}": "Vezměte pás {{n}} z {{total}}",
+  "{{width}} wide, {{length}} long": "šířka {{width}}, délka {{length}}",
+  "Rip cuts": "Podélné řezy",
+  "Strip {{n}} of {{total}}": "Pás {{n}} z {{total}}"
 }

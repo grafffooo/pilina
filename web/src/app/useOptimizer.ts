@@ -18,6 +18,7 @@ export function useOptimizer() {
   const materials = useStore((s) => s.materials);
   const library = useStore((s) => s.offcuts);
   const useOffcuts = project?.useOffcuts;
+  const cutOrder = useStore((s) => s.settings.cutOrder);
 
   // Only the fields that change the cut; renaming a project doesn't re-run the engine.
   const job = useMemo(
@@ -27,10 +28,11 @@ export function useOptimizer() {
             project,
             materials,
             offcutStock(matchingOffcuts(project, library), materials),
+            { cutOrder },
           )
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [id, parts, stock, kerf, trim, materials, library, useOffcuts],
+    [id, parts, stock, kerf, trim, materials, library, useOffcuts, cutOrder],
   );
   const key = jobKey(job);
 

@@ -90,6 +90,7 @@ fn job() -> impl Strategy<Value = Job> {
             options: Options {
                 time_budget_ms: 40,
                 seed: 7,
+                ..Options::default()
             },
         })
 }
@@ -214,6 +215,45 @@ fn check(job: &Job, plan: &Plan) -> Result<(), String> {
                         c.number, p.part_id
                     ));
                 }
+            }
+        }
+
+        // Rips first: trims, then rips, then the strips' own cuts in strip order. Every cut
+        // after the trims names a real strip, and the strips' cuts stay inside it.
+        let phase = |c: &Cut| match c.stage {
+            0 => (0, 0),
+            1 => (1, 0),
+            _ => (2, c.strip),
+        };
+        if sheet.cuts.windows(2).any(|w| phase(&w[0]) > phase(&w[1])) {
+            return Err(format!("sheet {si}: cuts not rips first: {:?}", sheet.cuts));
+        }
+        let inside = |r: &Rect, x: f64, y: f64| {
+            x > r.x - EPS && x < r.x + r.w + EPS && y > r.y - EPS && y < r.y + r.h + EPS
+        };
+        for c in &sheet.cuts {
+            if c.stage == 0 {
+                continue;
+            }
+            let Some(r) = sheet.strips.get(c.strip as usize - 1) else {
+                return Err(format!(
+                    "sheet {si}: cut {} in missing strip {}",
+                    c.number, c.strip
+                ));
+            };
+            let mid = ((c.x1 + c.x2) / 2.0, (c.y1 + c.y2) / 2.0);
+            if c.stage >= 2 && !inside(r, mid.0, mid.1) {
+                return Err(format!("sheet {si}: cut {} outside strip {r:?}", c.number));
+            }
+        }
+        for p in ps {
+            let r = p.rect;
+            let fits = sheet
+                .strips
+                .iter()
+                .any(|s| inside(s, r.x, r.y) && inside(s, r.x + r.w, r.y + r.h));
+            if !fits {
+                return Err(format!("sheet {si}: {} in no strip {r:?}", p.part_id));
             }
         }
 

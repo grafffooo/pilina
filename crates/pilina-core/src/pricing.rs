@@ -289,6 +289,7 @@ mod tests {
                 width: 1000.0,
                 length: 2000.0,
                 qty: 1,
+                strips: vec![],
                 placements: vec![
                     Placement {
                         part_id: "a".into(),

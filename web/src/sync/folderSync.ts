@@ -2,7 +2,7 @@
 // when the window comes back into focus, and once a minute. Each sync reads the whole folder
 // and merges (see merge.ts); a few dozen small files take well under a second.
 import { create } from 'zustand';
-import { useStore } from '../store/store';
+import { setRecordListener, useStore } from '../store/store';
 import {
   folderSupport,
   forgetFolder,
@@ -11,7 +11,10 @@ import {
   type Folder,
   type FolderSupport,
 } from './folder';
+import * as storage from '../db/db';
+import type { Settings } from '../model/library';
 import { mergeFolder } from './merge';
+import { mergeWorkshop } from './workshop';
 
 export interface FolderSyncState {
   support: FolderSupport;
@@ -33,6 +36,8 @@ export const useFolderSync = create<FolderSyncState>(() => ({
 
 const LIBRARY_AT = 'cutlist.folder.libraryAt';
 const DELETIONS = 'cutlist.folder.deletions';
+const SETTINGS_AT = 'cutlist.folder.settingsAt';
+const OFFCUT_DELETIONS = 'cutlist.folder.offcutDeletions';
 const CHANGE_DELAY_MS = 2500;
 const EVERY_MS = 60_000;
 
@@ -77,8 +82,17 @@ export async function syncNow(): Promise<void> {
   running = (async () => {
     try {
       const files = await f.list();
-      const { projects, materials, edgeBands, ready } = useStore.getState();
+      const { projects, materials, edgeBands, settings, offcuts, ready } = useStore.getState();
       if (!ready) return;
+      const offcutDeletions = readJson<Record<string, number>>(OFFCUT_DELETIONS, {});
+      const workshop = mergeWorkshop({
+        files,
+        settings,
+        settingsAt: readJson<number>(SETTINGS_AT, 0),
+        offcuts,
+        offcutDeletions,
+        records: await storage.loadCutRecords(),
+      });
       const deletions = readJson<Record<string, number>>(DELETIONS, {});
       const result = mergeFolder({
         files,
@@ -90,8 +104,12 @@ export async function syncNow(): Promise<void> {
       });
       for (const w of result.writes) await f.write(w.name, w.text);
       for (const name of result.removes) await f.remove(name).catch(() => {});
+      for (const w of workshop.writes) await f.write(w.name, w.text);
       writeJson(DELETIONS, {});
       writeJson(LIBRARY_AT, result.libraryAt);
+      writeJson(OFFCUT_DELETIONS, {});
+      writeJson(SETTINGS_AT, workshop.settingsAt);
+      await storage.addCutRecords(workshop.newRecords);
       if (result.upsert.length || result.remove.length || result.library) {
         applying = true;
         try {
@@ -100,11 +118,19 @@ export async function syncNow(): Promise<void> {
           applying = false;
         }
       }
+      if (workshop.settings || workshop.offcutUpserts.length || workshop.offcutRemoves.length) {
+        applying = true;
+        try {
+          useStore.getState().applyWorkshopSync(workshop);
+        } finally {
+          applying = false;
+        }
+      }
       useFolderSync.setState({
         state: 'ok',
         lastSync: Date.now(),
         error: null,
-        unreadable: result.unreadable,
+        unreadable: [...result.unreadable, ...workshop.unreadable],
       });
     } catch (e) {
       console.error('Folder sync failed', e);
@@ -121,6 +147,9 @@ export async function syncNow(): Promise<void> {
     await syncNow();
   }
 }
+
+const sameSettings = (a: Settings, b: Settings) =>
+  JSON.stringify({ ...a, nextOffcutNumber: 0 }) === JSON.stringify({ ...b, nextOffcutNumber: 0 });
 
 let started = false;
 
@@ -140,11 +169,28 @@ export async function startFolderSync() {
       }
       schedule();
     }
+    if (s.offcuts !== prev.offcuts) {
+      const now = new Set(s.offcuts.map((o) => o.id));
+      const removed = prev.offcuts.filter((o) => !now.has(o.id));
+      if (removed.length) {
+        const deletions = readJson<Record<string, number>>(OFFCUT_DELETIONS, {});
+        for (const o of removed) deletions[o.id] = Date.now();
+        writeJson(OFFCUT_DELETIONS, deletions);
+      }
+      schedule();
+    }
+    if (s.settings !== prev.settings) {
+      // The offcut counter goes up with every kept offcut; that alone isn't a settings change.
+      if (!sameSettings(s.settings, prev.settings)) writeJson(SETTINGS_AT, Date.now());
+      schedule();
+    }
     if (s.materials !== prev.materials || s.edgeBands !== prev.edgeBands) {
       writeJson(LIBRARY_AT, Date.now());
       schedule();
     }
   });
+  // Cut records live only in the database, not the store: sync soon after each one.
+  setRecordListener(() => schedule());
   window.addEventListener('focus', () => schedule(200));
   setInterval(() => schedule(0), EVERY_MS);
 

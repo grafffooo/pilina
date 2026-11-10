@@ -1,5 +1,6 @@
 // Materials, edge bands and app settings: shared by all projects, stored on this device.
 import type { Unit } from '../lib/units';
+import type { CutOrder } from '../engine/types';
 import type { MeasureFrom } from './cutMeasure';
 import type { LabelFormat } from './offcut';
 import type { Grain, PriceInput, StockPrice, StockSpec } from '../engine/types';
@@ -45,6 +46,8 @@ export interface Settings {
   units: Unit;
   /** Cut positions: from the edge of the piece being cut (the last cut), or the sheet's edge. */
   cutMeasure: MeasureFrom;
+  /** Sawing order: all rips first (track saw, then mitre saw) or strip by strip (panel saw). */
+  cutOrder: CutOrder;
   /** Extra band length per banded edge, mm. */
   edgeAllowance: number;
   /** Leftovers at least this big count as reusable offcuts (mm). */
@@ -66,6 +69,7 @@ export const DEFAULT_SETTINGS: Settings = {
   currency: 'EUR',
   units: 'mm',
   cutMeasure: 'piece',
+  cutOrder: 'ripsFirst',
   edgeAllowance: 20,
   offcutMinLength: 300,
   offcutMinWidth: 100,

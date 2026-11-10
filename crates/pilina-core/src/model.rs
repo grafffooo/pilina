@@ -96,6 +96,21 @@ pub struct Options {
     pub time_budget_ms: u32,
     /// Seed for the randomized part orderings (results are deterministic for a given seed).
     pub seed: u64,
+    /// How the cuts of each sheet are numbered. Only the numbering changes, never the layout.
+    #[serde(default)]
+    pub cut_order: CutOrder,
+}
+
+/// The sawing order of a sheet's cuts.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum CutOrder {
+    /// Edge trims, then every rip across the whole sheet (left to right), then each strip's
+    /// cross cuts, splits and part trims, strip by strip. Track saw first, mitre saw after.
+    #[default]
+    RipsFirst,
+    /// Each rip followed straight away by its strip's cuts (a panel saw's order).
+    StripByStrip,
 }
 
 impl Default for Options {
@@ -103,6 +118,7 @@ impl Default for Options {
         Self {
             time_budget_ms: 600,
             seed: 1_234_567,
+            cut_order: CutOrder::default(),
         }
     }
 }
@@ -159,6 +175,10 @@ pub struct Cut {
     /// 0 = edge trim, 1 = rip through the whole (trimmed) sheet, 2 = cross cut of a strip,
     /// 3 = split a row, 4 = trim a part to its length.
     pub stage: u8,
+    /// 1-based strip the cut belongs to (a rip belongs to the strip on its left or top);
+    /// 0 for edge trims.
+    #[serde(default)]
+    pub strip: u32,
     pub axis: Axis,
     pub pos: f64,
     pub x1: f64,
@@ -181,6 +201,10 @@ pub struct SheetLayout {
     pub cuts: Vec<Cut>,
     /// Leftover rectangles, largest first.
     pub waste: Vec<Rect>,
+    /// The strips the rips make, in order: strip `n` is `strips[n - 1]`. The edge strip
+    /// beyond the last rip is waste and not listed.
+    #[serde(default)]
+    pub strips: Vec<Rect>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

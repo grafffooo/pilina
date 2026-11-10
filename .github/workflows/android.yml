@@ -1,0 +1,140 @@
+name: Android APK (Bubblewrap)
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to attach APK to (e.g. v0.1.0)'
+        required: false
+        default: 'v0.1.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Bubblewrap CLI
+        run: npm install -g @bubblewrap/cli
+
+      - name: Configure Bubblewrap
+        run: |
+          mkdir -p ~/.bubblewrap
+          echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > ~/.bubblewrap/config.json
+
+      - name: Prepare Keystore and TWA Manifest
+        run: |
+          mkdir -p android
+          cd android
+          
+          # Generate signing keystore
+          keytool -genkey -v -keystore android.keystore -alias android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass pilinakeystore -keypass pilinakeystore \
+            -dname "CN=Pilina, OU=Pilina, O=Pilina, L=Unknown, S=Unknown, C=US"
+
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          VERSION="${TAG#v}"
+          if [[ -z "$VERSION" || "$VERSION" == "main" ]]; then
+            VERSION="0.1.0"
+          fi
+
+          cat << EOF > twa-manifest.json
+          {
+            "packageId": "app.pilina.twa",
+            "host": "grafffooo.github.io",
+            "name": "Pilina",
+            "launcherName": "Pilina",
+            "display": "standalone",
+            "themeColor": "#F4EEE4",
+            "themeColorDark": "#1E1E1E",
+            "navigationColor": "#F4EEE4",
+            "navigationColorDark": "#1E1E1E",
+            "backgroundColor": "#F4EEE4",
+            "enableNotifications": false,
+            "startUrl": "/pilina/",
+            "iconUrl": "https://raw.githubusercontent.com/grafffooo/pilina/main/web/public/icon-512.png",
+            "maskableIconUrl": "https://raw.githubusercontent.com/grafffooo/pilina/main/web/public/icon-maskable-512.png",
+            "splashScreenFadeOutDuration": 300,
+            "signingKey": {
+              "path": "./android.keystore",
+              "alias": "android"
+            },
+            "appVersion": "${VERSION}",
+            "appVersionCode": 1,
+            "shortcuts": [],
+            "generatorApp": "bubblewrap-cli",
+            "webManifestUrl": "https://grafffooo.github.io/pilina/manifest.webmanifest",
+            "fallbackType": "customtabs",
+            "features": {},
+            "alphaDependencies": {
+              "enabled": false
+            },
+            "enableSiteSettingsShortcut": true,
+            "isChromeOSOnly": false,
+            "isMetaQuest": false,
+            "fullScopeUrl": "https://grafffooo.github.io/pilina/",
+            "minSdkVersion": 21,
+            "orientation": "default",
+            "fingerprints": [],
+            "additionalTrustedOrigins": [],
+            "retainedBundles": []
+          }
+          EOF
+
+      - name: Build Signed APK
+        run: |
+          cd android
+          export BUBBLEWRAP_KEYSTORE_PASSWORD=pilinakeystore
+          export BUBBLEWRAP_KEY_PASSWORD=pilinakeystore
+
+          bubblewrap update --skipVersionUpgrade
+          bubblewrap build --skipPwaValidation
+
+      - name: Copy & Name APK
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          VERSION="${TAG#v}"
+          if [[ -z "$VERSION" || "$VERSION" == "main" ]]; then
+            VERSION="0.1.0"
+          fi
+          cp android/app-release-signed.apk "Pilina_${VERSION}.apk"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pilina-android-apk
+          path: Pilina_*.apk
+
+      - name: Attach APK to GitHub Release
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          if [[ "$TAG" != v* ]]; then
+            TAG="v0.1.0"
+          fi
+          VERSION="${TAG#v}"
+          gh release upload "$TAG" "Pilina_${VERSION}.apk" --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -95,12 +95,15 @@ npm run lint
 npm run build        # production build (PWA) in web/dist
 ```
 
-### Desktop App (macOS, Windows, Linux)
+### Standalone Apps & Downloads
 
-Prebuilt binaries are available on the [**GitHub Releases**](https://github.com/grafffooo/pilina/releases) page:
-- **macOS:** Universal `.dmg` (runs on both Apple Silicon M1/M2/M3/M4 and Intel)
-- **Windows:** `.exe` installer (NSIS setup)
-- **Linux:** `.AppImage` and `.deb`
+Prebuilt packages for the first release are available on the [**GitHub Releases**](https://github.com/grafffooo/pilina/releases) page:
+- **macOS:** Universal `.dmg` installer (runs on both Apple Silicon M1/M2/M3/M4 and Intel)
+- **Windows:** `.exe` installer (NSIS setup) or `.msi` package
+- **Linux:** `.AppImage`, `.deb`, and `.rpm` packages
+- **Android:** Download the `.apk` package directly to your phone or tablet
+
+You can also use Pilina without installing anything by visiting the live web app at [**grafffooo.github.io/pilina**](https://grafffooo.github.io/pilina/) or clicking "Add to Home Screen" in mobile Chrome / Safari to install it as an offline PWA.
 
 To build the desktop app locally:
 
@@ -111,3 +114,55 @@ npm run app:dev    # development: opens the native window on the Vite dev server
 ```
 
 The desktop app wraps the web app in a native window (Tauri) with no external server. Project files use the native Save dialog and sticker sheets print directly through the native print panel.
+
+---
+
+## Self-Hosting with Docker (NAS & Local Network)
+
+You can self-host Pilina on your home network — perfect for a **Ugreen NAS (e.g. DXP4800 / UGOS Pro)**, **Synology Container Manager**, **TrueNAS**, **Unraid**, or any Raspberry Pi / Linux server. Once running, any phone, tablet, or workshop computer on your local Wi-Fi can open Pilina in a browser without internet access.
+
+The official multi-architecture image (`linux/amd64` and `linux/arm64`) is hosted on GitHub Container Registry: `ghcr.io/grafffooo/pilina:latest` (~25MB total footprint).
+
+### Option 1: Docker CLI
+
+```bash
+docker run -d \
+  --name pilina \
+  --restart unless-stopped \
+  -p 8080:80 \
+  ghcr.io/grafffooo/pilina:latest
+```
+
+Then open `http://<your-nas-ip>:8080` in your browser.
+
+### Option 2: Docker Compose
+
+Use the provided [`docker-compose.yml`](docker-compose.yml):
+
+```yaml
+services:
+  pilina:
+    image: ghcr.io/grafffooo/pilina:latest
+    container_name: pilina
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+```
+
+Start the container:
+
+```bash
+docker compose up -d
+```
+
+### Option 3: Ugreen NAS (DXP4800 / UGOS Pro) GUI
+
+1. Open **Docker** from your UGOS desktop.
+2. In the **Image** tab, click **Pull** and enter:
+   ```text
+   ghcr.io/grafffooo/pilina:latest
+   ```
+3. Once downloaded, select the image and click **Run**.
+4. Set container name to `pilina`, and map host port `8080` to container port `80`.
+5. Click **Done** — open `http://<nas-ip>:8080` from any phone or computer on your workshop Wi-Fi. All optimization runs entirely inside the client browser via WebAssembly, so your NAS CPU stays near 0%.
+

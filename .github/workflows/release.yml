@@ -67,11 +67,13 @@ jobs:
             ### Pilina v__VERSION__ — Sheet goods, cut plans & workshop offcuts
 
             Download the standalone installer for your platform:
-            - **macOS:** Download the `.dmg` package (Universal binary for both Apple Silicon M1/M2/M3/M4 and Intel Macs).
-            - **Windows:** Download the `.exe` setup installer (`-setup.exe`).
-            - **Linux:** Download the `.AppImage` (standalone) or `.deb` package.
+            - **macOS:** Download the `.dmg` package (Universal binary for Apple Silicon M1/M2/M3/M4 and Intel Macs).
+            - **Windows:** Download the `.exe` setup installer (`-setup.exe`) or `.msi` package.
+            - **Linux:** Download the `.AppImage` (standalone), `.deb`, or `.rpm` package.
+            - **Android:** Download the `.apk` package for phone / tablet install.
+            - **Docker / NAS:** Run `ghcr.io/grafffooo/pilina:latest` on Ugreen NAS, Synology, or local Docker server.
 
-            You can also run Pilina in any modern browser as an offline Progressive Web App (PWA) with zero install.
+            You can also run Pilina in any modern browser as an offline Progressive Web App (PWA) at https://grafffooo.github.io/pilina/ with zero install.
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}

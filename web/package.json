@@ -12,6 +12,7 @@
     "test": "vitest run",
     "e2e": "npm run engine && playwright test",
     "e2e:ui": "npm run engine && playwright test --ui",
+    "screenshots": "npm run engine && SCREENSHOTS=1 playwright test e2e/screenshots.spec.ts --project=desktop",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

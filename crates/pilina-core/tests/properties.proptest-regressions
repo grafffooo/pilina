@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 94624d55681817f81b704f8c8ec4f67e1d2a256a94082e018a620bf8dbc394f3 # shrinks to job = Job { parts: [PartSpec { id: "p0", length: 50.0, width: 30.0, qty: 0, label: "", grain: None, material: None, edges: Edges { top: false, bottom: false, left: false, right: false } }, PartSpec { id: "p1", length: 50.0, width: 30.0, qty: 0, label: "", grain: None, material: None, edges: Edges { top: false, bottom: false, left: false, right: false } }, PartSpec { id: "p2", length: 50.0, width: 30.0, qty: 0, label: "", grain: None, material: None, edges: Edges { top: false, bottom: false, left: false, right: false } }, PartSpec { id: "p3", length: 606.0, width: 606.0, qty: 1, label: "", grain: Width, material: None, edges: Edges { top: false, bottom: false, left: false, right: false } }], stock: [StockSpec { id: "s0", length: 400.0, width: 300.0, qty: None, priority: false, offcut: false, material: None, label: "", grain: None }, StockSpec { id: "s1", length: 633.0, width: 633.0, qty: None, priority: false, offcut: false, material: None, label: "", grain: Length }], kerf: 0.0, trim: 13.185650582652, options: Options { time_budget_ms: 40, seed: 7 } }

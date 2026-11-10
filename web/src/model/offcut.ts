@@ -188,8 +188,30 @@ export const LABEL_FORMATS: LabelFormat[] = [
   },
 ];
 
-export function labelFormat(id: string): LabelFormat {
+export const CUSTOM_LABEL_ID = 'custom';
+
+/** A starting point for a custom sticker sheet: the common 3 × 8. */
+export const DEFAULT_CUSTOM_LABEL: LabelFormat = {
+  ...LABEL_FORMATS[0]!,
+  id: CUSTOM_LABEL_ID,
+  name: '',
+};
+
+export function labelFormat(id: string, custom?: LabelFormat | null): LabelFormat {
+  if (id === CUSTOM_LABEL_ID) return { ...(custom ?? DEFAULT_CUSTOM_LABEL), id: CUSTOM_LABEL_ID };
   return LABEL_FORMATS.find((f) => f.id === id) ?? LABEL_FORMATS[0]!;
+}
+
+export const A4 = { w: 210, h: 297 };
+
+/** How far the stickers run past the A4 page, mm (0 when they fit). */
+export function labelOverflow(f: LabelFormat): { x: number; y: number } {
+  const w = f.marginLeft + f.cols * f.labelW + (f.cols - 1) * f.gapX;
+  const h = f.marginTop + f.rows * f.labelH + (f.rows - 1) * f.gapY;
+  return {
+    x: Math.max(0, Math.round((w - A4.w) * 10) / 10),
+    y: Math.max(0, Math.round((h - A4.h) * 10) / 10),
+  };
 }
 
 /** Top-left corner of sticker `index` (0-based, row by row), in mm from the page corner. */

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Rect, SheetLayout } from '../engine/types';
 import { formatLength, formatLengthUnit, unitLabel } from '../lib/units';
 import { cutKindLabel, isRipLike } from '../model/describe';
+import { cutPosition, measureFromPiece } from '../model/cutMeasure';
 import { jobKey } from '../model/job';
 import { stockPrice } from '../model/library';
 import { keepAdvice, leftoverGrain, offcutIdFromStock } from '../model/offcut';
@@ -51,6 +52,11 @@ export function CutMode() {
   const step = all[Math.min(session.sheet, all.length - 1)]!;
   const sheet = step.layout;
   const cuts = sheet.cuts;
+  const measureFrom = useStore((s) => s.settings.cutMeasure);
+  const measures = useMemo(
+    () => measureFromPiece(sheet, session.job.kerf),
+    [sheet, session.job.kerf],
+  );
   const sheetDone = session.cut >= cuts.length;
   const stock = session.job.stock.find((s) => s.id === sheet.stockId);
   const material = materials.find((m) => m.id === stock?.material);
@@ -227,8 +233,10 @@ export function CutMode() {
   const cut = cuts[session.cut]!;
   const following = cuts[session.cut + 1];
   const rip = isRipLike(cut);
+  const measure = measures.get(cut.number);
+  const where = (c: typeof cut) => cutPosition(c, measureFrom, measures);
   const speak = () => {
-    const text = `${t('Cut {{n}}', { n: cut.number })}. ${cutKindLabel(cut)}. ${cutSentence(cut.axis, cut.pos)}.`;
+    const text = `${t('Cut {{n}}', { n: cut.number })}. ${cutKindLabel(cut)}. ${cutSentence(cut.axis, where(cut), measureFrom)}.`;
     window.speechSynthesis?.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = locale();
@@ -251,12 +259,16 @@ export function CutMode() {
           </span>
           <div className={styles.position}>
             <span className={styles.positionLabel}>
-              {cut.axis === 'x'
-                ? t('Cut line from the left edge of the sheet')
-                : t('Cut line from the top edge of the sheet')}
+              {measureFrom === 'piece'
+                ? cut.axis === 'x'
+                  ? t('From the left edge of this piece (the last cut) to the blade')
+                  : t('From the top edge of this piece (the last cut) to the blade')
+                : cut.axis === 'x'
+                  ? t('Cut line from the left edge of the sheet')
+                  : t('Cut line from the top edge of the sheet')}
             </span>
             <span className={styles.positionValue}>
-              {formatLength(cut.pos)} <span className={styles.unit}>{unitLabel()}</span>
+              {formatLength(where(cut))} <span className={styles.unit}>{unitLabel()}</span>
             </span>
           </div>
           <div className={styles.facts}>
@@ -264,6 +276,12 @@ export function CutMode() {
               <span>{t('Cut length')}</span>
               <strong>{formatLengthUnit(cut.length)}</strong>
             </div>
+            {measure && (
+              <div>
+                <span>{cut.axis === 'x' ? t('Piece width') : t('Piece length')}</span>
+                <strong>{formatLengthUnit(measure.pieceSize)}</strong>
+              </div>
+            )}
             <div>
               <span>{t('Then')}</span>
               <strong>
@@ -271,7 +289,7 @@ export function CutMode() {
                   ? t('{{kind}} at {{axis}} = {{pos}}', {
                       kind: cutKindLabel(following).toLowerCase(),
                       axis: following.axis,
-                      pos: formatLength(following.pos),
+                      pos: formatLength(where(following)),
                     })
                   : t('sheet done')}
               </strong>
@@ -287,7 +305,7 @@ export function CutMode() {
               sheet: sheetTitle,
               n: cut.number,
               axis: cut.axis,
-              pos: formatLengthUnit(cut.pos),
+              pos: formatLengthUnit(where(cut)),
             })}
           />
         </div>

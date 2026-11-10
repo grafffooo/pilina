@@ -133,6 +133,13 @@ fn check(job: &Job, plan: &Plan) -> Result<(), String> {
             if !along && !across {
                 return Err(format!("sheet {si}: {} has the wrong size {r:?}", p.part_id));
             }
+            // A square looks the same either way: its `rotated` flag says which way the
+            // grain runs.
+            let (along, across) = if along && across {
+                (!p.rotated, p.rotated)
+            } else {
+                (along, across)
+            };
             // The part's grain side runs along the sheet's grain (unless either has none).
             let length_along_grain = match stock.grain {
                 Grain::Length => Some(along),

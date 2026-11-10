@@ -30,6 +30,7 @@ export function ExportPdfButton({ compact }: { compact?: boolean }) {
         materials,
         currency: settings.currency,
         edgeAllowance: settings.edgeAllowance,
+        cutMeasure: settings.cutMeasure,
       });
     } catch (e) {
       console.error('PDF export failed', e);

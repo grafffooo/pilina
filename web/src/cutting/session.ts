@@ -3,6 +3,7 @@
 import type { Job, Plan, SheetLayout } from '../engine/types';
 import { t } from '../i18n';
 import { formatLengthUnit } from '../lib/units';
+import type { MeasureFrom } from '../model/cutMeasure';
 
 export interface CutSession {
   /** Identity of the job the plan was made for; a changed project starts a new session. */
@@ -60,8 +61,14 @@ export function saveSession(projectId: string, session: CutSession | null) {
 }
 
 /** What to say for a cut, on screen and read aloud. */
-export function cutSentence(axis: 'x' | 'y', pos: number): string {
+export function cutSentence(axis: 'x' | 'y', pos: number, from: MeasureFrom = 'sheet'): string {
+  const p = formatLengthUnit(pos);
+  if (from === 'piece') {
+    return axis === 'x'
+      ? t('{{pos}} from the left edge of the piece', { pos: p })
+      : t('{{pos}} from the top edge of the piece', { pos: p });
+  }
   return axis === 'x'
-    ? t('{{pos}} from the left edge', { pos: formatLengthUnit(pos) })
-    : t('{{pos}} from the top edge', { pos: formatLengthUnit(pos) });
+    ? t('{{pos}} from the left edge', { pos: p })
+    : t('{{pos}} from the top edge', { pos: p });
 }

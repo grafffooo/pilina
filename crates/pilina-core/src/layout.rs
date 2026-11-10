@@ -239,14 +239,17 @@ pub(crate) fn build(
         });
     };
 
-    // Edge trims come first in the sawing order.
+    // Edge trims come first in the sawing order. The blade runs inside the trimmed margin
+    // (its centre half a kerf short of the usable area), so it never eats into a part; a
+    // trim thinner than the kerf gets the blade in its middle.
     if trim > 0.0 {
-        push_cut(Axis::Y, 0.0, trim, sheet_w, trim, sheet_w, 0);
-        let bottom = sheet_h - trim;
+        let t = round2(trim - half.min(trim / 2.0));
+        push_cut(Axis::Y, 0.0, t, sheet_w, t, sheet_w, 0);
+        let bottom = round2(sheet_h - t);
         push_cut(Axis::Y, 0.0, bottom, sheet_w, bottom, sheet_w, 0);
-        push_cut(Axis::X, trim, trim, trim, bottom, usable_h, 0);
-        let right = sheet_w - trim;
-        push_cut(Axis::X, right, trim, right, bottom, usable_h, 0);
+        push_cut(Axis::X, t, t, t, bottom, sheet_h - 2.0 * t, 0);
+        let right = round2(sheet_w - t);
+        push_cut(Axis::X, right, t, right, bottom, sheet_h - 2.0 * t, 0);
     }
     for c in &cuts {
         let (axis, x1, y1, x2, y2) = if transposed {

@@ -126,6 +126,23 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
               ))}
             </div>
           </div>
+          <div className={styles.row}>
+            <span className={styles.label} id="measure-label">
+              {t('Cut positions')}
+            </span>
+            <div className={ui.segmented} role="group" aria-labelledby="measure-label">
+              {(['piece', 'sheet'] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  aria-pressed={settings.cutMeasure === m}
+                  onClick={() => updateSettings({ cutMeasure: m })}
+                >
+                  {m === 'piece' ? t('From the last cut') : t('From the sheet edge')}
+                </button>
+              ))}
+            </div>
+          </div>
           <label className={styles.row}>
             <span className={styles.label}>{t('Currency')}</span>
             <select

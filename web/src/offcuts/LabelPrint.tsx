@@ -3,7 +3,10 @@ import { formatLength, formatLengthUnit } from '../lib/units';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  CUSTOM_LABEL_ID,
+  DEFAULT_CUSTOM_LABEL,
   labelFormat,
+  labelOverflow,
   LABEL_FORMATS,
   layoutLabels,
   stickerPosition,
@@ -15,6 +18,8 @@ import { updateSettings, useStore } from '../store/store';
 import { MenuIcon, WarningIcon } from '../ui/icons';
 import { BackButton } from '../ui/BackButton';
 import ui from '../ui/ui.module.css';
+import { NumberInput } from '../ui/NumberInput';
+import { formatNumber } from '../lib/format';
 import { QrCode } from './QrCode';
 import { confirmDialog } from '../ui/dialogs';
 import { locale } from '../i18n';
@@ -33,7 +38,7 @@ export function LabelPrint({ onMenu }: { onMenu?: () => void }) {
   const settings = useStore((s) => s.settings);
   const [printing, setPrinting] = useState<PrintJob>(null);
 
-  const format = labelFormat(settings.labelFormatId);
+  const format = labelFormat(settings.labelFormatId, settings.customLabel);
   const perSheet = format.cols * format.rows;
   const start = Math.min(Math.max(1, settings.labelStart), perSheet);
   const queue = offcuts
@@ -124,6 +129,29 @@ export function LabelPrint({ onMenu }: { onMenu?: () => void }) {
                 </span>
               </label>
             ))}
+            <label className={styles.radio}>
+              <input
+                type="radio"
+                name="label-format"
+                checked={format.id === CUSTOM_LABEL_ID}
+                onChange={() =>
+                  updateSettings({
+                    labelFormatId: CUSTOM_LABEL_ID,
+                    customLabel: settings.customLabel ?? DEFAULT_CUSTOM_LABEL,
+                    labelStart: 1,
+                  })
+                }
+              />
+              <span>
+                <span className={styles.radioTitle}>{t('Custom size')}</span>
+                <span className={styles.radioNote}>
+                  {format.id === CUSTOM_LABEL_ID
+                    ? `${format.cols} × ${format.rows} · ${formatNumber(format.labelW)} × ${formatNumber(format.labelH)} mm · ${t('{{count}} per sheet', { count: format.cols * format.rows })}`
+                    : t('Measure your sticker sheet')}
+                </span>
+              </span>
+            </label>
+            {format.id === CUSTOM_LABEL_ID && <CustomLabelFields format={format} />}
           </fieldset>
 
           <fieldset className={styles.group}>
@@ -365,6 +393,65 @@ function Label({
         )}
         {settings.labelShow.source && <span className={styles.labelSmall}>{source}</span>}
       </div>
+    </div>
+  );
+}
+
+/** The measurements of a sticker sheet that isn't in the list, in millimetres. */
+function CustomLabelFields({ format }: { format: LabelFormat }) {
+  const { t } = useTranslation();
+  const set = (patch: Partial<LabelFormat>) =>
+    updateSettings({ customLabel: { ...format, ...patch }, labelStart: 1 });
+  const field = (
+    key: keyof Pick<
+      LabelFormat,
+      'cols' | 'rows' | 'labelW' | 'labelH' | 'marginTop' | 'marginLeft' | 'gapX' | 'gapY'
+    >,
+    label: string,
+    whole = false,
+  ) => (
+    <label className={styles.customField}>
+      <span>{label}</span>
+      <NumberInput
+        className={ui.fieldInput}
+        value={format[key]}
+        onCommit={(v) => {
+          const n = Math.max(whole ? 1 : 0, v ?? 0);
+          set({ [key]: whole ? Math.min(20, Math.round(n)) : n });
+        }}
+      />
+    </label>
+  );
+  const over = labelOverflow(format);
+  return (
+    <div className={styles.custom}>
+      {field('cols', t('Columns'), true)}
+      {field('rows', t('Rows'), true)}
+      {field('labelW', t('Sticker width, mm'))}
+      {field('labelH', t('Sticker height, mm'))}
+      {field('marginTop', t('Top margin, mm'))}
+      {field('marginLeft', t('Left margin, mm'))}
+      {field('gapX', t('Gap across, mm'))}
+      {field('gapY', t('Gap down, mm'))}
+      {(over.x > 0 || over.y > 0) && (
+        <p className={styles.customWarn} role="alert">
+          {over.x > 0 && over.y > 0
+            ? t(
+                'These stickers run {{x}} mm past the page’s width and {{y}} mm past its height. Check the measurements.',
+                {
+                  x: formatNumber(over.x),
+                  y: formatNumber(over.y),
+                },
+              )
+            : over.x > 0
+              ? t('These stickers run {{x}} mm past the page’s width. Check the measurements.', {
+                  x: formatNumber(over.x),
+                })
+              : t('These stickers run {{y}} mm past the page’s height. Check the measurements.', {
+                  y: formatNumber(over.y),
+                })}
+        </p>
+      )}
     </div>
   );
 }

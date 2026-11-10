@@ -28,6 +28,14 @@
   flex: 1;
 }
 
+/* Header controls that wrap together, staying on the right. */
+.headerActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
 .cardFooter {
   padding: 6px 14px;
   border-top: 1px solid var(--border);

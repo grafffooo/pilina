@@ -137,6 +137,11 @@ export const PriceIcon = (p: IconProps) => (
     <circle cx="7.5" cy="7.5" r="1.5" />
   </Icon>
 );
+export const ScanIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M8 9h3v3H8zM13 13h3v3h-3zM13 9h3M8 15h2" />
+  </Icon>
+);
 export const CloudIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="M7 18h10a4 4 0 0 0 .6-8A6 6 0 0 0 6 9.5 4.3 4.3 0 0 0 7 18z" />

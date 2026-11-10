@@ -88,6 +88,7 @@ export function ShareDialog({ project, onClose }: { project: Project; onClose: (
       materials,
       currency: settings.currency,
       edgeAllowance: settings.edgeAllowance,
+      cutMeasure: settings.cutMeasure,
     });
   };
   const pdfReady = ready && !!plan && !!job && plan.sheets.length > 0;

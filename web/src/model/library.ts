@@ -1,5 +1,7 @@
 // Materials, edge bands and app settings: shared by all projects, stored on this device.
 import type { Unit } from '../lib/units';
+import type { MeasureFrom } from './cutMeasure';
+import type { LabelFormat } from './offcut';
 import type { Grain, PriceInput, StockPrice, StockSpec } from '../engine/types';
 import { locale as current, t } from '../i18n';
 import { newId, type Project } from './project';
@@ -41,6 +43,8 @@ export interface Settings {
   currency: string;
   /** Unit sizes are typed and shown in; data stays in millimetres. */
   units: Unit;
+  /** Cut positions: from the edge of the piece being cut (the last cut), or the sheet's edge. */
+  cutMeasure: MeasureFrom;
   /** Extra band length per banded edge, mm. */
   edgeAllowance: number;
   /** Leftovers at least this big count as reusable offcuts (mm). */
@@ -51,6 +55,8 @@ export interface Settings {
   /** Storage places offered when keeping an offcut. */
   locations: string[];
   labelFormatId: string;
+  /** The sticker sheet used when `labelFormatId` is "custom" (mm). */
+  customLabel: LabelFormat | null;
   /** First free sticker on the partly used label sheet (1-based). */
   labelStart: number;
   labelShow: { material: boolean; location: boolean; source: boolean };
@@ -59,12 +65,14 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = {
   currency: 'EUR',
   units: 'mm',
+  cutMeasure: 'piece',
   edgeAllowance: 20,
   offcutMinLength: 300,
   offcutMinWidth: 100,
   nextOffcutNumber: 1,
   locations: ['Rack A', 'Rack B', 'Bin 1'],
   labelFormatId: 'a4-3x8',
+  customLabel: null,
   labelStart: 1,
   labelShow: { material: true, location: true, source: true },
 };

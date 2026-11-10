@@ -3,7 +3,8 @@ import { useMemo, useState } from 'react';
 import { formatArea, formatLength, unitLabel } from '../lib/units';
 import type { Offcut, OffcutStatus } from '../model/offcut';
 import { useStore } from '../store/store';
-import { MenuIcon, MoreIcon, PlusIcon, SearchIcon } from '../ui/icons';
+import { MenuIcon, MoreIcon, PlusIcon, ScanIcon, SearchIcon } from '../ui/icons';
+import { canScan, ScanDialog } from './ScanDialog';
 import { LengthInput } from '../ui/NumberInput';
 import { ComboInput } from '../ui/ComboInput';
 import { confirmDialog } from '../ui/dialogs';
@@ -15,6 +16,8 @@ import { MaterialSelect } from '../editor/MaterialSelect';
 import { locale, t as i18nT } from '../i18n';
 import styles from './Offcuts.module.css';
 import { useTranslation } from 'react-i18next';
+import { createPortal } from 'react-dom';
+import type { Grain } from '../engine/types';
 
 const statusText = (s: OffcutStatus) =>
   s === 'available' ? i18nT('Available') : s === 'reserved' ? i18nT('Reserved') : i18nT('Used');
@@ -42,6 +45,8 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
   const { updateOffcuts, removeOffcut, setView } = useStore.getState();
 
   const [query, setQuery] = useState('');
+
+  const [scanning, setScanning] = useState(false);
   const [materialId, setMaterialId] = useState<string | null>(null);
   const [minL, setMinL] = useState<number | null>(null);
   const [minW, setMinW] = useState<number | null>(null);
@@ -136,7 +141,29 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
+          {canScan() && (
+            <button
+              type="button"
+              className={styles.scanButton}
+              aria-label={t('Scan a label')}
+              title={t('Scan a label')}
+              onClick={() => setScanning(true)}
+            >
+              <ScanIcon size={18} />
+            </button>
+          )}
         </label>
+        {scanning &&
+          createPortal(
+            <ScanDialog
+              onClose={() => setScanning(false)}
+              onResult={(text) => {
+                setScanning(false);
+                setQuery(text);
+              }}
+            />,
+            document.body,
+          )}
         <select
           className={ui.fieldInput}
           aria-label={t('Material')}
@@ -369,6 +396,7 @@ function AddOffcut() {
   const [width, setWidth] = useState<number | null>(null);
   const [materialId, setMaterialId] = useState<string | null>(null);
   const [location, setLocation] = useState('');
+  const [grain, setGrain] = useState<Grain>('length');
   const ok = !!length && !!width && length > 0 && width > 0;
   return (
     <Popover
@@ -389,7 +417,7 @@ function AddOffcut() {
             if (!ok) return;
             useStore
               .getState()
-              .addOffcuts([{ length: length!, width: width!, materialId, location }]);
+              .addOffcuts([{ length: length!, width: width!, materialId, location, grain }]);
             setLength(null);
             setWidth(null);
             close();
@@ -420,6 +448,16 @@ function AddOffcut() {
             ariaLabel={t('Material')}
             onChange={setMaterialId}
           />
+          <select
+            className={ui.fieldInput}
+            aria-label={t('Grain')}
+            value={grain}
+            onChange={(e) => setGrain(e.target.value as Grain)}
+          >
+            <option value="length">{t('Grain along the length')}</option>
+            <option value="width">{t('Grain along the width')}</option>
+            <option value="none">{t('No grain')}</option>
+          </select>
           <ComboInput
             className={ui.fieldInput}
             aria-label={t('Place')}

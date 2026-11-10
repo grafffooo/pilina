@@ -3,6 +3,7 @@ import { newMaterial } from './library';
 import {
   keepAdvice,
   labelFormat,
+  labelOverflow,
   layoutLabels,
   matchingOffcuts,
   newOffcut,
@@ -74,5 +75,19 @@ describe('labels', () => {
     expect(b.nextStart).toBe(3);
 
     expect(layoutLabels([1, 2, 3], f, 22).nextStart).toBe(1);
+  });
+});
+
+describe('custom sticker sheets', () => {
+  it('uses the saved measurements, or a 3 × 8 to start from', () => {
+    expect(labelFormat('custom', null)).toMatchObject({ id: 'custom', cols: 3, rows: 8 });
+    const mine = { ...labelFormat('a4-2x7'), cols: 2, rows: 5, labelW: 100, labelH: 50 };
+    expect(labelFormat('custom', mine)).toMatchObject({ id: 'custom', rows: 5, labelH: 50 });
+  });
+
+  it('says how far stickers run past the page', () => {
+    expect(labelOverflow(labelFormat('a4-3x8'))).toEqual({ x: 0, y: 0 });
+    const tooWide = { ...labelFormat('a4-3x8'), labelW: 75 };
+    expect(labelOverflow(tooWide)).toEqual({ x: 15, y: 0 });
   });
 });

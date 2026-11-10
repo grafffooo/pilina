@@ -75,10 +75,12 @@ export function PartsTable({ project }: { project: Project }) {
           {t('n_pieces', { count: pieces })} · {t('n_rows', { count: rowsWithData })}
         </span>
         <span className={styles.spacer} />
-        <ProjectSettingChips project={project} />
-        <button type="button" className={ui.buttonPrimary} onClick={() => addRow()}>
-          {t('Add part')}
-        </button>
+        <span className={styles.headerActions}>
+          <ProjectSettingChips project={project} />
+          <button type="button" className={ui.buttonPrimary} onClick={() => addRow()}>
+            {t('Add part')}
+          </button>
+        </span>
       </div>
       <div className={styles.tableWrap}>
         <table id="parts-table" className={`${styles.table} ${styles.partsTable}`}>

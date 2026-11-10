@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { cutPosition, measureFromPiece } from '../model/cutMeasure';
 import { createPortal } from 'react-dom';
 import type { Job, Plan, SheetLayout } from '../engine/types';
 import { formatNumber } from '../lib/format';
@@ -486,13 +487,17 @@ export function CutOrder({
   const setActiveCut = useView((s) => s.setActiveCut);
   const sheet = plan.sheets[index]!;
   const length = sheet.cuts.reduce((a, c) => a + c.length, 0);
+  const kerf = useStore((s) => s.result.job?.kerf ?? 0);
+  const measureFrom = useStore((s) => s.settings.cutMeasure);
+  const measures = useMemo(() => measureFromPiece(sheet, kerf), [sheet, kerf]);
   return (
     <div className={styles.listCard}>
       <div className={styles.listHeader}>
         {title && <h3>{t('Cut order')}</h3>}
         <span className={styles.spacer} />
         <span className={styles.listMeta}>
-          {t('n_cuts', { count: sheet.cuts.length })} · {formatLong(length)}
+          {t('n_cuts', { count: sheet.cuts.length })} · {formatLong(length)} ·{' '}
+          {measureFrom === 'piece' ? t('from the last cut') : t('from the sheet edge')}
         </span>
       </div>
       {sheet.cuts.length === 0 ? (
@@ -516,7 +521,7 @@ export function CutOrder({
                 >
                   <span className={rip ? styles.cutNumRip : styles.cutNumCross}>{c.number}</span>
                   <span className={styles.cutPos}>
-                    {c.axis} = {formatLength(c.pos)}
+                    {c.axis} = {formatLength(cutPosition(c, measureFrom, measures))}
                   </span>
                   <span className={styles.cutKind}>{cutKindLabel(c)}</span>
                   <span className={styles.cutLen}>{formatLengthUnit(c.length)}</span>

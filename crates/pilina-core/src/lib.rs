@@ -538,4 +538,25 @@ mod tests {
             assert!(p.rect.y + p.rect.h <= first.length - 10.0);
         }
     }
+
+    #[test]
+    fn trim_cuts_keep_the_blade_out_of_the_parts() {
+        let mut job = skrinky();
+        job.trim = 10.0;
+        let half = job.kerf / 2.0;
+        let plan = optimize(&job);
+        let sheet = &plan.sheets[0];
+        let trims: Vec<_> = sheet.cuts.iter().filter(|c| c.stage == 0).collect();
+        assert_eq!(trims.len(), 4);
+        for c in trims {
+            // The kerf band [pos - half, pos + half] stays inside the 10 mm margin.
+            let (lo, hi) = (c.pos - half, c.pos + half);
+            let size = if c.axis == Axis::X {
+                sheet.width
+            } else {
+                sheet.length
+            };
+            assert!(hi <= 10.0 + 1e-9 || lo >= size - 10.0 - 1e-9, "{c:?}");
+        }
+    }
 }

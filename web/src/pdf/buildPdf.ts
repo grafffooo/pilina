@@ -5,6 +5,7 @@ import { PDFDocument, degrees, rgb, type PDFFont, type PDFPage, type RGB } from 
 import type { SheetLayout } from '../engine/types';
 import { formatNumber } from '../lib/format';
 import { formatLength, formatLengthUnit } from '../lib/units';
+import { cutPosition, measureFromPiece } from '../model/cutMeasure';
 import { cutKindLabel, classifyOffcut, isRipLike, sizeOf, swatch } from '../model/describe';
 import type { Project } from '../model/project';
 import { t as tr } from '../i18n';
@@ -134,10 +135,16 @@ function sheetPage(ctx: Ctx, sheet: SheetLayout, index: number) {
   let ly = oy + dh + 22;
   const orderTitle = tr('Cut order');
   text(page, bold, orderTitle, M, ly, 11);
+  const from = input.cutMeasure ?? 'piece';
+  const measures = measureFromPiece(sheet, input.job.kerf);
   text(
     page,
     regular,
-    tr('Rip cuts (orange) run the full length; cross cuts (red) follow.'),
+    `${tr('Rip cuts (orange) run the full length; cross cuts (red) follow.')} ${
+      from === 'piece'
+        ? tr('Positions are measured from the last cut edge.')
+        : tr('Positions are measured from the sheet edge.')
+    }`,
     M + bold.widthOfTextAtSize(orderTitle, 11) + 12,
     ly + 1.5,
     8,
@@ -154,7 +161,14 @@ function sheetPage(ctx: Ctx, sheet: SheetLayout, index: number) {
     const color = isRipLike(c) ? RIP : CROSS;
     page.drawCircle({ x: x + 6, y: H - top - 4.5, size: 6, borderColor: color, borderWidth: 1 });
     text(page, bold, String(c.number), x + 6, top + 1, 6.5, INK, 'center');
-    text(page, bold, `${c.axis} = ${formatLength(c.pos)}`, x + 16, top, 8.5);
+    text(
+      page,
+      bold,
+      `${c.axis} = ${formatLength(cutPosition(c, from, measures))}`,
+      x + 16,
+      top,
+      8.5,
+    );
     text(page, regular, clip(regular, cutKindLabel(c), 8.5, 70), x + 76, top, 8.5, INK_2);
     text(page, regular, `${formatLength(c.length)}`, x + colW - 10, top, 8.5, INK_2, 'right');
   });

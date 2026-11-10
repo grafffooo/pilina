@@ -7,6 +7,7 @@ import { countPieces, emptyPart, isBlankPart, type PartRow, type Project } from 
 import { duplicatePart, insertParts, removePart, replacePart, updatePart } from '../store/store';
 import { MoreIcon, PlusIcon } from '../ui/icons';
 import { LengthInput, NumberInput } from '../ui/NumberInput';
+import { ProjectSettingChips } from './ProjectSettingChips';
 import { Menu } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import { EdgePicker } from './EdgePicker';
@@ -74,6 +75,7 @@ export function PartsTable({ project }: { project: Project }) {
           {t('n_pieces', { count: pieces })} · {t('n_rows', { count: rowsWithData })}
         </span>
         <span className={styles.spacer} />
+        <ProjectSettingChips project={project} />
         <button type="button" className={ui.buttonPrimary} onClick={() => addRow()}>
           {t('Add part')}
         </button>

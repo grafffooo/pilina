@@ -1,5 +1,5 @@
-.cut,
-.cutting {
+.badge {
+  flex: none;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -11,12 +11,24 @@
   white-space: nowrap;
 }
 
-.cut {
-  background: color-mix(in srgb, var(--moss) 14%, transparent);
-  color: var(--moss);
+.large {
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.draft {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
 }
 
 .cutting {
-  background: var(--accent-soft);
-  color: var(--accent-ink);
+  background: var(--info-bg);
+  color: var(--info-text);
+}
+
+.cut {
+  background: var(--ok-bg);
+  color: var(--ok-text);
 }

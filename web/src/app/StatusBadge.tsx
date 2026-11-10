@@ -26,18 +26,25 @@ export const cutDate = (at: number) =>
     new Date(at),
   );
 
-/** Nothing for a draft: that's the normal state. */
-export function StatusBadge({ status }: { status: ProjectStatus }) {
+/** Draft (quiet beige), cutting (pale blue) or cut (green). `large` sits next to the
+ *  project name; the small one in the sidebar. */
+export function StatusBadge({ status, large }: { status: ProjectStatus; large?: boolean }) {
   const { t } = useTranslation();
-  if (status.kind === 'draft') return null;
+  const size = large ? styles.large : '';
+  if (status.kind === 'draft') {
+    return <span className={`${styles.badge} ${styles.draft} ${size}`}>{t('Draft')}</span>;
+  }
   return status.kind === 'cut' ? (
-    <span className={styles.cut} title={t('Cut on {{date}}', { date: cutDate(status.at) })}>
-      <CheckIcon size={12} />
+    <span
+      className={`${styles.badge} ${styles.cut} ${size}`}
+      title={t('Cut on {{date}}', { date: cutDate(status.at) })}
+    >
+      <CheckIcon size={large ? 14 : 12} />
       {t('status_cut')}
     </span>
   ) : (
-    <span className={styles.cutting}>
-      <SawIcon size={12} />
+    <span className={`${styles.badge} ${styles.cutting} ${size}`}>
+      <SawIcon size={large ? 14 : 12} />
       {t('Cutting {{done}} / {{total}}', { done: status.done, total: status.total })}
     </span>
   );

@@ -33,48 +33,6 @@
   outline-offset: 2px;
 }
 
-.chips {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.chip {
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  font-size: 12px;
-  color: var(--text-2);
-}
-
-.chipStatic {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: transparent;
-}
-
-.chip strong {
-  color: var(--text);
-}
-
-.chip:hover {
-  border-color: var(--text-3);
-}
-
-.fieldRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.fieldRow input {
-  width: 100px;
-  text-align: right;
-}
-
 .actions {
   display: flex;
   align-items: center;
@@ -129,10 +87,6 @@
   .spinner {
     animation: none;
   }
-}
-
-.chips {
-  align-items: center;
 }
 
 .cutBanner {

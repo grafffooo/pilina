@@ -327,7 +327,6 @@
   "Undo": "Späť",
   "Unnamed material": "Nepomenovaný materiál",
   "Untitled project": "Projekt bez názvu",
-  "Up to date": "Aktuálne",
   "Use": "Použiť",
   "Use matching library offcuts first": "Najprv použiť vhodné zvyšky zo skladu",
   "Use {{name}}": "Použiť {{name}}",
@@ -624,5 +623,6 @@
   "Unlinking stops syncing; the folder and its files stay as they are.": "Odpojením sa synchronizácia zastaví; priečinok a jeho súbory zostanú, ako sú.",
   "“{{name}}” was shared with you. Add it to your projects?": "Niekto s vami zdieľal „{{name}}“. Pridať k vašim projektom?",
   "A folder dialog is already open. Choose a folder there or close it, then try again.": "Dialóg na výber priečinka je už otvorený. Vyberte v ňom priečinok alebo ho zatvorte a skúste to znova.",
-  "Couldn’t use that folder: {{error}}": "Tento priečinok sa nedá použiť: {{error}}"
+  "Couldn’t use that folder: {{error}}": "Tento priečinok sa nedá použiť: {{error}}",
+  "Draft": "Rozpracovaný"
 }

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { confirmDialog } from '../ui/dialogs';
-import { formatLengthUnit, unitLabel } from '../lib/units';
 import { useStore, updateProject } from '../store/store';
 import type { Project } from '../model/project';
 import {
@@ -13,8 +12,7 @@ import {
   UndoIcon,
   WarningIcon,
 } from '../ui/icons';
-import { LengthInput } from '../ui/NumberInput';
-import { Menu, Popover } from '../ui/Popover';
+import { Menu } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import styles from './ProjectHeader.module.css';
 import { ShareDialog } from './ShareDialog';
@@ -42,26 +40,10 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
           readOnly={locked}
           onChange={(e) => updateProject({ name: e.target.value }, 'name')}
         />
-        <div className={styles.chips}>
-          <StatusBadge status={status} />
-          <SettingChip
-            disabled={locked}
-            label={t('Kerf')}
-            hint={t('Saw blade thickness')}
-            value={project.kerf}
-            onCommit={(kerf) => updateProject({ kerf }, 'kerf')}
-          />
-          <SettingChip
-            disabled={locked}
-            label={t('Edge trim')}
-            hint={t('Trimmed off every sheet edge before cutting')}
-            value={project.trim}
-            onCommit={(trim) => updateProject({ trim }, 'trim')}
-          />
-        </div>
       </div>
       <div className={styles.actions}>
         <RunStatus />
+        <StatusBadge status={status} large />
         <UndoRedo />
         <button
           type="button"
@@ -125,57 +107,10 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
   );
 }
 
-function SettingChip({
-  label,
-  hint,
-  value,
-  onCommit,
-  disabled,
-}: {
-  label: string;
-  hint: string;
-  value: number;
-  onCommit: (v: number) => void;
-  disabled?: boolean;
-}) {
-  if (disabled) {
-    return (
-      <span className={`${styles.chip} ${styles.chipStatic}`}>
-        {label} <strong>{formatLengthUnit(value)}</strong>
-      </span>
-    );
-  }
-  return (
-    <Popover
-      triggerClassName={styles.chip}
-      label={
-        <>
-          {label} <strong>{formatLengthUnit(value)}</strong>
-        </>
-      }
-    >
-      {(close) => (
-        <label className={ui.field}>
-          {hint}
-          <span className={styles.fieldRow}>
-            <LengthInput
-              className={ui.fieldInput}
-              value={value}
-              onCommit={(v) => onCommit(Math.max(0, v ?? 0))}
-              onKeyDown={(e) => e.key === 'Enter' && close()}
-            />
-            {unitLabel()}
-          </span>
-        </label>
-      )}
-    </Popover>
-  );
-}
-
+/** Only speaks up when the engine fails; a plan that's up to date needs no badge. */
 export function RunStatus() {
   const { t } = useTranslation();
   const status = useStore((s) => s.result.status);
-  if (status === 'empty') return null;
   if (status === 'error') {
     return (
       <span className={styles.statusError} role="status">
@@ -184,21 +119,7 @@ export function RunStatus() {
       </span>
     );
   }
-  return (
-    <span className={status === 'running' ? styles.statusBusy : styles.statusOk} role="status">
-      {status === 'running' ? (
-        <>
-          <span className={styles.spinner} aria-hidden="true" />
-          {t('Optimizing…')}
-        </>
-      ) : (
-        <>
-          <CheckIcon size={14} />
-          {t('Up to date')}
-        </>
-      )}
-    </span>
-  );
+  return null;
 }
 
 function UndoRedo() {

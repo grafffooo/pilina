@@ -21,12 +21,16 @@ export function pdfFileName(name: string): string {
   return `${slug || 'cutting-plan'}.pdf`;
 }
 
-export async function exportPdf(input: PdfInput): Promise<void> {
+/** The cutting plan as a PDF file, named after the project. */
+export async function makePdf(input: PdfInput): Promise<File> {
   const [regular, semibold] = await Promise.all([load(regularUrl), load(semiboldUrl)]);
   const bytes = await buildPdf(input, { regular, semibold });
-  await downloadBlob(
-    new Blob([bytes as BlobPart], { type: 'application/pdf' }),
-    pdfFileName(input.project.name),
-    { name: 'PDF', extensions: ['pdf'] },
-  );
+  return new File([bytes as BlobPart], pdfFileName(input.project.name), {
+    type: 'application/pdf',
+  });
+}
+
+export async function exportPdf(input: PdfInput): Promise<void> {
+  const file = await makePdf(input);
+  await downloadBlob(file, file.name, { name: 'PDF', extensions: ['pdf'] });
 }

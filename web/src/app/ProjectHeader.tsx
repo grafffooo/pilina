@@ -1,14 +1,23 @@
-import { downloadBlob } from '../lib/download';
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { confirmDialog } from '../ui/dialogs';
 import { formatLengthUnit, unitLabel } from '../lib/units';
-import { exportProjectFile, fileSlug } from '../model/importExport';
 import { useStore, updateProject } from '../store/store';
 import type { Project } from '../model/project';
-import { CheckIcon, MenuIcon, MoreIcon, RedoIcon, UndoIcon, WarningIcon } from '../ui/icons';
+import {
+  CheckIcon,
+  MenuIcon,
+  MoreIcon,
+  RedoIcon,
+  ShareIcon,
+  UndoIcon,
+  WarningIcon,
+} from '../ui/icons';
 import { LengthInput } from '../ui/NumberInput';
 import { Menu, Popover } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import styles from './ProjectHeader.module.css';
+import { ShareDialog } from './ShareDialog';
 import { cutDate, setProjectCut, StatusBadge, useProjectStatus } from './StatusBadge';
 import { useTranslation } from 'react-i18next';
 
@@ -16,6 +25,7 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
   const { t } = useTranslation();
   const status = useProjectStatus(project);
   const locked = status.kind === 'cut';
+  const [sharing, setSharing] = useState(false);
   return (
     <div className={styles.header}>
       {onMenu && (
@@ -53,6 +63,16 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
       <div className={styles.actions}>
         <RunStatus />
         <UndoRedo />
+        <button
+          type="button"
+          className={ui.iconButton}
+          aria-label={t('Share')}
+          title={t('Share')}
+          aria-haspopup="dialog"
+          onClick={() => setSharing(true)}
+        >
+          <ShareIcon />
+        </button>
         <Menu
           label={<MoreIcon />}
           ariaLabel={t('Project actions')}
@@ -65,18 +85,7 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
               label: t('Duplicate project'),
               onSelect: () => useStore.getState().duplicateProject(project.id),
             },
-            {
-              label: t('Export project file'),
-              onSelect: () => {
-                const { materials, edgeBands } = useStore.getState();
-                const file = exportProjectFile(project, materials, edgeBands);
-                void downloadBlob(
-                  new Blob([JSON.stringify(file, null, 2)], { type: 'application/json' }),
-                  `${fileSlug(project.name)}.pilina.json`,
-                  { name: t('Pilina project'), extensions: ['json'] },
-                );
-              },
-            },
+            { label: t('Share or export…'), onSelect: () => setSharing(true) },
             {
               label: t('Delete project…'),
               danger: true,
@@ -94,6 +103,11 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
           ]}
         />
       </div>
+      {sharing &&
+        createPortal(
+          <ShareDialog project={project} onClose={() => setSharing(false)} />,
+          document.body,
+        )}
       {status.kind === 'cut' && (
         <div className={styles.cutBanner} role="note">
           <CheckIcon size={16} />

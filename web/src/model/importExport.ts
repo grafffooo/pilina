@@ -6,6 +6,7 @@ import { linkLegacyStockLabels, type EdgeBand, type Material } from './library';
 import {
   emptyPart,
   emptyStock,
+  isBlankPart,
   migrate,
   newId,
   type PartRow,
@@ -216,6 +217,65 @@ export function convertOldProjects(
   // The unit most of the projects were measured in, to offer as the setting.
   const top = [...units].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
   return { projects: projects.map((p) => migrate(p)), newMaterials, units: top };
+}
+
+/** Local time as the old app wrote it: 2026-10-22T11:33:00. */
+function oldDate(ms: number): string {
+  const d = new Date(ms);
+  const two = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}T${two(d.getHours())}:${two(d.getMinutes())}:${two(d.getSeconds())}`;
+}
+
+/**
+ * The project as the old app's Markdown export, so it opens there too. The old app knows
+ * one unit-less size per field (written in millimetres), stock names instead of materials,
+ * and no prices; unlimited stock is its 999. Pipes in names would break the table.
+ */
+export function projectToOldMarkdown(project: Project, materials: Material[]): string {
+  const cell = (s: string) => s.replace(/\|/g, '/').replace(/\s+/g, ' ').trim();
+  const n = (v: number | null) => (v === null ? '' : String(Math.round(v * 100) / 100));
+  const materialName = (id: string | null) =>
+    (id && materials.find((m) => m.id === id)?.name) || '';
+  const title = cell(project.name) || 'Untitled project';
+  const id = project.id.startsWith('old-') ? project.id.slice(4) : project.id;
+  const parts = project.parts.filter((p) => !isBlankPart(p));
+  const lines = [
+    '---',
+    `title: ${title}`,
+    `id: ${id}`,
+    `updated: ${oldDate(project.updatedAt)}`,
+    `kerf: ${n(project.kerf)}`,
+    `trim: ${n(project.trim)}`,
+    'units: mm',
+    '---',
+    '',
+    `# ${title}`,
+    '',
+    '## Settings',
+    `- **Saw Thickness / Kerf**: ${n(project.kerf)} mm`,
+    `- **Trim / Margin**: ${n(project.trim)} mm`,
+    '- **Units**: mm',
+    '',
+    '## Parts',
+    '| # | Length | Width | Qty | Label | Grain | Enabled | EdgeTop | EdgeBottom | EdgeLeft | EdgeRight |',
+    '|---|--------|-------|-----|-------|-------|---------|---------|------------|----------|-----------|',
+    ...parts.map(
+      (p, i) =>
+        `| ${i + 1} | ${n(p.length)} | ${n(p.width)} | ${n(p.qty)} | ${cell(p.label)} | ${p.grain} | ${p.enabled} | ${p.edges.top} | ${p.edges.bottom} | ${p.edges.left} | ${p.edges.right} |`,
+    ),
+    '',
+    '## Stock Panels',
+    '| # | Length | Width | Qty | Label | Priority | Enabled |',
+    '|---|--------|-------|-----|-------|----------|---------|',
+    ...project.stock
+      .filter((s) => s.length !== null || s.width !== null)
+      .map(
+        (s, i) =>
+          `| ${i + 1} | ${n(s.length)} | ${n(s.width)} | ${s.qty === null ? UNLIMITED_FROM : n(s.qty)} | ${cell(materialName(s.materialId))} | ${s.priority} | ${s.enabled} |`,
+      ),
+    '',
+  ];
+  return lines.join('\n');
 }
 
 /** Reads the old app's storage array (as found in localStorage or pasted). */

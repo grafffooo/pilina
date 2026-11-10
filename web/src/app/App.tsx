@@ -29,7 +29,11 @@ import { useProjectStatus } from './StatusBadge';
 import { Sidebar } from './Sidebar';
 import { PwaNotices } from './Pwa';
 import { isDesktopApp } from '../lib/platform';
-import { DialogHost } from '../ui/dialogs';
+import { confirmDialog, DialogHost } from '../ui/dialogs';
+import { importProjectFile } from '../model/importExport';
+import { readProjectLink } from '../model/shareLink';
+import { startFolderSync } from '../sync/folderSync';
+import { t as i18nT } from '../i18n';
 import { useOptimizer } from './useOptimizer';
 import { usePricing } from './usePricing';
 import styles from './App.module.css';
@@ -56,6 +60,10 @@ export function App() {
   useOptimizer();
   usePricing();
   useUndoShortcuts();
+  useProjectFromLink(ready);
+  useEffect(() => {
+    if (ready) void startFolderSync();
+  }, [ready]);
 
   if (!ready || !project) {
     return <div className={styles.loading}>{t('Loading…')}</div>;
@@ -219,6 +227,44 @@ function Drawer({ onClose }: { onClose: () => void }) {
       </div>
     </div>
   );
+}
+
+/** A shared link (#import=…) offers to add the project it carries. */
+function useProjectFromLink(ready: boolean) {
+  useEffect(() => {
+    if (!ready || !location.hash.startsWith('#import=')) return;
+    const hash = location.hash;
+    // Forget the link first, so a reload doesn't ask again.
+    history.replaceState(null, '', location.pathname + location.search);
+    void (async () => {
+      try {
+        const file = await readProjectLink(hash);
+        if (!file) return;
+        const name = file.project.name || i18nT('Untitled project');
+        const ok = await confirmDialog({
+          title: i18nT('Add shared project?'),
+          message: i18nT('“{{name}}” was shared with you. Add it to your projects?', { name }),
+          confirmLabel: i18nT('Add project'),
+        });
+        if (!ok) return;
+        const state = useStore.getState();
+        const r = importProjectFile(
+          file,
+          state.materials,
+          state.edgeBands,
+          new Set(state.projects.map((p) => p.id)),
+        );
+        state.importProjects([r.project], r.newMaterials, r.newEdgeBands);
+      } catch (e) {
+        console.error('Could not read the shared link', e);
+        await confirmDialog({
+          title: i18nT('Couldn’t open the link'),
+          message: i18nT('The link seems incomplete. Ask for the project file instead.'),
+          confirmLabel: i18nT('OK'),
+        });
+      }
+    })();
+  }, [ready]);
 }
 
 /** ⌘Z / Ctrl+Z undo, ⇧⌘Z / Ctrl+Y redo, for the whole project (including while typing). */

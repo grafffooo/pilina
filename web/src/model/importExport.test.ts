@@ -7,6 +7,7 @@ import {
   isProjectFile,
   parseOldMarkdown,
   parseOldStorage,
+  projectToOldMarkdown,
 } from './importExport';
 import { newEdgeBand, newMaterial } from './library';
 import { emptyPart, newProject } from './project';
@@ -116,6 +117,44 @@ describe('old app import', () => {
     expect(p.parts[0]!.length).toBeCloseTo(762);
     expect(p.parts[0]!.width).toBeCloseTo(285.75);
     expect(p.stock[0]!.length).toBeCloseTo(2438.4);
+  });
+});
+
+describe('export for the old app', () => {
+  it('writes Markdown the old app (and this one) reads back', () => {
+    const board = newMaterial('DTD Black 18mm');
+    const p = newProject('Skrinky | dielňa', Date.parse('2026-10-22T11:33:00'), board.id);
+    p.kerf = 3.2;
+    p.parts = [
+      {
+        ...emptyPart(),
+        length: 1000,
+        width: 300,
+        qty: 2,
+        label: 'Sides',
+        grain: 'length',
+        edges: { top: true, bottom: false, left: false, right: true },
+      },
+      { ...emptyPart(), length: 764, width: 80, qty: 3, label: 'Rails', enabled: false },
+      emptyPart(),
+    ];
+    p.stock[0]!.qty = null;
+    const md = projectToOldMarkdown(p, [board]);
+    expect(md).toContain(
+      '| 1 | 1000 | 300 | 2 | Sides | length | true | true | false | false | true |',
+    );
+    expect(md).toContain('| 1 | 2800 | 2070 | 999 | DTD Black 18mm | true | true |');
+    expect(md).toContain('updated: 2026-10-22T11:33:00');
+
+    const back = convertOldProjects([parseOldMarkdown(md)], [board]).projects[0]!;
+    expect(back.name).toBe('Skrinky / dielňa');
+    expect(back.kerf).toBe(3.2);
+    expect(back.parts.map((x) => [x.length, x.width, x.qty, x.grain, x.enabled])).toEqual([
+      [1000, 300, 2, 'length', true],
+      [764, 80, 3, 'none', false],
+    ]);
+    expect(back.parts[0]!.edges).toEqual({ top: true, bottom: false, left: false, right: true });
+    expect(back.stock[0]).toMatchObject({ qty: null, materialId: board.id });
   });
 });
 

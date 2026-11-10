@@ -6,6 +6,7 @@ import { useNow } from '../ui/hooks';
 import {
   ChartIcon,
   ChevronRightIcon,
+  CloudIcon,
   CheckIcon,
   ImportIcon,
   LogoIcon,
@@ -23,6 +24,7 @@ import { isDesktopApp } from '../lib/platform';
 import { InstallButton } from './Pwa';
 import { locale, t as i18nT } from '../i18n';
 import { SettingsDialog } from './SettingsDialog';
+import { useFolderSync } from '../sync/folderSync';
 import { cutDate, StatusBadge } from './StatusBadge';
 import { peekSession } from '../cutting/session';
 import type { Project } from '../model/project';
@@ -209,6 +211,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       {importing &&
         createPortal(<ImportDialog onClose={() => setImporting(false)} />, document.body)}
 
+      <FolderStatus />
       <div className={styles.saveState} role="status">
         {saveState === 'error' ? (
           <>
@@ -293,5 +296,27 @@ function SettingsButton() {
       </button>
       {open && createPortal(<SettingsDialog onClose={() => setOpen(false)} />, document.body)}
     </>
+  );
+}
+
+/** "Cloud folder: Pilina · synced" under the save state, when a folder is linked. */
+function FolderStatus() {
+  const { t } = useTranslation();
+  const sync = useFolderSync();
+  if (sync.state === 'off') return null;
+  const text =
+    sync.state === 'needs-permission'
+      ? t('Folder “{{name}}” needs permission (Settings)', { name: sync.folderName })
+      : sync.state === 'error'
+        ? t('Folder “{{name}}” couldn’t sync', { name: sync.folderName })
+        : sync.state === 'syncing'
+          ? t('Syncing with “{{name}}”…', { name: sync.folderName })
+          : t('Synced with “{{name}}”', { name: sync.folderName });
+  const bad = sync.state === 'error' || sync.state === 'needs-permission';
+  return (
+    <div className={styles.saveState} role="status">
+      {bad ? <WarningIcon size={14} /> : <CloudIcon size={14} />}
+      <span>{text}</span>
+    </div>
   );
 }

@@ -1,0 +1,100 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 0.35);
+}
+
+.dialog {
+  width: min(600px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 20px 20px;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.25);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.head h2 {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.icon {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.rowText {
+  flex: 1;
+  min-width: 200px;
+}
+
+.rowText h3 {
+  font-size: var(--text-md, 14px);
+  font-weight: 600;
+}
+
+.rowText p {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.rowActions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.linkBox {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 4px 0 4px 48px;
+}
+
+.note {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.warn {
+  flex: 1;
+  min-width: 200px;
+  font-size: 12px;
+  color: var(--warn-text);
+}

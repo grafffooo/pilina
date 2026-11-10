@@ -137,6 +137,27 @@ export const PriceIcon = (p: IconProps) => (
     <circle cx="7.5" cy="7.5" r="1.5" />
   </Icon>
 );
+export const CloudIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M7 18h10a4 4 0 0 0 .6-8A6 6 0 0 0 6 9.5 4.3 4.3 0 0 0 7 18z" />
+  </Icon>
+);
+export const ShareIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 15V3M8 7l4-4 4 4M7 11H5v10h14V11h-2" />
+  </Icon>
+);
+export const LinkIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.3 1.3" />
+    <path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.3-1.3" />
+  </Icon>
+);
+export const FileIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h6" />
+  </Icon>
+);
 export const DownloadIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="M12 3v12M7 10l5 5 5-5M4 21h16" />

@@ -81,6 +81,12 @@ interface AppState {
   setCutting(on: boolean): void;
   /** Adds imported projects (replacing ones with the same id) plus any new materials and bands. */
   importProjects(projects: Project[], materials: Material[], edgeBands: EdgeBand[]): void;
+  /** Applies a sync with the linked folder quietly: nothing opens, change times stay. */
+  applySync(change: {
+    upsert: Project[];
+    remove: string[];
+    library: { materials: Material[]; edgeBands: EdgeBand[] } | null;
+  }): void;
   /** Records a sheet as cut (for statistics); never blocks the workshop if saving fails. */
   recordCut(record: CutRecord): void;
 }
@@ -423,6 +429,41 @@ export const useStore = create<AppState>()((set, get) => {
       if (newMaterials.length || newBands.length) libraryDirty = true;
       scheduleOffcutSave();
       if (imported[0]) open(imported[0].id);
+    },
+
+    applySync({ upsert, remove, library }) {
+      const gone = new Set(remove);
+      const incoming = new Map(upsert.map((p) => [p.id, p]));
+      const { currentId } = get();
+      set((s) => {
+        const known = new Set(s.projects.map((p) => p.id));
+        const projects = [
+          ...upsert.filter((p) => !known.has(p.id)),
+          ...s.projects.filter((p) => !gone.has(p.id)).map((p) => incoming.get(p.id) ?? p),
+        ];
+        return {
+          projects,
+          ...(library ?? {}),
+        };
+      });
+      upsert.forEach((p) => dirty.add(p.id));
+      for (const id of remove) {
+        dirty.delete(id);
+        void storage.deleteProject(id);
+      }
+      if (library) libraryDirty = true;
+      if (upsert.length || remove.length || library) scheduleOffcutSave();
+      // The open project changed elsewhere: its undo steps no longer apply.
+      if (currentId && incoming.has(currentId)) set({ history: emptyHistory() });
+      if (currentId && gone.has(currentId)) {
+        const rest = get().projects;
+        if (rest.length === 0) {
+          const fresh = newProject();
+          set({ projects: [fresh] });
+          scheduleSave(fresh.id);
+        }
+        open(get().projects[0]!.id);
+      }
     },
 
     setCutting(cutting) {

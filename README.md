@@ -47,6 +47,9 @@ cd web
 npm install
 npm run dev        # builds the engine to WASM, then starts Vite
 npm test           # unit tests
+npx playwright install chromium   # once: the browser for the end-to-end tests
+npm run e2e        # end-to-end tests in Chromium, desktop and phone sizes (own server on :5174)
+npm run e2e:ui     # …the same, in Playwright's window to watch and step through
 npm run lint
 npm run build      # production build (PWA) in web/dist
 ```

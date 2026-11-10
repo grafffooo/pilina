@@ -6,6 +6,8 @@ node_modules/
 web/dist/
 web/dev-dist/
 web/src/engine/pkg/
+web/test-results/
+web/playwright-report/
 *.local
 
 # Editors / OS

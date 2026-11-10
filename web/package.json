@@ -10,6 +10,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "e2e": "npm run engine && playwright test",
+    "e2e:ui": "npm run engine && playwright test --ui",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -36,6 +38,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@expo-google-fonts/inter": "^0.4.2",
+    "@playwright/test": "^1.65.0",
     "@tauri-apps/cli": "^2.12.4",
     "@types/node": "^26.6.6",
     "@types/qrcode": "^1.5.6",

@@ -1,0 +1,7 @@
+services:
+  pilina:
+    image: ghcr.io/grafffooo/pilina:latest
+    container_name: pilina
+    restart: unless-stopped
+    ports:
+      - "8080:80"

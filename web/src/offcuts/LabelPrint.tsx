@@ -1,4 +1,5 @@
 // Prints offcut labels on A4 sticker sheets, starting at the first free sticker.
+import { formatLength, formatLengthUnit } from '../lib/units';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -343,7 +344,7 @@ function Label({
   const qr = Math.min(format.labelH - 2 * pad, 30);
   const m = materials.find((x) => x.id === offcut.materialId);
   const material = m
-    ? [m.name, m.thickness ? `${m.thickness} mm` : null].filter(Boolean).join(' · ')
+    ? [m.name, m.thickness ? formatLengthUnit(m.thickness) : null].filter(Boolean).join(' · ')
     : null;
   const source = [offcut.sourceProjectName, dateFormat().format(offcut.createdAt)]
     .filter(Boolean)
@@ -354,7 +355,7 @@ function Label({
       <div className={styles.labelText}>
         <span className={styles.labelCode}>{offcut.code}</span>
         <span className={styles.labelSize}>
-          {offcut.length} × {offcut.width}
+          {formatLength(offcut.length)} × {formatLength(offcut.width)}
         </span>
         {settings.labelShow.material && material && (
           <span className={styles.labelLine}>{material}</span>

@@ -142,3 +142,18 @@
 .drawer :global(aside) > div:first-child {
   padding-right: 40px;
 }
+
+/* Groups the editor cards so a cut project can disable them all at once. */
+.editorFields {
+  display: contents;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+/* Locked: controls fade so it reads as a record, values stay readable. */
+.editorFields:disabled :is(button, select, input[type='checkbox']) {
+  opacity: 0.5;
+  cursor: default;
+}

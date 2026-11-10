@@ -156,6 +156,10 @@
   text-align: right;
 }
 
+.cell[data-unit='in'] {
+  min-width: 84px;
+}
+
 .cell::placeholder {
   color: var(--text-3);
   opacity: 0.6;

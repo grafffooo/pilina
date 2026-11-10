@@ -6,7 +6,7 @@ import { isMultiCell, parsePartRows } from '../model/paste';
 import { countPieces, emptyPart, isBlankPart, type PartRow, type Project } from '../model/project';
 import { duplicatePart, insertParts, removePart, replacePart, updatePart } from '../store/store';
 import { MoreIcon, PlusIcon } from '../ui/icons';
-import { NumberInput } from '../ui/NumberInput';
+import { LengthInput, NumberInput } from '../ui/NumberInput';
 import { Menu } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import { EdgePicker } from './EdgePicker';
@@ -101,20 +101,23 @@ export function PartsTable({ project }: { project: Project }) {
             {parts.map((p, i) => {
               const missing = missingPartFields(p);
               const name = p.label || t('Part {{n}}', { n: i + 1 });
-              const cell = (col: 'length' | 'width' | 'qty', label: string) => (
-                <NumberInput
-                  className={styles.cell}
-                  aria-label={`${label}, ${name}`}
-                  aria-invalid={missing.has(col) || undefined}
-                  placeholder={label}
-                  data-row={i}
-                  data-col={col}
-                  value={p[col]}
-                  onCommit={(v) => updatePart(p.id, { [col]: v }, `${p.id}.${col}`)}
-                  onKeyDown={(e) => onKeyDown(e, i)}
-                  onPaste={(e) => onPaste(e, p)}
-                />
-              );
+              const cell = (col: 'length' | 'width' | 'qty', label: string) => {
+                const Input = col === 'qty' ? NumberInput : LengthInput;
+                return (
+                  <Input
+                    className={styles.cell}
+                    aria-label={`${label}, ${name}`}
+                    aria-invalid={missing.has(col) || undefined}
+                    placeholder={label}
+                    data-row={i}
+                    data-col={col}
+                    value={p[col]}
+                    onCommit={(v) => updatePart(p.id, { [col]: v }, `${p.id}.${col}`)}
+                    onKeyDown={(e) => onKeyDown(e, i)}
+                    onPaste={(e) => onPaste(e, p)}
+                  />
+                );
+              };
               return (
                 <tr key={p.id} className={p.enabled ? undefined : styles.disabledRow}>
                   <td className={`${styles.colCheck} ${styles.cCheck}`}>

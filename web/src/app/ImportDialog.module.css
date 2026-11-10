@@ -132,3 +132,19 @@
   font-size: 11px;
   user-select: all;
 }
+
+.unitHint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.unitHint span {
+  flex: 1;
+  min-width: 180px;
+}

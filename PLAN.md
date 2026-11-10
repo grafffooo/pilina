@@ -16,7 +16,7 @@ Pilina started as a ground-up rebuild of CutList Optimizer. The existing apps (`
 | Topic | Decision |
 |---|---|
 | Data | **Local only.** Each device keeps its own data in IndexedDB. Share by file (`.pilina.json`, plus `.md` the old app can read), a linked folder (Chromium desktop), the phone's share sheet, or a link/QR code holding a small project. No server. |
-| Pricing | **Chosen per project:** whole sheets, or area used plus a waste %. Kept offcuts can be credited back. Edge banding is priced per metre. |
+| Pricing | **Chosen per project:** whole sheets, or area used plus a waste %. Kept offcuts can be credited back. Edge banding is priced per metre (per foot when working in inches). |
 | Cut modes | **Guillotine first** (table saw / panel saw). The engine's API leaves room for a CNC nesting mode later. |
 | Languages | **English, Slovak and Czech** at launch, with translations set up from day one. The other 41 come later from the old translation files. |
 | Look | The design canvas: warm workshop palette (wood-brown accent, moss green only on Start cutting), Inter font, orange rip cuts, red dashed cross cuts, light and dark themes. |
@@ -86,11 +86,12 @@ pilina/
 - **Stock sheet:** material + size + quantity (or unlimited) + priority.
 - **Edge band:** name, price per metre.
 - **Project:**
-  - name, kerf, trim, units, pricing mode (whole sheets / area + waste %), offcut credit on or off;
-  - parts: size, quantity, label, grain, enabled, edge-band type per edge, material;
+  - name, kerf, trim, pricing mode (whole sheets / area + waste %), offcut credit on or off;
+  - parts: size, quantity, label, grain, enabled, banded edges and their edge band, material;
   - stock;
   - extra cost lines (for example hinges);
-  - status: draft / cut.
+  - status: draft, cutting (a cut mode session in progress, "2 / 5" sheets) or cut. Nothing extra is stored: "cut" is the project's `cutAt`, set by cut mode after the last sheet or by "Mark as cut". A cut project is read-only until "Edit as draft", and the sidebar keeps cut projects in a collapsed "Cut" group.
+- **Units** (a workshop setting, not per project, since materials and offcuts are shared): millimetres, centimetres or inches. Everything is stored in millimetres; only typing and display convert. Inches show as fractions to 1/32″ and accept `23 5/8`, `23-5/8`, `23.625` or feet and inches (`2' 3 1/2"`); a unit typed after a number (`600mm`) wins over the setting. With inches, long lengths are in feet and areas in ft², so prices per m² and per metre are shown and entered per ft² and per foot. Old CutList projects measured in inches or centimetres are converted on import, and the import offers to switch the setting.
 - **Offcut:** `OC-0001` ID, material, size, location, status (available / reserved / used), where it came from, label printed or not.
 - **Cut record:** saved when a sheet is marked as cut (date, project, material used, waste, cost). The statistics are built from these records.
 - **Import** from the old app: its localStorage data and its `.md` files.
@@ -139,7 +140,6 @@ Each milestone ends with tests passing and a short demo in the browser.
 - **TypeScript types** are kept in sync with `model.rs` by hand; generating them (e.g. `ts-rs`) once the model settles.
 - **End-to-end tests (Playwright)** aren't set up yet; milestone 2 was checked by unit tests (model, store with an in-memory IndexedDB) and by hand in the browser at desktop, tablet and phone sizes. Worth adding before milestone 4's cut-mode flow.
 - **PDF size:** pdf-lib's font subsetting drops glyphs from the Inter TTFs, so both weights are embedded whole (~370 KB per PDF). Revisit if a fixed fontkit appears or with a different subsetter.
-- **Edge bands** are chosen per part (or the project default), not per edge; the plan's "type per edge" can come later if anyone needs mixed bands on one part.
 - **Cut mode positions** are measured from the sheet's left/top edge. Measuring from the edge of the piece being cut (what a panel saw fence needs) would be a useful option.
 - **Label printing** was checked on screen (layout in millimetres, QR codes decode with the browser's barcode reader); a real print on sticker sheets still needs a try, using the outline test page first. Custom sticker sizes aren't in yet.
 - **Scanning labels** works with a hardware scanner typing into the library search; scanning with the phone camera (BarcodeDetector) is a natural next step.

@@ -11,7 +11,7 @@ import {
   useStore,
 } from '../store/store';
 import { MoreIcon, StarIcon } from '../ui/icons';
-import { NumberInput } from '../ui/NumberInput';
+import { LengthInput, NumberInput } from '../ui/NumberInput';
 import { Menu } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import { MaterialSelect } from './MaterialSelect';
@@ -80,7 +80,7 @@ export function StockTable({ project }: { project: Project }) {
                     />
                   </td>
                   <td className={styles.cLength}>
-                    <NumberInput
+                    <LengthInput
                       className={styles.cell}
                       aria-label={t('Length, {{name}}', { name })}
                       aria-invalid={(bad && !s.length) || undefined}
@@ -91,7 +91,7 @@ export function StockTable({ project }: { project: Project }) {
                     />
                   </td>
                   <td className={styles.cWidth}>
-                    <NumberInput
+                    <LengthInput
                       className={styles.cell}
                       aria-label={t('Width, {{name}}', { name })}
                       aria-invalid={(bad && !s.width) || undefined}

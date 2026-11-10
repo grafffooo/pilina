@@ -70,5 +70,6 @@
   "{{count}} sheet sizes_one": "1 sheet size",
   "{{count}} sheet sizes_other": "{{count}} sheet sizes",
   "… and {{count}} more cuts (numbered on the drawing)_one": "… and 1 more cut (numbered on the drawing)",
-  "… and {{count}} more cuts (numbered on the drawing)_other": "… and {{count}} more cuts (numbered on the drawing)"
+  "… and {{count}} more cuts (numbered on the drawing)_other": "… and {{count}} more cuts (numbered on the drawing)",
+  "status_cut": "Cut"
 }

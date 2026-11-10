@@ -2,6 +2,7 @@
 // device so closing the tab (or the phone locking) doesn't lose your place.
 import type { Job, Plan, SheetLayout } from '../engine/types';
 import { t } from '../i18n';
+import { formatLengthUnit } from '../lib/units';
 
 export interface CutSession {
   /** Identity of the job the plan was made for; a changed project starts a new session. */
@@ -39,6 +40,16 @@ export function loadSession(projectId: string, jobKey: string): CutSession | nul
   }
 }
 
+/** The saved session whatever job it was for, to show how far the cutting got. */
+export function peekSession(projectId: string): CutSession | null {
+  try {
+    const raw = localStorage.getItem(key(projectId));
+    return raw ? (JSON.parse(raw) as CutSession) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function saveSession(projectId: string, session: CutSession | null) {
   try {
     if (session) localStorage.setItem(key(projectId), JSON.stringify(session));
@@ -51,6 +62,6 @@ export function saveSession(projectId: string, session: CutSession | null) {
 /** What to say for a cut, on screen and read aloud. */
 export function cutSentence(axis: 'x' | 'y', pos: number): string {
   return axis === 'x'
-    ? t('{{pos}} mm from the left edge', { pos })
-    : t('{{pos}} mm from the top edge', { pos });
+    ? t('{{pos}} from the left edge', { pos: formatLengthUnit(pos) })
+    : t('{{pos}} from the top edge', { pos: formatLengthUnit(pos) });
 }

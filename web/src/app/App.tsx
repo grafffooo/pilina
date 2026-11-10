@@ -25,6 +25,7 @@ import { useMediaQuery } from '../ui/hooks';
 import { CloseIcon, MenuIcon, PartsIcon, SawIcon, SheetIcon } from '../ui/icons';
 import ui from '../ui/ui.module.css';
 import { ProjectHeader, RunStatus } from './ProjectHeader';
+import { useProjectStatus } from './StatusBadge';
 import { Sidebar } from './Sidebar';
 import { PwaNotices } from './Pwa';
 import { isDesktopApp } from '../lib/platform';
@@ -50,6 +51,8 @@ export function App() {
   }, []);
   const view = useStore((s) => s.view);
   const cutting = useStore((s) => s.cutting);
+  // Sizes are formatted in the workshop's unit: draw everything again when it changes.
+  useStore((s) => s.settings.units);
   useOptimizer();
   usePricing();
   useUndoShortcuts();
@@ -81,9 +84,7 @@ export function App() {
           {wide && <Sidebar />}
           <main className={styles.editor}>
             <ProjectHeader project={project} onMenu={openDrawer} />
-            <PartsTable project={project} />
-            <StockTable project={project} />
-            <PricingCard project={project} />
+            <ProjectEditor project={project} />
           </main>
           <div className={styles.resultsCol}>
             <Results project={project} />
@@ -95,6 +96,18 @@ export function App() {
       {!isDesktopApp() && <PwaNotices />}
       <DialogHost />
     </>
+  );
+}
+
+/** Parts, stock and pricing; read-only once the project is cut. */
+function ProjectEditor({ project }: { project: Project }) {
+  const locked = useProjectStatus(project).kind === 'cut';
+  return (
+    <fieldset className={styles.editorFields} disabled={locked}>
+      <PartsTable project={project} />
+      <StockTable project={project} />
+      <PricingCard project={project} />
+    </fieldset>
   );
 }
 
@@ -116,9 +129,7 @@ function PhoneLayout({ project, onMenu }: { project: Project; onMenu: () => void
         {tab === 'parts' && (
           <>
             <ProjectHeader project={project} onMenu={onMenu} />
-            <PartsTable project={project} />
-            <StockTable project={project} />
-            <PricingCard project={project} />
+            <ProjectEditor project={project} />
           </>
         )}
         {tab !== 'parts' && (

@@ -1,12 +1,13 @@
 // App settings in a modal: language and theme for this device, plus the workshop settings
-// shared by every project (currency, edge band allowance, reusable leftover size).
+// shared by every project (units, currency, edge band allowance, reusable leftover size).
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES, loadLanguageChoice, setLanguageChoice, type LanguageChoice } from '../i18n';
 import { CURRENCIES, formatMoney } from '../model/library';
 import { updateSettings, useStore } from '../store/store';
 import { CloseIcon } from '../ui/icons';
-import { NumberInput } from '../ui/NumberInput';
+import { LengthInput } from '../ui/NumberInput';
+import { UNITS, unitLabel } from '../lib/units';
 import ui from '../ui/ui.module.css';
 import { loadAppearance, saveAppearance, type Theme } from './appearance';
 import styles from './SettingsDialog.module.css';
@@ -105,6 +106,23 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
           <h3 id="settings-workshop-h" className={styles.groupTitle}>
             {t('Workshop')}
           </h3>
+          <div className={styles.row}>
+            <span className={styles.label} id="units-label">
+              {t('Units')}
+            </span>
+            <div className={ui.segmented} role="group" aria-labelledby="units-label">
+              {UNITS.map((u) => (
+                <button
+                  key={u}
+                  type="button"
+                  aria-pressed={settings.units === u}
+                  onClick={() => updateSettings({ units: u })}
+                >
+                  {u === 'mm' ? t('Millimetres') : u === 'cm' ? t('Centimetres') : t('Inches')}
+                </button>
+              ))}
+            </div>
+          </div>
           <label className={styles.row}>
             <span className={styles.label}>{t('Currency')}</span>
             <select
@@ -122,32 +140,32 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
           <label className={styles.row}>
             <span className={styles.label}>{t('Edge band allowance')}</span>
             <span className={styles.inline}>
-              <NumberInput
+              <LengthInput
                 className={`${ui.fieldInput} ${styles.short}`}
                 value={settings.edgeAllowance}
                 onCommit={(v) => updateSettings({ edgeAllowance: Math.max(0, v ?? 0) })}
               />
-              {t('mm extra per banded edge')}
+              {t('{{unit}} extra per banded edge', { unit: unitLabel() })}
             </span>
           </label>
           <div className={styles.row}>
             <span className={styles.label}>{t('Reusable leftover')}</span>
             <span className={styles.inline}>
               {t('at least')}
-              <NumberInput
+              <LengthInput
                 className={`${ui.fieldInput} ${styles.short}`}
-                aria-label={t('Minimum leftover length, mm')}
+                aria-label={t('Minimum leftover length')}
                 value={settings.offcutMinLength}
                 onCommit={(v) => updateSettings({ offcutMinLength: Math.max(0, v ?? 0) })}
               />
               ×
-              <NumberInput
+              <LengthInput
                 className={`${ui.fieldInput} ${styles.short}`}
-                aria-label={t('Minimum leftover width, mm')}
+                aria-label={t('Minimum leftover width')}
                 value={settings.offcutMinWidth}
                 onCommit={(v) => updateSettings({ offcutMinWidth: Math.max(0, v ?? 0) })}
               />
-              mm
+              {unitLabel()}
             </span>
           </div>
         </section>

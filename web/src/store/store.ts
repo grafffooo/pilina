@@ -1,4 +1,5 @@
 // App state: projects (saved to IndexedDB), undo history of the open project, and its results.
+import { setCurrentUnit } from '../lib/units';
 import { create } from 'zustand';
 import { t } from '../i18n';
 import * as storage from '../db/db';
@@ -297,6 +298,8 @@ export const useStore = create<AppState>()((set, get) => {
         name: t('{{name}} (copy)', { name: src.name || t('Untitled project') }),
         createdAt: now,
         updatedAt: now,
+        // The copy is a new plan, not something already cut.
+        cutAt: null,
       };
       set((s) => ({ projects: [copy, ...s.projects] }));
       scheduleSave(copy.id);
@@ -440,6 +443,10 @@ export const useStore = create<AppState>()((set, get) => {
     },
   };
 });
+
+// Sizes everywhere are shown in the workshop's unit; keep the formatter in step with it.
+setCurrentUnit(useStore.getState().settings.units);
+useStore.subscribe((s) => setCurrentUnit(s.settings.units));
 
 export function useCurrentProject(): Project | undefined {
   return useStore((s) => s.projects.find((p) => p.id === s.currentId));

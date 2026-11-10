@@ -1,4 +1,5 @@
 // Materials, edge bands and app settings: shared by all projects, stored on this device.
+import type { Unit } from '../lib/units';
 import type { Grain, PriceInput, StockPrice, StockSpec } from '../engine/types';
 import { locale as current, t } from '../i18n';
 import { newId, type Project } from './project';
@@ -38,6 +39,8 @@ export interface EdgeBand {
 
 export interface Settings {
   currency: string;
+  /** Unit sizes are typed and shown in; data stays in millimetres. */
+  units: Unit;
   /** Extra band length per banded edge, mm. */
   edgeAllowance: number;
   /** Leftovers at least this big count as reusable offcuts (mm). */
@@ -55,6 +58,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   currency: 'EUR',
+  units: 'mm',
   edgeAllowance: 20,
   offcutMinLength: 300,
   offcutMinWidth: 100,

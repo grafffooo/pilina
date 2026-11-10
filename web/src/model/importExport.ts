@@ -1,5 +1,6 @@
 // Moving projects in and out: the old CutList (.md files or its browser storage) and
 // this app's own project files for sharing (.pilina.json; older exports are .cutlist.json).
+import type { Unit } from '../lib/units';
 import type { Edges, Grain } from '../engine/types';
 import { linkLegacyStockLabels, type EdgeBand, type Material } from './library';
 import {
@@ -130,6 +131,16 @@ export function parseOldMarkdown(text: string, fileName = 'Imported project'): O
   return p;
 }
 
+/** The old app's unit setting was only a label: its numbers are in that unit. */
+export function oldUnit(units: string | undefined): Unit {
+  const u = (units ?? '').trim().toLowerCase();
+  if (/^(in|inch|inches|"|″)$/.test(u)) return 'in';
+  if (u === 'cm') return 'cm';
+  return 'mm';
+}
+
+const MM_PER_OLD_UNIT: Record<Unit, number> = { mm: 1, cm: 10, in: 25.4 };
+
 /** The old app used 999 for "as many as needed". */
 const UNLIMITED_FROM = 999;
 
@@ -140,8 +151,17 @@ const UNLIMITED_FROM = 999;
 export function convertOldProjects(
   old: OldProject[],
   materials: Material[],
-): { projects: Project[]; newMaterials: Material[] } {
+): { projects: Project[]; newMaterials: Material[]; units: Unit | null } {
+  const units = new Map<Unit, number>();
   const projects = old.map((o) => {
+    const unit = oldUnit(o.settings?.units);
+    units.set(unit, (units.get(unit) ?? 0) + 1);
+    const k = MM_PER_OLD_UNIT[unit];
+    // Sizes in millimetres; `null` stays "not entered".
+    const size = (v: unknown) => {
+      const n = num(v);
+      return n === null ? null : n * k;
+    };
     const parts: PartRow[] = (o.parts ?? [])
       .filter((x) => num(x.length) || num(x.width) || x.label)
       .map((x) => {
@@ -150,8 +170,8 @@ export function convertOldProjects(
           : 'none';
         return {
           ...emptyPart(),
-          length: num(x.length),
-          width: num(x.width),
+          length: size(x.length),
+          width: size(x.width),
           qty: num(x.qty) ?? 1,
           label: x.label ?? '',
           grain,
@@ -171,8 +191,8 @@ export function convertOldProjects(
         const qty = num(x.qty);
         return {
           ...emptyStock(),
-          length: num(x.length),
-          width: num(x.width),
+          length: size(x.length),
+          width: size(x.width),
           qty: qty === null || qty >= UNLIMITED_FROM ? null : qty,
           priority: x.priority !== false,
           enabled: x.enabled !== false,
@@ -186,14 +206,16 @@ export function convertOldProjects(
       name: o.title || 'Imported project',
       createdAt: Number.isFinite(updated) ? updated : now,
       updatedAt: Number.isFinite(updated) ? updated : now,
-      kerf: num(o.settings?.kerf) ?? 4,
-      trim: o.settings?.trim && o.settings.trim > 0 ? o.settings.trim : 0,
+      kerf: size(o.settings?.kerf) ?? 4,
+      trim: o.settings?.trim && o.settings.trim > 0 ? o.settings.trim * k : 0,
       parts: parts.length ? parts : [emptyPart()],
       stock,
     };
   });
   const newMaterials = linkLegacyStockLabels(projects, materials);
-  return { projects: projects.map((p) => migrate(p)), newMaterials };
+  // The unit most of the projects were measured in, to offer as the setting.
+  const top = [...units].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  return { projects: projects.map((p) => migrate(p)), newMaterials, units: top };
 }
 
 /** Reads the old app's storage array (as found in localStorage or pasted). */

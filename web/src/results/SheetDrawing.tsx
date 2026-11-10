@@ -3,7 +3,7 @@
 import { useId } from 'react';
 import type { SheetLayout } from '../engine/types';
 import { classifyOffcut, edgeSides, isRipLike, sizeOf } from '../model/describe';
-import { formatMm } from '../lib/format';
+import { formatLength } from '../lib/units';
 import { useView } from '../store/view';
 import type { PartInfo } from './partInfo';
 import styles from './Results.module.css';
@@ -97,7 +97,7 @@ export function SheetDrawing({
         .filter((r) => classifyOffcut(r) === 'usable')
         .map((r, i) => {
           const s = sizeOf(r);
-          const lines = [t('Offcut'), `${formatMm(s.long)} × ${formatMm(s.short)}`];
+          const lines = [t('Offcut'), `${formatLength(s.long)} × ${formatLength(s.short)}`];
           const fit = fitText(lines, r.w, r.h, m * 0.024, m * 0.012);
           return (
             fit && (
@@ -110,7 +110,8 @@ export function SheetDrawing({
         const info = parts.get(p.partId);
         const r = p.rect;
         const lines = [info?.label ?? '?'];
-        if (showSizes && info) lines.push(`${formatMm(info.length)} × ${formatMm(info.width)}`);
+        if (showSizes && info)
+          lines.push(`${formatLength(info.length)} × ${formatLength(info.width)}`);
         const fit = fitText(lines, r.w, r.h, m * 0.026, m * 0.011);
         return (
           <g key={`${p.partId}-${p.instance}`}>

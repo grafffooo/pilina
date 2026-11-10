@@ -1,7 +1,8 @@
 // Statistics across all projects: what was cut, what it cost, how much was wasted.
 import { useEffect, useMemo, useState } from 'react';
 import { db } from '../db/db';
-import { formatNumber, formatSquareMetres } from '../lib/format';
+import { formatNumber } from '../lib/format';
+import { formatArea } from '../lib/units';
 import type { CutRecord } from '../model/cutRecord';
 import { formatMoney } from '../model/library';
 import { computeStats, type Range } from '../model/stats';
@@ -128,7 +129,7 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
             <Tile
               label={t('Sheets cut')}
               value={formatNumber(stats.sheets)}
-              note={formatSquareMetres(stats.sheetArea)}
+              note={formatArea(stats.sheetArea)}
             />
             <Tile
               label={t('Spent on board')}
@@ -207,7 +208,7 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
                   value: m.sheetArea,
                   note: t('n_sheets', { count: m.sheets }),
                 }))}
-                format={formatSquareMetres}
+                format={(v) => formatArea(v)}
               />
             </section>
 

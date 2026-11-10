@@ -1,7 +1,7 @@
 // Step-by-step cut mode: one cut at a time, then keep the offcuts of each finished sheet.
 import { useEffect, useMemo, useState } from 'react';
 import type { Rect, SheetLayout } from '../engine/types';
-import { formatMm } from '../lib/format';
+import { formatLength, formatLengthUnit, unitLabel } from '../lib/units';
 import { cutKindLabel, isRipLike } from '../model/describe';
 import { jobKey } from '../model/job';
 import { stockPrice } from '../model/library';
@@ -202,7 +202,7 @@ export function CutMode() {
   const sheetTitle = t('Sheet {{n}} of {{total}}', { n: session.sheet + 1, total: all.length });
   const sheetSub = [
     stock?.label || material?.name,
-    `${formatMm(sheet.length)} × ${formatMm(sheet.width)}`,
+    `${formatLength(sheet.length)} × ${formatLength(sheet.width)}`,
   ]
     .filter(Boolean)
     .join(' · ');
@@ -256,13 +256,13 @@ export function CutMode() {
                 : t('Cut line from the top edge of the sheet')}
             </span>
             <span className={styles.positionValue}>
-              {formatMm(cut.pos)} <span className={styles.unit}>mm</span>
+              {formatLength(cut.pos)} <span className={styles.unit}>{unitLabel()}</span>
             </span>
           </div>
           <div className={styles.facts}>
             <div>
               <span>{t('Cut length')}</span>
-              <strong>{formatMm(cut.length)} mm</strong>
+              <strong>{formatLengthUnit(cut.length)}</strong>
             </div>
             <div>
               <span>{t('Then')}</span>
@@ -271,7 +271,7 @@ export function CutMode() {
                   ? t('{{kind}} at {{axis}} = {{pos}}', {
                       kind: cutKindLabel(following).toLowerCase(),
                       axis: following.axis,
-                      pos: formatMm(following.pos),
+                      pos: formatLength(following.pos),
                     })
                   : t('sheet done')}
               </strong>
@@ -283,11 +283,11 @@ export function CutMode() {
             sheet={sheet}
             parts={parts}
             cutStep={cut.number}
-            label={t('{{sheet}} with cut {{n}} highlighted at {{axis}} = {{pos}} mm', {
+            label={t('{{sheet}} with cut {{n}} highlighted at {{axis}} = {{pos}}', {
               sheet: sheetTitle,
               n: cut.number,
               axis: cut.axis,
-              pos: cut.pos,
+              pos: formatLengthUnit(cut.pos),
             })}
           />
         </div>
@@ -417,9 +417,8 @@ function KeepOffcuts({
         <div>
           <p className={styles.keepTitle}>{t('Keep any offcuts?')}</p>
           <p className={styles.keepHint}>
-            {t('Suggested: pieces at least {{length}} × {{width}} mm.', {
-              length: settings.offcutMinLength,
-              width: settings.offcutMinWidth,
+            {t('Suggested: pieces at least {{size}}.', {
+              size: `${formatLength(settings.offcutMinLength)} × ${formatLengthUnit(settings.offcutMinWidth)}`,
             })}
           </p>
         </div>
@@ -446,7 +445,8 @@ function KeepOffcuts({
                     />
                     <span>
                       <span className={styles.keepSize}>
-                        {formatMm(Math.max(p.r.w, p.r.h))} × {formatMm(Math.min(p.r.w, p.r.h))}
+                        {formatLength(Math.max(p.r.w, p.r.h))} ×{' '}
+                        {formatLength(Math.min(p.r.w, p.r.h))}
                       </span>
                       <span className={p.advice === 'suggested' ? styles.tagGood : styles.tag}>
                         {adviceText(p.advice)}

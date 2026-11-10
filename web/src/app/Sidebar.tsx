@@ -5,6 +5,7 @@ import { formatMoney } from '../model/library';
 import { useNow } from '../ui/hooks';
 import {
   ChartIcon,
+  ChevronRightIcon,
   CheckIcon,
   ImportIcon,
   LogoIcon,
@@ -22,6 +23,10 @@ import { isDesktopApp } from '../lib/platform';
 import { InstallButton } from './Pwa';
 import { locale, t as i18nT } from '../i18n';
 import { SettingsDialog } from './SettingsDialog';
+import { cutDate, StatusBadge } from './StatusBadge';
+import { peekSession } from '../cutting/session';
+import type { Project } from '../model/project';
+import { projectStatus, type ProjectStatus } from '../model/status';
 import styles from './Sidebar.module.css';
 import { useTranslation } from 'react-i18next';
 
@@ -56,10 +61,12 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const view = useStore((s) => s.view);
   const materialCount = useStore((s) => s.materials.length);
   const offcutCount = useStore((s) => s.offcuts.filter((o) => o.status === 'available').length);
-  const currency = useStore((s) => s.settings.currency);
   const [query, setQuery] = useState('');
   const [importing, setImporting] = useState(false);
   const now = useNow();
+  // Statuses come from cut mode sessions too; read them again when cut mode closes.
+  const cutting = useStore((s) => s.cutting);
+  const [cutOpen, setCutOpen] = useState(false);
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -70,6 +77,21 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         p.name.toLowerCase().includes(q) || p.parts.some((r) => r.label.toLowerCase().includes(q)),
     );
   }, [projects, query]);
+
+  // Projects still being planned or cut on top; finished ones in a "Cut" group below.
+  const [open, cut] = useMemo(() => {
+    void cutting;
+    const rows = shown.map((project) => ({
+      project,
+      status: projectStatus(project, peekSession(project.id)),
+      active: project.id === currentId && view === 'project',
+    }));
+    return [
+      rows.filter((r) => r.status.kind !== 'cut'),
+      rows.filter((r) => r.status.kind === 'cut'),
+    ];
+  }, [shown, cutting, currentId, view]);
+  const cutShown = cutOpen || query.trim() !== '' || cut.some((r) => r.project.id === currentId);
 
   return (
     <aside className={styles.sidebar} aria-label={t('Projects')}>
@@ -110,32 +132,25 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       <nav className={styles.list}>
-        {shown.map((p) => {
-          const active = p.id === currentId;
-          const s = p.summary;
-          return (
+        {open.map((p) => (
+          <ProjectRow key={p.project.id} {...p} onNavigate={onNavigate} />
+        ))}
+        {cut.length > 0 && (
+          <>
             <button
-              key={p.id}
               type="button"
-              className={styles.project}
-              aria-current={active && view === 'project' ? 'page' : undefined}
-              onClick={() => {
-                useStore.getState().select(p.id);
-                onNavigate?.();
-              }}
+              className={styles.groupToggle}
+              aria-expanded={cutShown}
+              onClick={() => setCutOpen(!cutShown)}
             >
-              <span className={styles.projectName}>{p.name || t('Untitled project')}</span>
-              {s && s.pieces > 0 && (
-                <span className={styles.projectMeta}>
-                  {t('n_parts', { count: s.pieces })} · {t('n_sheets', { count: s.sheets })} ·{' '}
-                  {t('{{pct}}% used', { pct: formatNumber(Math.round(s.usedPct)) })}
-                  {s.cost != null && s.cost > 0 && ` · ${formatMoney(s.cost, currency)}`}
-                </span>
-              )}
-              <span className={styles.projectDate}>{when(p.updatedAt, now)}</span>
+              <ChevronRightIcon size={14} />
+              <span>{t('status_cut')}</span>
+              <span className={styles.count}>{cut.length}</span>
             </button>
-          );
-        })}
+            {cutShown &&
+              cut.map((p) => <ProjectRow key={p.project.id} {...p} onNavigate={onNavigate} />)}
+          </>
+        )}
         {shown.length === 0 && (
           <p className={styles.empty}>{t('No projects match “{{query}}”.', { query })}</p>
         )}
@@ -214,6 +229,51 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         )}
       </div>
     </aside>
+  );
+}
+
+function ProjectRow({
+  project: p,
+  status,
+  active,
+  onNavigate,
+}: {
+  project: Project;
+  status: ProjectStatus;
+  active: boolean;
+  onNavigate?: () => void;
+}) {
+  const { t } = useTranslation();
+  const currency = useStore((s) => s.settings.currency);
+  const now = useNow();
+  const s = p.summary;
+  return (
+    <button
+      type="button"
+      className={styles.project}
+      aria-current={active ? 'page' : undefined}
+      onClick={() => {
+        useStore.getState().select(p.id);
+        onNavigate?.();
+      }}
+    >
+      <span className={styles.nameRow}>
+        <span className={styles.projectName}>{p.name || t('Untitled project')}</span>
+        <StatusBadge status={status} />
+      </span>
+      {s && s.pieces > 0 && (
+        <span className={styles.projectMeta}>
+          {t('n_parts', { count: s.pieces })} · {t('n_sheets', { count: s.sheets })} ·{' '}
+          {t('{{pct}}% used', { pct: formatNumber(Math.round(s.usedPct)) })}
+          {s.cost != null && s.cost > 0 && ` · ${formatMoney(s.cost, currency)}`}
+        </span>
+      )}
+      <span className={styles.projectDate}>
+        {status.kind === 'cut'
+          ? t('Cut on {{date}}', { date: cutDate(status.at) })
+          : when(p.updatedAt, now)}
+      </span>
+    </button>
   );
 }
 

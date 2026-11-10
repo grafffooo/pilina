@@ -98,6 +98,25 @@ describe('old app import', () => {
     expect(newMaterials.map((m) => [m.name, m.thickness])).toEqual([['Plexi 3mm', 3]]);
     expect(() => parseOldStorage('{"a":1}')).toThrow();
   });
+
+  it('converts projects the old app measured in inches', () => {
+    const json = JSON.stringify([
+      {
+        title: 'Bookcase',
+        settings: { kerf: 0.125, trim: 0.5, units: 'in' },
+        parts: [{ length: 30, width: 11.25, qty: 2, label: 'Shelf' }],
+        stock: [{ length: 96, width: 48, qty: 1, label: 'Ply' }],
+      },
+    ]);
+    const { projects, units } = convertOldProjects(parseOldStorage(json), []);
+    const p = projects[0]!;
+    expect(units).toBe('in');
+    expect(p.kerf).toBeCloseTo(3.175);
+    expect(p.trim).toBeCloseTo(12.7);
+    expect(p.parts[0]!.length).toBeCloseTo(762);
+    expect(p.parts[0]!.width).toBeCloseTo(285.75);
+    expect(p.stock[0]!.length).toBeCloseTo(2438.4);
+  });
 });
 
 describe('project files', () => {

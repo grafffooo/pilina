@@ -1,4 +1,4 @@
-import { useStore } from '../store/store';
+import { useCurrentProject, useStore } from '../store/store';
 import { PlayIcon } from '../ui/icons';
 import ui from '../ui/ui.module.css';
 import styles from './CutMode.module.css';
@@ -10,6 +10,7 @@ export function StartCuttingButton({ large }: { large?: boolean }) {
   const ready = useStore(
     (s) => s.result.status === 'ready' && (s.result.plan?.sheets.length ?? 0) > 0,
   );
+  const cut = useCurrentProject()?.cutAt != null;
   return (
     <button
       type="button"
@@ -19,7 +20,7 @@ export function StartCuttingButton({ large }: { large?: boolean }) {
       onClick={() => useStore.getState().setCutting(true)}
     >
       <PlayIcon size={16} />
-      {t('Start cutting')}
+      {cut ? t('Cut again') : t('Start cutting')}
     </button>
   );
 }

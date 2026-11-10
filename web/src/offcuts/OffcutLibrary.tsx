@@ -1,10 +1,10 @@
 // Offcut library: every kept leftover with its ID, size, material, place and label state.
 import { useMemo, useState } from 'react';
-import { formatSquareMetres } from '../lib/format';
+import { formatArea, formatLength, unitLabel } from '../lib/units';
 import type { Offcut, OffcutStatus } from '../model/offcut';
 import { useStore } from '../store/store';
 import { MenuIcon, MoreIcon, PlusIcon, SearchIcon } from '../ui/icons';
-import { NumberInput } from '../ui/NumberInput';
+import { LengthInput } from '../ui/NumberInput';
 import { ComboInput } from '../ui/ComboInput';
 import { confirmDialog } from '../ui/dialogs';
 import { Menu, Popover } from '../ui/Popover';
@@ -104,7 +104,7 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
             <BackButton />
           </div>
           <span className={styles.meta}>
-            {t('n_available', { count: available.length })} · {formatSquareMetres(area)} ·{' '}
+            {t('n_available', { count: available.length })} · {formatArea(area)} ·{' '}
             {t('n_materials', { count: materialCount })}
           </span>
         </div>
@@ -152,17 +152,17 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
         </select>
         <span className={styles.fits}>
           {t('Fits')}
-          <NumberInput
+          <LengthInput
             className={`${ui.fieldInput} ${styles.fitInput}`}
-            aria-label={t('Must fit length, mm')}
+            aria-label={t('Must fit length')}
             placeholder={t('L')}
             value={minL}
             onCommit={setMinL}
           />
           ×
-          <NumberInput
+          <LengthInput
             className={`${ui.fieldInput} ${styles.fitInput}`}
-            aria-label={t('Must fit width, mm')}
+            aria-label={t('Must fit width')}
             placeholder={t('W')}
             value={minW}
             onCommit={setMinW}
@@ -202,7 +202,7 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
                   <span className="sr-only">{t('Shape')}</span>
                 </th>
                 <th>{t('ID')}</th>
-                <th>{t('Size (mm)')}</th>
+                <th>{t('Size ({{unit}})', { unit: unitLabel() })}</th>
                 <th>{t('Material')}</th>
                 <th>{t('Place')}</th>
                 <th>{t('Added')}</th>
@@ -245,7 +245,7 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
                   </td>
                   <td className={styles.code}>{o.code}</td>
                   <td className={styles.size}>
-                    {o.length} × {o.width}
+                    {formatLength(o.length)} × {formatLength(o.width)}
                   </td>
                   <td>
                     <span className={styles.material}>{matName(o.materialId)}</span>
@@ -397,22 +397,22 @@ function AddOffcut() {
         >
           <span className={styles.addTitle}>{t('Add an offcut by hand')}</span>
           <div className={styles.addSize}>
-            <NumberInput
+            <LengthInput
               className={ui.fieldInput}
-              aria-label={t('Length, mm')}
+              aria-label={t('Length')}
               placeholder={t('Length')}
               value={length}
               onCommit={setLength}
             />
             ×
-            <NumberInput
+            <LengthInput
               className={ui.fieldInput}
-              aria-label={t('Width, mm')}
+              aria-label={t('Width')}
               placeholder={t('Width')}
               value={width}
               onCommit={setWidth}
             />
-            mm
+            {unitLabel()}
           </div>
           <MaterialSelect
             value={materialId}

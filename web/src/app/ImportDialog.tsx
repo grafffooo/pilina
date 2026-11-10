@@ -11,7 +11,8 @@ import {
 } from '../model/importExport';
 import type { EdgeBand, Material } from '../model/library';
 import type { Project } from '../model/project';
-import { useStore } from '../store/store';
+import { updateSettings, useStore } from '../store/store';
+import type { Unit } from '../lib/units';
 import { CloseIcon } from '../ui/icons';
 import ui from '../ui/ui.module.css';
 import styles from './ImportDialog.module.css';
@@ -29,6 +30,10 @@ function readOldStorage(): OldProject[] {
 export function ImportDialog({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  // The old app's projects were measured in this unit, and the setting differs.
+  const [suggestUnit, setSuggestUnit] = useState<Unit | null>(null);
+  const offerUnit = (unit: Unit | null, count: number) =>
+    setSuggestUnit(count > 0 && unit && unit !== useStore.getState().settings.units ? unit : null);
   const [dragging, setDragging] = useState(false);
   const [pasted, setPasted] = useState('');
   const [oldHere] = useState(readOldStorage);
@@ -63,8 +68,9 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
 
   const importOld = (old: OldProject[], skipped: string[] = []) => {
     const { materials } = useStore.getState();
-    const { projects, newMaterials } = convertOldProjects(old, materials);
+    const { projects, newMaterials, units } = convertOldProjects(old, materials);
     commit(projects, newMaterials, [], skipped);
+    offerUnit(units, projects.length);
   };
 
   const importFiles = async (files: FileList | File[]) => {
@@ -108,6 +114,7 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
       bands,
       skipped,
     );
+    offerUnit(converted.units, converted.projects.length);
   };
 
   const onDrop = (e: DragEvent) => {
@@ -206,6 +213,31 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
           </button>
         </details>
 
+        {suggestUnit && (
+          <p className={styles.unitHint}>
+            <span>
+              {suggestUnit === 'in'
+                ? t('These projects were measured in inches.')
+                : suggestUnit === 'cm'
+                  ? t('These projects were measured in centimetres.')
+                  : t('These projects were measured in millimetres.')}
+            </span>
+            <button
+              type="button"
+              className={ui.button}
+              onClick={() => {
+                updateSettings({ units: suggestUnit });
+                setSuggestUnit(null);
+              }}
+            >
+              {suggestUnit === 'in'
+                ? t('Show sizes in inches')
+                : suggestUnit === 'cm'
+                  ? t('Show sizes in centimetres')
+                  : t('Show sizes in millimetres')}
+            </button>
+          </p>
+        )}
         {message && (
           <p className={message.ok ? styles.ok : styles.error} role="status">
             {message.text}

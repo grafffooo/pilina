@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import type { Job, Plan, SheetLayout } from '../engine/types';
-import { formatMetres, formatMm, formatNumber } from '../lib/format';
+import { formatNumber } from '../lib/format';
+import { formatLength, formatLengthUnit, formatLong } from '../lib/units';
 import { classifyOffcut, cutKindLabel, isRipLike, sizeOf } from '../model/describe';
 import { unplacedReason, usedPercent } from '../model/job';
 import type { Project } from '../model/project';
@@ -88,7 +89,7 @@ export function StatCards({ plan, job, compact }: { plan: Plan; job: Job; compac
   const first = job.stock.find((s) => s.id === plan.sheets[0]?.stockId);
   const sheetNote =
     stockIds.size === 1 && first
-      ? `${formatMm(first.length)} × ${formatMm(first.width)}${first.label ? ` · ${first.label}` : ''}`
+      ? `${formatLength(first.length)} × ${formatLength(first.width)}${first.label ? ` · ${first.label}` : ''}`
       : t('{{count}} sheet sizes', { count: stockIds.size });
   const banded = job.parts.filter((p) => p.edges && Object.values(p.edges).some(Boolean));
   const bandedPieces = banded.reduce((n, p) => n + p.qty, 0);
@@ -114,15 +115,13 @@ export function StatCards({ plan, job, compact }: { plan: Plan; job: Job; compac
         label={t('Cuts')}
         value={formatNumber(totals.cuts)}
         note={
-          compact
-            ? undefined
-            : t('{{length}} of sawing', { length: formatMetres(totals.cutLength) })
+          compact ? undefined : t('{{length}} of sawing', { length: formatLong(totals.cutLength) })
         }
       />
       {!compact && (
         <Stat
           label={t('Edge banding')}
-          value={formatMetres(totals.edgeBandLength)}
+          value={formatLong(totals.edgeBandLength)}
           note={bandedPieces > 0 ? t('n_parts_banded', { count: bandedPieces }) : t('none set')}
         />
       )}
@@ -169,7 +168,7 @@ export function UnplacedBanner({ plan, job, project }: { plan: Plan; job: Job; p
             return (
               <li key={u.partId}>
                 <strong>{name}</strong> ×{u.count}
-                {spec && ` (${formatMm(spec.length)} × ${formatMm(spec.width)})`}:{' '}
+                {spec && ` (${formatLength(spec.length)} × ${formatLength(spec.width)})`}:{' '}
                 {reason === 'too-big'
                   ? t('bigger than every stock sheet (with grain and edge trim)')
                   : t('not enough stock sheets')}
@@ -265,7 +264,7 @@ export function SheetPanel({
       <div className={styles.toolbar}>
         <SheetPager plan={plan} />
         <span className={styles.toolbarMeta}>
-          {formatMm(sheet.length)} × {formatMm(sheet.width)}
+          {formatLength(sheet.length)} × {formatLength(sheet.width)}
           {stock?.label ? ` · ${stock.label}` : ''} ·{' '}
           {t('n_parts', { count: sheet.placements.length })} ·{' '}
           {t('{{pct}}% used', { pct: formatNumber(Math.round(used)) })}
@@ -493,7 +492,7 @@ export function CutOrder({
         {title && <h3>{t('Cut order')}</h3>}
         <span className={styles.spacer} />
         <span className={styles.listMeta}>
-          {t('n_cuts', { count: sheet.cuts.length })} · {formatMetres(length)}
+          {t('n_cuts', { count: sheet.cuts.length })} · {formatLong(length)}
         </span>
       </div>
       {sheet.cuts.length === 0 ? (
@@ -517,10 +516,10 @@ export function CutOrder({
                 >
                   <span className={rip ? styles.cutNumRip : styles.cutNumCross}>{c.number}</span>
                   <span className={styles.cutPos}>
-                    {c.axis} = {formatMm(c.pos)}
+                    {c.axis} = {formatLength(c.pos)}
                   </span>
                   <span className={styles.cutKind}>{cutKindLabel(c)}</span>
-                  <span className={styles.cutLen}>{formatMm(c.length)} mm</span>
+                  <span className={styles.cutLen}>{formatLengthUnit(c.length)}</span>
                 </button>
               </li>
             );
@@ -558,7 +557,7 @@ export function Offcuts({ plan }: { plan: Plan }) {
             return (
               <li key={i}>
                 <span className={kind === 'usable' ? styles.offcutBig : undefined}>
-                  {formatMm(s.long)} × {formatMm(s.short)}
+                  {formatLength(s.long)} × {formatLength(s.short)}
                 </span>
                 <span className={kind === 'usable' ? styles.offcutKeep : styles.offcutKind}>
                   {offcutText(kind)}

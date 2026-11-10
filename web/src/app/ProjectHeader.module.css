@@ -49,6 +49,13 @@
   color: var(--text-2);
 }
 
+.chipStatic {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+}
+
 .chip strong {
   color: var(--text);
 }
@@ -122,4 +129,32 @@
   .spinner {
     animation: none;
   }
+}
+
+.chips {
+  align-items: center;
+}
+
+.cutBanner {
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-radius: var(--radius-md, 12px);
+  background: color-mix(in srgb, var(--moss) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--moss) 30%, transparent);
+  color: var(--text);
+  font-size: var(--text-sm, 13px);
+}
+
+.cutBanner > svg {
+  color: var(--moss);
+  flex: none;
+}
+
+.cutBanner span {
+  flex: 1;
+  min-width: 200px;
 }

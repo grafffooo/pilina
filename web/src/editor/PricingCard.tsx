@@ -1,4 +1,5 @@
 // Per-project pricing choices: how board is charged, default edge band and extra cost lines.
+import { formatLength, formatLengthUnit } from '../lib/units';
 import { emptyExtra, type ExtraLine, type Project } from '../model/project';
 import { addEdgeBand, updatePricing, updateProject, useStore } from '../store/store';
 import { CloseIcon, PlusIcon } from '../ui/icons';
@@ -85,9 +86,8 @@ export function PricingCard({ project }: { project: Project }) {
                 checked={pricing.offcutCredit}
                 onChange={(e) => updatePricing({ offcutCredit: e.target.checked })}
               />
-              {t('Credit reusable leftovers (at least {{length}} × {{width}} mm)', {
-                length: settings.offcutMinLength,
-                width: settings.offcutMinWidth,
+              {t('Credit reusable leftovers (at least {{size}})', {
+                size: `${formatLength(settings.offcutMinLength)} × ${formatLengthUnit(settings.offcutMinWidth)}`,
               })}
             </span>
           </label>

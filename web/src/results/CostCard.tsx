@@ -1,4 +1,5 @@
-import { formatMetres, formatNumber, formatSquareMetres } from '../lib/format';
+import { formatNumber } from '../lib/format';
+import { formatArea, formatLong } from '../lib/units';
 import { formatMoney } from '../model/library';
 import type { Project } from '../model/project';
 import { useStore } from '../store/store';
@@ -49,7 +50,7 @@ export function CostCard({ project }: { project: Project }) {
               {m.material}
               <span className={styles.costNote}>
                 {mode.mode === 'area'
-                  ? t('{{area}} used', { area: formatSquareMetres(m.usedArea) })
+                  ? t('{{area}} used', { area: formatArea(m.usedArea) })
                   : t('n_sheets', { count: m.sheets })}
               </span>
             </dt>
@@ -58,7 +59,7 @@ export function CostCard({ project }: { project: Project }) {
               <>
                 <dt className={styles.costCredit}>
                   {t('Leftovers credited')}
-                  <span className={styles.costNote}>{formatSquareMetres(m.creditArea)}</span>
+                  <span className={styles.costNote}>{formatArea(m.creditArea)}</span>
                 </dt>
                 <dd className={styles.costCredit}>−{money(m.credit)}</dd>
               </>
@@ -69,7 +70,7 @@ export function CostCard({ project }: { project: Project }) {
           <div key={b.band} className={styles.costLine}>
             <dt>
               {b.band}
-              <span className={styles.costNote}>{formatMetres(b.length)}</span>
+              <span className={styles.costNote}>{formatLong(b.length)}</span>
             </dt>
             <dd>{b.priced ? money(b.cost) : <NoPrice onClick={openLibrary} />}</dd>
           </div>

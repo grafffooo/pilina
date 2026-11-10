@@ -1,18 +1,21 @@
 import { downloadBlob } from '../lib/download';
 import { confirmDialog } from '../ui/dialogs';
-import { formatMm } from '../lib/format';
+import { formatLengthUnit, unitLabel } from '../lib/units';
 import { exportProjectFile, fileSlug } from '../model/importExport';
 import { useStore, updateProject } from '../store/store';
 import type { Project } from '../model/project';
 import { CheckIcon, MenuIcon, MoreIcon, RedoIcon, UndoIcon, WarningIcon } from '../ui/icons';
-import { NumberInput } from '../ui/NumberInput';
+import { LengthInput } from '../ui/NumberInput';
 import { Menu, Popover } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import styles from './ProjectHeader.module.css';
+import { cutDate, setProjectCut, StatusBadge, useProjectStatus } from './StatusBadge';
 import { useTranslation } from 'react-i18next';
 
 export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: () => void }) {
   const { t } = useTranslation();
+  const status = useProjectStatus(project);
+  const locked = status.kind === 'cut';
   return (
     <div className={styles.header}>
       {onMenu && (
@@ -26,16 +29,20 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
           aria-label={t('Project name')}
           value={project.name}
           placeholder={t('Untitled project')}
+          readOnly={locked}
           onChange={(e) => updateProject({ name: e.target.value }, 'name')}
         />
         <div className={styles.chips}>
+          <StatusBadge status={status} />
           <SettingChip
+            disabled={locked}
             label={t('Kerf')}
             hint={t('Saw blade thickness')}
             value={project.kerf}
             onCommit={(kerf) => updateProject({ kerf }, 'kerf')}
           />
           <SettingChip
+            disabled={locked}
             label={t('Edge trim')}
             hint={t('Trimmed off every sheet edge before cutting')}
             value={project.trim}
@@ -51,6 +58,9 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
           ariaLabel={t('Project actions')}
           triggerClassName={ui.iconButton}
           items={[
+            locked
+              ? { label: t('Back to draft'), onSelect: () => setProjectCut(project, false) }
+              : { label: t('Mark as cut'), onSelect: () => setProjectCut(project, true) },
             {
               label: t('Duplicate project'),
               onSelect: () => useStore.getState().duplicateProject(project.id),
@@ -84,6 +94,19 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
           ]}
         />
       </div>
+      {status.kind === 'cut' && (
+        <div className={styles.cutBanner} role="note">
+          <CheckIcon size={16} />
+          <span>
+            {t('Cut on {{date}}. The project is locked so its layout and costs stay as cut.', {
+              date: cutDate(status.at),
+            })}
+          </span>
+          <button type="button" className={ui.button} onClick={() => setProjectCut(project, false)}>
+            {t('Edit as draft')}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -93,18 +116,27 @@ function SettingChip({
   hint,
   value,
   onCommit,
+  disabled,
 }: {
   label: string;
   hint: string;
   value: number;
   onCommit: (v: number) => void;
+  disabled?: boolean;
 }) {
+  if (disabled) {
+    return (
+      <span className={`${styles.chip} ${styles.chipStatic}`}>
+        {label} <strong>{formatLengthUnit(value)}</strong>
+      </span>
+    );
+  }
   return (
     <Popover
       triggerClassName={styles.chip}
       label={
         <>
-          {label} <strong>{formatMm(value)} mm</strong>
+          {label} <strong>{formatLengthUnit(value)}</strong>
         </>
       }
     >
@@ -112,13 +144,13 @@ function SettingChip({
         <label className={ui.field}>
           {hint}
           <span className={styles.fieldRow}>
-            <NumberInput
+            <LengthInput
               className={ui.fieldInput}
               value={value}
               onCommit={(v) => onCommit(Math.max(0, v ?? 0))}
               onKeyDown={(e) => e.key === 'Enter' && close()}
             />
-            mm
+            {unitLabel()}
           </span>
         </label>
       )}

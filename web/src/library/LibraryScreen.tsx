@@ -12,7 +12,21 @@ import type { Grain } from '../engine/types';
 import { materialGrain } from '../model/library';
 import { MenuIcon, MoreIcon } from '../ui/icons';
 import { BackButton } from '../ui/BackButton';
-import { NumberInput } from '../ui/NumberInput';
+import {
+  areaPriceIn,
+  areaPriceOut,
+  areaUnit,
+  formatLengthUnit,
+  isImperial,
+  longPriceIn,
+  longPriceOut,
+  unitLabel,
+} from '../lib/units';
+import { LengthInput, NumberInput } from '../ui/NumberInput';
+
+/** Prices converted to feet carry long fractions: compare and show them rounded. */
+const exact = (v: number) => Math.round(v * 1e6) / 1e6;
+const formatPrice = (v: number) => String(Math.round(v * 1e4) / 1e4);
 import { confirmDialog } from '../ui/dialogs';
 import { Menu } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
@@ -126,13 +140,13 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                     </td>
                     <td className={styles.colNum}>
                       <span className={styles.withUnit}>
-                        <NumberInput
+                        <LengthInput
                           className={editor.cell}
-                          aria-label={t('Thickness of {{name}}, mm', { name: m.name })}
+                          aria-label={t('Thickness of {{name}}', { name: m.name })}
                           value={m.thickness}
                           onCommit={(thickness) => updateMaterial(m.id, { thickness })}
                         />
-                        mm
+                        {unitLabel()}
                       </span>
                     </td>
                     <td>
@@ -153,8 +167,18 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                         aria-label={t('Price of {{name}}', { name: m.name })}
                         aria-invalid={m.price === null || undefined}
                         placeholder="—"
-                        value={m.price}
-                        onCommit={(price) => updateMaterial(m.id, { price })}
+                        format={formatPrice}
+                        value={
+                          m.priceUnit === 'sqm' && m.price !== null
+                            ? exact(areaPriceOut(m.price))
+                            : m.price
+                        }
+                        onCommit={(price) =>
+                          updateMaterial(m.id, {
+                            price:
+                              m.priceUnit === 'sqm' && price !== null ? areaPriceIn(price) : price,
+                          })
+                        }
                       />
                     </td>
                     <td>
@@ -167,13 +191,13 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                         }
                       >
                         <option value="sheet">{t('sheet')}</option>
-                        <option value="sqm">m²</option>
+                        <option value="sqm">{areaUnit()}</option>
                       </select>
                     </td>
                     <td>
                       {m.priceUnit === 'sheet' ? (
                         <span className={styles.size}>
-                          <NumberInput
+                          <LengthInput
                             className={editor.cell}
                             aria-label={t('Sheet length for the price of {{name}}', {
                               name: m.name,
@@ -183,7 +207,7 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                             onCommit={(sheetLength) => updateMaterial(m.id, { sheetLength })}
                           />
                           ×
-                          <NumberInput
+                          <LengthInput
                             className={editor.cell}
                             aria-label={t('Sheet width for the price of {{name}}', {
                               name: m.name,
@@ -236,7 +260,13 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
         <div className={editor.cardHeader}>
           <h2 id="bands-h">{t('Edge bands')}</h2>
           <span className={editor.cardMeta}>
-            {t('Priced per metre, plus {{mm}} mm per banded edge', { mm: settings.edgeAllowance })}
+            {isImperial()
+              ? t('Priced per foot, plus {{length}} per banded edge', {
+                  length: formatLengthUnit(settings.edgeAllowance),
+                })
+              : t('Priced per metre, plus {{length}} per banded edge', {
+                  length: formatLengthUnit(settings.edgeAllowance),
+                })}
           </span>
           <span className={editor.spacer} />
           <button
@@ -257,7 +287,9 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
             <thead>
               <tr>
                 <th>{t('Name')}</th>
-                <th className={editor.num}>{t('Price per metre')}</th>
+                <th className={editor.num}>
+                  {isImperial() ? t('Price per foot') : t('Price per metre')}
+                </th>
                 <th className={editor.colMore}>
                   <span className="sr-only">{t('More')}</span>
                 </th>
@@ -285,11 +317,18 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                   <td className={styles.colNum}>
                     <NumberInput
                       className={editor.cell}
-                      aria-label={t('Price per metre of {{name}}', { name: b.name })}
+                      aria-label={
+                        isImperial()
+                          ? t('Price per foot of {{name}}', { name: b.name })
+                          : t('Price per metre of {{name}}', { name: b.name })
+                      }
                       aria-invalid={b.pricePerMetre === null || undefined}
                       placeholder="—"
-                      value={b.pricePerMetre}
-                      onCommit={(pricePerMetre) => updateEdgeBand(b.id, { pricePerMetre })}
+                      format={formatPrice}
+                      value={b.pricePerMetre === null ? null : exact(longPriceOut(b.pricePerMetre))}
+                      onCommit={(v) =>
+                        updateEdgeBand(b.id, { pricePerMetre: v === null ? null : longPriceIn(v) })
+                      }
                     />
                   </td>
                   <td className={editor.colMore}>

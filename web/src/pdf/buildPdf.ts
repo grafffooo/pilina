@@ -3,7 +3,8 @@
 import fontkit from '@pdf-lib/fontkit';
 import { PDFDocument, degrees, rgb, type PDFFont, type PDFPage, type RGB } from 'pdf-lib';
 import type { CostBreakdown, Job, Plan, SheetLayout } from '../engine/types';
-import { formatMetres, formatMm, formatNumber, formatSquareMetres } from '../lib/format';
+import { formatNumber } from '../lib/format';
+import { formatArea, formatLength, formatLengthUnit, formatLong } from '../lib/units';
 import { cutKindLabel, classifyOffcut, isRipLike, sizeOf, swatch } from '../model/describe';
 import { unplacedReason, usedPercent } from '../model/job';
 import { formatMoney, type Material } from '../model/library';
@@ -139,10 +140,10 @@ function summaryPages(ctx: Ctx) {
   text(
     page,
     regular,
-    tr('Cutting plan · {{date}} · kerf {{kerf}} mm · edge trim {{trim}} mm', {
+    tr('Cutting plan · {{date}} · kerf {{kerf}} · edge trim {{trim}}', {
       date,
-      kerf: formatMm(job.kerf),
-      trim: formatMm(job.trim ?? 0),
+      kerf: formatLengthUnit(job.kerf),
+      trim: formatLengthUnit(job.trim ?? 0),
     }),
     M,
     y,
@@ -157,8 +158,8 @@ function summaryPages(ctx: Ctx) {
     [tr('Sheets'), formatNumber(t.sheets)],
     [tr('Material used'), `${formatNumber(Math.round(usedPercent(plan)))}%`],
     [tr('Cuts'), formatNumber(t.cuts)],
-    [tr('Sawing'), formatMetres(t.cutLength)],
-    [tr('Edge banding'), formatMetres(t.edgeBandLength)],
+    [tr('Sawing'), formatLong(t.cutLength)],
+    [tr('Edge banding'), formatLong(t.edgeBandLength)],
   ];
   if (cost) stats.push([tr('Cost'), formatMoney(cost.total, currency)]);
   const colW = (W - 2 * M) / stats.length;
@@ -201,7 +202,7 @@ function summaryPages(ctx: Ctx) {
     for (const m of cost.materials) {
       const note =
         project.pricing.mode === 'area'
-          ? tr('{{area}} used', { area: formatSquareMetres(m.usedArea) })
+          ? tr('{{area}} used', { area: formatArea(m.usedArea) })
           : tr('n_sheets', { count: m.sheets });
       line(
         m.material,
@@ -212,7 +213,7 @@ function summaryPages(ctx: Ctx) {
       if (m.credit > 0) {
         line(
           tr('Reusable leftovers credited'),
-          formatSquareMetres(m.creditArea),
+          formatArea(m.creditArea),
           `−${formatMoney(m.credit, currency)}`,
           ACCENT,
         );
@@ -221,7 +222,7 @@ function summaryPages(ctx: Ctx) {
     for (const b of cost.edgeBands) {
       line(
         b.band,
-        formatMetres(b.length),
+        formatLong(b.length),
         b.priced ? formatMoney(b.cost, currency) : tr('no price'),
         b.priced ? INK : WARN,
       );
@@ -269,7 +270,7 @@ function summaryPages(ctx: Ctx) {
       text(
         page,
         regular,
-        `${label} ×${u.count}${spec ? ` (${formatMm(spec.length)} × ${formatMm(spec.width)})` : ''}: ${why}`,
+        `${label} ×${u.count}${spec ? ` (${formatLength(spec.length)} × ${formatLength(spec.width)})` : ''}: ${why}`,
         M,
         y,
         9,
@@ -334,8 +335,8 @@ function summaryPages(ctx: Ctx) {
     const cells = [
       '',
       p.label || tr('Part {{n}}', { n: i + 1 }),
-      formatMm(p.length!),
-      formatMm(p.width!),
+      formatLength(p.length!),
+      formatLength(p.width!),
       formatNumber(p.qty!),
       grain,
       edges,
@@ -385,7 +386,7 @@ function summaryPages(ctx: Ctx) {
     const n = used.get(s.id) ?? 0;
     if (n === 0) continue;
     const name = s.label || tr('Unnamed material');
-    text(page, regular, `${formatMm(s.length)} × ${formatMm(s.width)}`, M, y, 9.5);
+    text(page, regular, `${formatLength(s.length)} × ${formatLength(s.width)}`, M, y, 9.5);
     text(page, regular, clip(regular, name, 9.5, 300), M + 110, y, 9.5);
     text(page, bold, tr('n_sheets', { count: n }), W - M, y, 9.5, INK, 'right');
     y += 15;
@@ -420,7 +421,7 @@ function sheetPage(ctx: Ctx, sheet: SheetLayout, index: number) {
     page,
     regular,
     [
-      `${formatMm(sheet.length)} × ${formatMm(sheet.width)} mm`,
+      `${formatLength(sheet.length)} × ${formatLengthUnit(sheet.width)}`,
       stock?.label,
       tr('n_parts', { count: sheet.placements.length }),
       tr('{{pct}}% used', { pct: formatNumber(Math.round(used)) }),
@@ -473,9 +474,9 @@ function sheetPage(ctx: Ctx, sheet: SheetLayout, index: number) {
     const color = isRipLike(c) ? RIP : CROSS;
     page.drawCircle({ x: x + 6, y: H - top - 4.5, size: 6, borderColor: color, borderWidth: 1 });
     text(page, bold, String(c.number), x + 6, top + 1, 6.5, INK, 'center');
-    text(page, bold, `${c.axis} = ${formatMm(c.pos)}`, x + 16, top, 8.5);
+    text(page, bold, `${c.axis} = ${formatLength(c.pos)}`, x + 16, top, 8.5);
     text(page, regular, clip(regular, cutKindLabel(c), 8.5, 70), x + 76, top, 8.5, INK_2);
-    text(page, regular, `${formatMm(c.length)}`, x + colW - 10, top, 8.5, INK_2, 'right');
+    text(page, regular, `${formatLength(c.length)}`, x + colW - 10, top, 8.5, INK_2, 'right');
   });
   if (sheet.cuts.length > perCol * 3) {
     text(
@@ -525,7 +526,7 @@ function drawSheet(
     label(
       page,
       regular,
-      [`${formatMm(z.long)} × ${formatMm(z.short)}`],
+      [`${formatLength(z.long)} × ${formatLength(z.short)}`],
       X(r.x),
       Y(r.y),
       r.w * s,
@@ -549,7 +550,7 @@ function drawSheet(
     });
     const lines = [part?.label || tr('Part {{n}}', { n: i + 1 })];
     if (part?.length && part.width)
-      lines.push(`${formatMm(part.length)} × ${formatMm(part.width)}`);
+      lines.push(`${formatLength(part.length)} × ${formatLength(part.width)}`);
     label(page, bold, lines, X(r.x), Y(r.y), r.w * s, r.h * s, 9, INK, regular);
   }
 

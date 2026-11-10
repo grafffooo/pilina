@@ -1,4 +1,6 @@
 // Parses rows pasted from a spreadsheet (tab separated) or CSV into part rows.
+// Sizes are read in the workshop's unit (and stored in millimetres).
+import { parseLength } from '../lib/units';
 import { emptyPart, type PartRow } from './project';
 
 /** Parses "1 234,5", "1234.5" or "18,5" style numbers; `null` when empty or invalid. */
@@ -34,8 +36,8 @@ export function parsePartRows(text: string): PartRow[] {
   const rows: PartRow[] = [];
   lines.forEach((line, i) => {
     const cells = splitRow(line).map((c) => c.trim());
-    const length = parseNumber(cells[0] ?? '');
-    const width = parseNumber(cells[1] ?? '');
+    const length = parseLength(cells[0] ?? '');
+    const width = parseLength(cells[1] ?? '');
     if (i === 0 && length === null) return; // header
     if (length === null || width === null) return;
     const qty = parseNumber(cells[2] ?? '');

@@ -4,6 +4,7 @@ import { StockTable } from '../editor/StockTable';
 import type { Project } from '../model/project';
 import {
   CutOrder,
+  CutOrderSetting,
   EmptyResults,
   Results,
   SheetPanel,
@@ -186,9 +187,10 @@ function PhoneLayout({ project }: { project: Project }) {
         {tab === 'cut' &&
           (plan && plan.sheets.length > 0 ? (
             <>
-              <StartCuttingButton large />
+              <CutOrderSetting />
               <SheetPager plan={plan} />
               <CutOrder plan={plan} title={false} fullHeight />
+              <StartCuttingButton large />
             </>
           ) : (
             <EmptyResults running={status === 'running'} />

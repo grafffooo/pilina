@@ -8,9 +8,12 @@ import { formatLength, formatLengthUnit, formatLong } from '../lib/units';
 import { classifyOffcut, cutKindLabel, isRipLike, sizeOf } from '../model/describe';
 import { unplacedReason, usedPercent } from '../model/job';
 import type { Project } from '../model/project';
-import { useStore } from '../store/store';
+import { updateSettings, useStore } from '../store/store';
+import { useMediaQuery } from '../ui/hooks';
+import { SegmentedControl } from '../ui/SegmentedControl';
 import { useView } from '../store/view';
 import {
+  CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   CollapseIcon,
@@ -272,29 +275,7 @@ export function SheetPanel({
           {t('{{pct}}% used', { pct: formatNumber(Math.round(used)) })}
         </span>
         <span className={styles.spacer} />
-        <div className={ui.segmented} role="group" aria-label={t('Show on drawing')}>
-          <button
-            type="button"
-            aria-pressed={view.showCuts}
-            onClick={() => view.toggle('showCuts')}
-          >
-            {t('Cuts')}
-          </button>
-          <button
-            type="button"
-            aria-pressed={view.showSizes}
-            onClick={() => view.toggle('showSizes')}
-          >
-            {t('Sizes')}
-          </button>
-          <button
-            type="button"
-            aria-pressed={view.showEdges}
-            onClick={() => view.toggle('showEdges')}
-          >
-            {t('Edges')}
-          </button>
-        </div>
+        <ViewToggles />
         <div className={styles.zoom}>
           <button
             type="button"
@@ -473,6 +454,65 @@ function Legend({ sheet, parts }: { sheet: SheetLayout; parts: Map<string, PartI
 }
 
 /** `fullHeight` lets the list grow with the page (phone Cut tab) instead of scrolling inside. */
+/** What the drawing shows: labels, sizes, cuts and edges, each on its own. */
+function ViewToggles() {
+  const { t } = useTranslation();
+  const view = useView();
+  const phone = useMediaQuery('(max-width: 767px)');
+  const items = [
+    ['showLabels', t('Labels')],
+    ['showSizes', t('Sizes')],
+    ['showCuts', t('Cuts')],
+    ['showEdges', t('Edges')],
+  ] as const;
+  if (phone) {
+    // Checkbox chips with a 44 px tap area each.
+    return (
+      <div className={styles.toggleChips} role="group" aria-label={t('Show on drawing')}>
+        {items.map(([key, label]) => (
+          <label key={key} className={styles.toggleChip} data-on={view[key] ? '' : undefined}>
+            <input type="checkbox" checked={view[key]} onChange={() => view.toggle(key)} />
+            <span className={styles.toggleBox} aria-hidden="true">
+              {view[key] && <CheckIcon size={14} />}
+            </span>
+            {label}
+          </label>
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div className={ui.segmented} role="group" aria-label={t('Show on drawing')}>
+      {items.map(([key, label]) => (
+        <button key={key} type="button" aria-pressed={view[key]} onClick={() => view.toggle(key)}>
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Rips first or strip by strip, as a setting right on the Cut tab (phones). */
+export function CutOrderSetting() {
+  const { t } = useTranslation();
+  const order = useStore((s) => s.settings.cutOrder);
+  return (
+    <div className={styles.orderSetting}>
+      <span>{t('Cut order')}</span>
+      <SegmentedControl
+        full
+        label={t('Cut order')}
+        value={order}
+        options={[
+          { value: 'ripsFirst', label: t('Rips first') },
+          { value: 'stripByStrip', label: t('Strip by strip') },
+        ]}
+        onChange={(cutOrder) => updateSettings({ cutOrder })}
+      />
+    </div>
+  );
+}
+
 export function CutOrder({
   plan,
   title = true,
@@ -491,6 +531,8 @@ export function CutOrder({
   const kerf = useStore((s) => s.result.job?.kerf ?? 0);
   const measureFrom = useStore((s) => s.settings.cutMeasure);
   const measures = useMemo(() => measureFromPiece(sheet, kerf), [sheet, kerf]);
+  // On a phone the list only informs; tapping a row does nothing.
+  const phone = useMediaQuery('(max-width: 767px)');
   return (
     <div className={styles.listCard}>
       <div className={styles.listHeader}>
@@ -512,23 +554,34 @@ export function CutOrder({
             return (
               <li key={c.number}>
                 {group && <span className={styles.cutGroup}>{group}</span>}
-                <button
-                  type="button"
-                  className={styles.cutRow}
-                  aria-pressed={active}
-                  onPointerEnter={() => setActiveCut(c.number)}
-                  onPointerLeave={() => setActiveCut(null)}
-                  onFocus={() => setActiveCut(c.number)}
-                  onBlur={() => setActiveCut(null)}
-                  onClick={() => setActiveCut(active ? null : c.number)}
-                >
-                  <span className={rip ? styles.cutNumRip : styles.cutNumCross}>{c.number}</span>
-                  <span className={styles.cutPos}>
-                    {c.axis} = {formatLength(cutPosition(c, measureFrom, measures))}
-                  </span>
-                  <span className={styles.cutKind}>{cutKindLabel(c)}</span>
-                  <span className={styles.cutLen}>{formatLengthUnit(c.length)}</span>
-                </button>
+                {phone ? (
+                  <div className={styles.cutRow}>
+                    <span className={rip ? styles.cutNumRip : styles.cutNumCross}>{c.number}</span>
+                    <span className={styles.cutPos}>
+                      {c.axis} = {formatLength(cutPosition(c, measureFrom, measures))}
+                    </span>
+                    <span className={styles.cutKind}>{cutKindLabel(c)}</span>
+                    <span className={styles.cutLen}>{formatLengthUnit(c.length)}</span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.cutRow}
+                    aria-pressed={active}
+                    onPointerEnter={() => setActiveCut(c.number)}
+                    onPointerLeave={() => setActiveCut(null)}
+                    onFocus={() => setActiveCut(c.number)}
+                    onBlur={() => setActiveCut(null)}
+                    onClick={() => setActiveCut(active ? null : c.number)}
+                  >
+                    <span className={rip ? styles.cutNumRip : styles.cutNumCross}>{c.number}</span>
+                    <span className={styles.cutPos}>
+                      {c.axis} = {formatLength(cutPosition(c, measureFrom, measures))}
+                    </span>
+                    <span className={styles.cutKind}>{cutKindLabel(c)}</span>
+                    <span className={styles.cutLen}>{formatLengthUnit(c.length)}</span>
+                  </button>
+                )}
               </li>
             );
           })}

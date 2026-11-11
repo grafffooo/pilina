@@ -5,6 +5,7 @@ import {
   enterParts,
   expectSheets,
   openApp,
+  onPhone,
   openPart,
   section,
   waitForSaved,
@@ -37,7 +38,8 @@ test('parts typed in become a plan, rips first', async ({ page }) => {
   await expect(cuts.getByText('Rip cuts')).toBeVisible();
   await expect(cuts.getByText('Strip 2 of 2')).toBeVisible();
   // Every rip is numbered before the first cross cut.
-  const kinds = await cuts.getByRole('button').allTextContents();
+  // On a phone the rows only inform (list items); on a desktop they are buttons.
+  const kinds = await cuts.getByRole(onPhone() ? 'listitem' : 'button').allTextContents();
   const firstCross = kinds.findIndex((k) => k.includes('Cross cut'));
   expect(kinds.slice(firstCross).some((k) => k.includes('Rip'))).toBe(false);
 });

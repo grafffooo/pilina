@@ -218,8 +218,8 @@
 }
 
 .actions > button {
-  height: 56px;
-  font-size: 15px;
+  height: 60px;
+  font-size: 17px;
 }
 
 .back {
@@ -352,7 +352,7 @@
   min-height: 44px;
   padding: 0 14px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-control);
   background: var(--surface);
   font-weight: 500;
 }
@@ -441,17 +441,25 @@
 }
 
 .startLarge {
+  /* A floating button above the phone's bottom bar. */
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--bar-h) + 12px + env(safe-area-inset-bottom));
+  z-index: 10;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 52px;
+  gap: 10px;
+  height: 56px;
+  padding: 0 20px;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--radius-control);
   background: var(--moss);
   color: var(--on-moss);
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.28);
 }
 
 .startLarge:disabled {

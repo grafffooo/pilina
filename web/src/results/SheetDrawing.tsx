@@ -55,6 +55,7 @@ export function SheetDrawing({
   const view = useView();
   const controlled = cutStep !== undefined;
   const activeCut = controlled ? cutStep : view.activeCut;
+  const showLabels = controlled || view.showLabels;
   const showCuts = controlled || view.showCuts;
   const showSizes = controlled || view.showSizes;
   const showEdges = !controlled && view.showEdges;
@@ -100,8 +101,11 @@ export function SheetDrawing({
         .filter((r) => classifyOffcut(r) === 'usable')
         .map((r, i) => {
           const s = sizeOf(r);
-          const lines = [t('Offcut'), `${formatLength(s.long)} × ${formatLength(s.short)}`];
-          const fit = fitText(lines, r.w, r.h, m * 0.024, m * 0.012);
+          const lines = [
+            ...(showLabels ? [t('Offcut')] : []),
+            ...(showSizes ? [`${formatLength(s.long)} × ${formatLength(s.short)}`] : []),
+          ];
+          const fit = lines.length > 0 ? fitText(lines, r.w, r.h, m * 0.024, m * 0.012) : null;
           return (
             fit && (
               <Label key={`w${i}`} x={r.x} y={r.y} w={r.w} h={r.h} fit={fit} lines={lines} muted />
@@ -112,10 +116,10 @@ export function SheetDrawing({
       {sheet.placements.map((p) => {
         const info = parts.get(p.partId);
         const r = p.rect;
-        const lines = [info?.label ?? '?'];
+        const lines = showLabels ? [info?.label ?? '?'] : [];
         if (showSizes && info)
           lines.push(`${formatLength(info.length)} × ${formatLength(info.width)}`);
-        const fit = fitText(lines, r.w, r.h, m * 0.026, m * 0.011);
+        const fit = lines.length > 0 ? fitText(lines, r.w, r.h, m * 0.026, m * 0.011) : null;
         return (
           <g key={`${p.partId}-${p.instance}`}>
             <rect

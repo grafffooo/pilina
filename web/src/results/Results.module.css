@@ -616,3 +616,90 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* Phones: what the drawing shows, as checkbox chips with a 44 px tap area each. */
+.toggleChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+
+.toggleChip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--tap);
+  padding: 0 14px 0 10px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.toggleChip[data-on] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.toggleChip input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+}
+
+.toggleChip:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.toggleBox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--text-3);
+  border-radius: 6px;
+  color: var(--on-accent);
+}
+
+.toggleChip[data-on] .toggleBox {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.orderSetting {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.orderSetting > span {
+  padding: 0 4px;
+}
+
+@media (max-width: 767px) {
+  .fit {
+    height: var(--tap);
+    padding-inline: 16px;
+    font-size: 14px;
+  }
+
+  /* In the phone's column the cut list takes the height of its rows (it had a 300 px basis). */
+  .listCard {
+    flex: none;
+  }
+}

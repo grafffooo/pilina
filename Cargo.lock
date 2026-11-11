@@ -2434,7 +2434,7 @@ dependencies = [
 
 [[package]]
 name = "pilina-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "pilina-core",
  "serde_json",
@@ -2442,7 +2442,7 @@ dependencies = [
 
 [[package]]
 name = "pilina-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "criterion",
  "proptest",
@@ -2452,7 +2452,7 @@ dependencies = [
 
 [[package]]
 name = "pilina-desktop"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde_json",
  "tauri",
@@ -2463,7 +2463,7 @@ dependencies = [
 
 [[package]]
 name = "pilina-wasm"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "js-sys",
  "pilina-core",

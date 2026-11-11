@@ -30,7 +30,7 @@
 
 .editor {
   flex: 1 1 580px;
-  border-right: 1px solid var(--border);
+  border-inline-end: 1px solid var(--border);
 }
 
 .resultsCol {
@@ -45,7 +45,7 @@
 
   .editor {
     flex: none;
-    border-right: 0;
+    border-inline-end: 0;
     border-bottom: 1px solid var(--border);
   }
 
@@ -135,12 +135,12 @@
 .drawerClose {
   position: absolute;
   top: 16px;
-  right: 8px;
+  inset-inline-end: 8px;
   z-index: 1;
 }
 
 .drawer :global(aside) > div:first-child {
-  padding-right: 40px;
+  padding-inline-end: 40px;
 }
 
 /* Groups the editor cards so a cut project can disable them all at once. */

@@ -7,7 +7,7 @@
   min-height: 100dvh;
   padding: 16px 12px;
   background: var(--side);
-  border-right: 1px solid var(--border);
+  border-inline-end: 1px solid var(--border);
 }
 
 .brand {
@@ -99,7 +99,7 @@
   border: 0;
   border-radius: 10px;
   background: transparent;
-  text-align: left;
+  text-align: start;
 }
 
 .project:hover {
@@ -147,7 +147,7 @@
 
 .groupToggle span:nth-child(2) {
   flex: 1;
-  text-align: left;
+  text-align: start;
 }
 
 .projectName {
@@ -195,7 +195,7 @@
 
 .groupToggle span:nth-child(2) {
   flex: 1;
-  text-align: left;
+  text-align: start;
 }
 
 .projectName {
@@ -246,7 +246,7 @@
   background: transparent;
   color: var(--text-2);
   font-weight: 500;
-  text-align: left;
+  text-align: start;
 }
 
 .libraryLink span:nth-child(2) {

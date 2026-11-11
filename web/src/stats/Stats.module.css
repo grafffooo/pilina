@@ -271,7 +271,7 @@
 .projects td {
   padding: 5px 4px;
   border-bottom: 1px solid var(--border);
-  text-align: left;
+  text-align: start;
 }
 
 .projects th,
@@ -284,7 +284,7 @@
 }
 
 .num {
-  text-align: right !important;
+  text-align: end !important;
   white-space: nowrap;
 }
 

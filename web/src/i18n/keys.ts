@@ -26,9 +26,9 @@ export function extractKeys(sources: string[]): UsedKey[] {
 /** Plural keys written as identifiers (n_sheets) need English forms too; sentence keys don't. */
 export const isIdKey = (key: string) => /^[a-z0-9_]+$/.test(key);
 
-export const PLURAL_FORMS: Record<'en' | 'sk' | 'cs', string[]> = {
-  en: ['one', 'other'],
-  // Slovak and Czech: 1 / 2–4 / decimals / 5+.
-  sk: ['one', 'few', 'many', 'other'],
-  cs: ['one', 'few', 'many', 'other'],
-};
+/** The plural forms a language needs (i18next's key suffixes), from the CLDR rules. */
+export function pluralForms(intlLocale: string): string[] {
+  const order = ['zero', 'one', 'two', 'few', 'many', 'other'];
+  const have = new Intl.PluralRules(intlLocale).resolvedOptions().pluralCategories as string[];
+  return order.filter((c) => have.includes(c));
+}

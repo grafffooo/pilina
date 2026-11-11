@@ -196,3 +196,9 @@ h3 {
     break-after: auto;
   }
 }
+
+/* Right-to-left languages (Arabic, Urdu): arrows and chevrons point the other way. The sheet
+   drawings and printed labels keep their real-world left and right. */
+[dir='rtl'] [data-flip-rtl] {
+  scale: -1 1;
+}

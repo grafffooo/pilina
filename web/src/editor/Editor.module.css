@@ -33,7 +33,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .cardFooter {
@@ -69,11 +69,11 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-3);
-  text-align: left;
+  text-align: start;
 }
 
 .table th.num {
-  text-align: right;
+  text-align: end;
 }
 
 .table td {
@@ -87,7 +87,7 @@
 
 .colCheck {
   width: 44px;
-  padding-left: 14px !important;
+  padding-inline-start: 14px !important;
 }
 
 .colQty {
@@ -130,7 +130,7 @@
 
 .colMore {
   width: 44px;
-  padding-right: 10px !important;
+  padding-inline-end: 10px !important;
 }
 
 .checkWrap {
@@ -161,7 +161,7 @@
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   background: transparent;
-  text-align: right;
+  text-align: end;
 }
 
 .cell[data-unit='in'] {
@@ -189,7 +189,7 @@
 }
 
 .cellText {
-  text-align: left;
+  text-align: start;
   min-width: 120px;
 }
 
@@ -449,7 +449,7 @@
 
 .shortInput {
   width: 72px;
-  text-align: right;
+  text-align: end;
 }
 
 .checkbox {

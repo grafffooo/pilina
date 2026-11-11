@@ -35,13 +35,13 @@ export const SearchIcon = (p: IconProps) => (
   </Icon>
 );
 export const UndoIcon = (p: IconProps) => (
-  <Icon {...p}>
+  <Icon data-flip-rtl {...p}>
     <path d="M9 14 4 9l5-5" />
     <path d="M4 9h10a6 6 0 0 1 0 12h-3" />
   </Icon>
 );
 export const RedoIcon = (p: IconProps) => (
-  <Icon {...p}>
+  <Icon data-flip-rtl {...p}>
     <path d="m15 14 5-5-5-5" />
     <path d="M20 9H10a6 6 0 0 0 0 12h3" />
   </Icon>
@@ -64,12 +64,12 @@ export const StarIcon = ({ filled, ...p }: IconProps & { filled?: boolean }) => 
   </Icon>
 );
 export const ChevronLeftIcon = (p: IconProps) => (
-  <Icon strokeWidth={2} {...p}>
+  <Icon data-flip-rtl strokeWidth={2} {...p}>
     <path d="m15 18-6-6 6-6" />
   </Icon>
 );
 export const ChevronRightIcon = (p: IconProps) => (
-  <Icon strokeWidth={2} {...p}>
+  <Icon data-flip-rtl strokeWidth={2} {...p}>
     <path d="m9 18 6-6-6-6" />
   </Icon>
 );

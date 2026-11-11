@@ -1,6 +1,7 @@
 // Loaded on demand (dynamic import) so pdf-lib and the fonts stay out of the startup bundle.
 import regularUrl from '@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf?url';
 import semiboldUrl from '@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf?url';
+import { inPrintLanguage } from '../i18n';
 import { downloadBlob } from '../lib/download';
 import { buildPdf, type PdfInput } from './buildPdf';
 
@@ -24,7 +25,8 @@ export function pdfFileName(name: string): string {
 /** The cutting plan as a PDF file, named after the project. */
 export async function makePdf(input: PdfInput): Promise<File> {
   const [regular, semibold] = await Promise.all([load(regularUrl), load(semiboldUrl)]);
-  const bytes = await buildPdf(input, { regular, semibold });
+  // Scripts the PDF font can't draw get an English PDF (see pdfLanguage).
+  const bytes = await inPrintLanguage(() => buildPdf(input, { regular, semibold }));
   return new File([bytes as BlobPart], pdfFileName(input.project.name), {
     type: 'application/pdf',
   });

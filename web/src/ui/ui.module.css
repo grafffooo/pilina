@@ -33,7 +33,7 @@
   border: 0;
   border-radius: var(--radius-sm);
   background: transparent;
-  text-align: left;
+  text-align: start;
 }
 
 .menuItem:hover,

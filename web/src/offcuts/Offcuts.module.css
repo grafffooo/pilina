@@ -83,7 +83,7 @@
 
 .fitInput {
   width: 72px;
-  text-align: right;
+  text-align: end;
 }
 
 .check {
@@ -107,7 +107,7 @@
 
 .colSelect {
   width: 36px;
-  padding-left: 14px !important;
+  padding-inline-start: 14px !important;
 }
 
 .colShape {
@@ -210,7 +210,7 @@
 
 .addSize input {
   width: 90px;
-  text-align: right;
+  text-align: end;
 }
 
 .addForm select {
@@ -229,7 +229,7 @@
   place-items: center;
   width: 28px;
   height: 28px;
-  margin-right: -4px;
+  margin-inline-end: -4px;
   border: 0;
   border-radius: var(--radius-sm);
   background: transparent;

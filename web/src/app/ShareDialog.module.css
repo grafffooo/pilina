@@ -76,7 +76,7 @@
 .rowActions {
   display: flex;
   gap: 8px;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .linkBox {

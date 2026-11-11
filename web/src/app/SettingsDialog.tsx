@@ -75,13 +75,13 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
               onChange={(e) => {
                 const choice = e.target.value as LanguageChoice;
                 setLanguage(choice);
-                setLanguageChoice(choice);
+                void setLanguageChoice(choice);
               }}
             >
               <option value="auto">{t('Same as this device')}</option>
               {LANGUAGES.map((l) => (
                 <option key={l.id} value={l.id}>
-                  {l.name}
+                  {l.name === l.english ? l.name : `${l.name} (${l.english})`}
                 </option>
               ))}
             </select>

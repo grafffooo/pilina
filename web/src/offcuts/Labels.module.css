@@ -339,3 +339,32 @@
   font-size: 12px;
   color: var(--warn-text);
 }
+
+@media (max-width: 767px) {
+  .radio,
+  .checkRow {
+    align-items: center;
+    min-height: var(--tap);
+  }
+
+  .radio input,
+  .checkRow input {
+    width: 22px;
+    height: 22px;
+    margin: 0;
+  }
+
+  /* Stickers to tap as the first free one: 44 px each, across the full width. */
+  .mini {
+    width: 100%;
+    gap: 6px;
+  }
+
+  .miniUsed,
+  .miniFree,
+  .miniFilled {
+    height: var(--tap);
+    border-radius: 8px;
+    font-size: 13px;
+  }
+}

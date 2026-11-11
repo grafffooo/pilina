@@ -311,3 +311,25 @@
   padding: 16px 4px;
   color: var(--text-2);
 }
+
+@media (max-width: 767px) {
+  .search {
+    height: 48px;
+    border-radius: var(--radius-control);
+  }
+
+  .search input {
+    font-size: 16px;
+  }
+
+  .scanButton {
+    width: var(--tap);
+    height: var(--tap);
+    margin-inline-end: 0;
+  }
+
+  .check {
+    min-height: var(--tap);
+    align-items: center;
+  }
+}

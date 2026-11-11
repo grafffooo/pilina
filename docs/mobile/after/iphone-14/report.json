@@ -1,0 +1,299 @@
+[
+  {
+    "screen": "01-parts-empty",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "02-add-part",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "03-edge-sheet",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "04-material-sheet",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "05-parts-filled",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "06-stock-sheets",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "07-costs",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "08-edge-picker",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "09-input-focused",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "10-share",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "11-cutting-settings",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "12-add-sheet-sheet",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "13-actions-sheet",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "14-sheets",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "15-sheets-scrolled",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "16-cut-list",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "17-cut-mode",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "18-cut-mode-strip",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "19-cut-mode-keep-offcuts",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "20-cut-mode-done",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "21-labels",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "22-menu",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "23-cut-projects",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "24-offcut-library",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "25-filters-sheet",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "26-add-offcut",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "27-materials",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "28-add-board",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "29-add-edge-band",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "30-statistics",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "31-import",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "32-settings",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "33-settings-end",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  }
+]

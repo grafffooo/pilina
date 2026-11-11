@@ -297,19 +297,20 @@ function OffcutsFooter({ project }: { project: Project }) {
   const matching = matchingOffcuts(project, offcuts).length;
   return (
     <div className={styles.offcutFooter}>
-      <input
-        id="use-offcuts"
-        type="checkbox"
-        className={styles.checkbox}
-        checked={project.useOffcuts}
-        onChange={(e) => updateProject({ useOffcuts: e.target.checked })}
-      />
-      <label htmlFor="use-offcuts" className={styles.offcutText}>
-        <span className={styles.offcutTitle}>{t('Use matching library offcuts first')}</span>
-        <span className={styles.cardMeta}>
-          {matching === 0
-            ? t('No offcuts in these materials are in the library yet.')
-            : t('n_matching_offcuts', { count: matching })}
+      <label className={styles.offcutLabel}>
+        <input
+          type="checkbox"
+          className={styles.checkbox}
+          checked={project.useOffcuts}
+          onChange={(e) => updateProject({ useOffcuts: e.target.checked })}
+        />
+        <span className={styles.offcutText}>
+          <span className={styles.offcutTitle}>{t('Use matching library offcuts first')}</span>
+          <span className={styles.cardMeta}>
+            {matching === 0
+              ? t('No offcuts in these materials are in the library yet.')
+              : t('n_matching_offcuts', { count: matching })}
+          </span>
         </span>
       </label>
       <button

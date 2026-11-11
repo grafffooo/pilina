@@ -91,6 +91,7 @@ npx playwright install chromium   # once: install browser for end-to-end tests &
 npm run e2e          # end-to-end tests in Chromium, desktop and phone sizes (server on :5174)
 npm run e2e:ui       # …the same, in Playwright's interactive window
 npm run screenshots  # capture real Light & Dark mode screenshots into ../docs/screenshots/
+npm run screenshots:mobile  # phone audit: screenshots and a report of every screen into ../docs/mobile/<MOBILE_PHASE>/
 npm run lint
 npm run build        # production build (PWA) in web/dist
 ```

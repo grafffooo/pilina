@@ -589,3 +589,31 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+@media (max-width: 767px) {
+  .addRow {
+    height: var(--tap);
+  }
+
+  .checkbox {
+    width: 22px;
+    height: 22px;
+  }
+
+  .offcutLabel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: var(--tap);
+    cursor: pointer;
+  }
+}
+
+.offcutLabel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}

@@ -112,3 +112,9 @@
   flex: 1;
   min-width: 200px;
 }
+
+@media (max-width: 767px) {
+  .title {
+    height: var(--tap);
+  }
+}

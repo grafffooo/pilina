@@ -232,3 +232,20 @@
   color: var(--accent-ink);
   font-weight: 600;
 }
+
+/* The Edges row of a card: the part's glyph and a summary, opening the edge sheet. */
+.edgeTrigger {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  border: 1px solid var(--text-3);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: start;
+}

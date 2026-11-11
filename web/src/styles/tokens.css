@@ -160,6 +160,17 @@ body {
   body {
     overflow-x: clip;
   }
+
+  /* A <details> toggle is a tap target. */
+  summary {
+    display: flex;
+    align-items: center;
+    min-height: var(--tap);
+  }
+
+  input[type='file'] {
+    font-size: 16px;
+  }
 }
 
 :focus-visible {

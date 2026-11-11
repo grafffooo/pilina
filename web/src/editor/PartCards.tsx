@@ -125,16 +125,20 @@ export function PartCards({
             </div>
             <div className={cardStyles.field}>
               <span>{t('Edges')}</span>
-              <div className={cardStyles.edgeRow}>
-                <EdgePicker
-                  edges={p.edges}
-                  partName={name}
-                  bandId={p.edgeBandId}
-                  onChange={(edges) => updatePart(p.id, { edges })}
-                  onBandChange={(edgeBandId) => updatePart(p.id, { edgeBandId })}
-                />
-                <span>{describeEdges(p.edges)}</span>
-              </div>
+              <EdgePicker
+                edges={p.edges}
+                partName={name}
+                bandId={p.edgeBandId}
+                onChange={(edges) => updatePart(p.id, { edges })}
+                onBandChange={(edgeBandId) => updatePart(p.id, { edgeBandId })}
+                triggerClassName={cardStyles.edgeTrigger}
+                trigger={
+                  <>
+                    <EdgeGlyph edges={p.edges} size={28} />
+                    <span>{describeEdges(p.edges)}</span>
+                  </>
+                }
+              />
             </div>
             <CardActions>
               <button type="button" onClick={() => duplicatePart(p.id)}>

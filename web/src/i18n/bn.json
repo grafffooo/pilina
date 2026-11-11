@@ -600,5 +600,8 @@
   "Today": "আজ",
   "Yesterday": "গতকাল",
   "This week": "এই সপ্তাহ",
-  "Earlier": "আগের"
+  "Earlier": "আগের",
+  "Add another": "আরেকটি যোগ করুন",
+  "Smaller than the reusable size": "পুনর্ব্যবহারযোগ্য আকারের চেয়ে ছোট",
+  "Filters": "ফিল্টার"
 }

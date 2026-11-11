@@ -134,14 +134,34 @@ for (const device of DEVICES) {
       // — Editor —
       await shot('parts-empty');
       for (const [i, p] of CABINET.entries()) {
-        const n1 = i + 1;
-        const length = page.getByRole('textbox', { name: `Length, Part ${n1}` });
-        if (!(await length.isVisible()))
-          await page.getByRole('button', { name: 'Add part' }).click();
-        await length.fill(p.length);
-        await page.getByRole('textbox', { name: `Width, Part ${n1}` }).fill(p.width);
-        await page.getByRole('textbox', { name: `Qty, Part ${n1}` }).fill(p.qty ?? '1');
-        await page.getByRole('textbox', { name: `Label, part ${n1}` }).fill(p.label ?? '');
+        if (i === 0) {
+          // The first, blank card is open: type into it.
+          await page.getByRole('textbox', { name: 'Length, Part 1' }).fill(p.length);
+          await page.getByRole('textbox', { name: 'Width, Part 1' }).fill(p.width);
+          await page.getByRole('textbox', { name: 'Qty, Part 1' }).fill(p.qty ?? '1');
+          await page.getByRole('textbox', { name: 'Label, part 1' }).fill(p.label ?? '');
+          continue;
+        }
+        // The others have their own screen.
+        await page.getByRole('button', { name: 'Add part' }).first().click();
+        if (i === 1) {
+          await page.getByRole('textbox', { name: 'Length', exact: true }).fill(p.length);
+          await shot('add-part');
+          await page.getByRole('button', { name: /^Edge banding for/ }).click();
+          await page.waitForTimeout(300);
+          await shot('edge-sheet');
+          await page.getByRole('button', { name: 'Done' }).click();
+          await page.getByRole('button', { name: /^Material: / }).click();
+          await page.waitForTimeout(300);
+          await shot('material-sheet');
+          await page.keyboard.press('Escape');
+        }
+        await page.getByRole('textbox', { name: 'Label', exact: true }).fill(p.label ?? '');
+        await page.getByRole('textbox', { name: 'Length', exact: true }).fill(p.length);
+        await page.getByRole('textbox', { name: 'Width', exact: true }).fill(p.width);
+        await page.getByRole('textbox', { name: 'Qty', exact: true }).fill(p.qty ?? '1');
+        await page.getByRole('button', { name: 'Add part', exact: true }).click();
+        await expect(page.getByRole('textbox', { name: 'Length', exact: true })).toBeHidden();
       }
       await page.keyboard.press('Tab');
       await page.getByRole('textbox', { name: 'Project name' }).fill('Pantry shelving');
@@ -169,6 +189,7 @@ for (const device of DEVICES) {
         await page.keyboard.press('Escape');
       }
       // A focused input, to see what the browser does on focus.
+      await page.getByRole('button', { name: /×/, expanded: false }).first().click();
       await page
         .getByRole('textbox', { name: /^Length, / })
         .first()

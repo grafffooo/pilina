@@ -600,5 +600,8 @@
   "Today": "I dag",
   "Yesterday": "I går",
   "This week": "Denne uken",
-  "Earlier": "Eldre"
+  "Earlier": "Eldre",
+  "Add another": "Legg til en til",
+  "Smaller than the reusable size": "Mindre enn den brukbare størrelsen",
+  "Filters": "Filtre"
 }

@@ -600,5 +600,8 @@
   "Today": "Heute",
   "Yesterday": "Gestern",
   "This week": "Diese Woche",
-  "Earlier": "Früher"
+  "Earlier": "Früher",
+  "Add another": "Weitere hinzufügen",
+  "Smaller than the reusable size": "Kleiner als die nutzbare Größe",
+  "Filters": "Filter"
 }

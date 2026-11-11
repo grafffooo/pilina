@@ -600,5 +600,8 @@
   "Today": "Ma",
   "Yesterday": "Tegnap",
   "This week": "Ezen a héten",
-  "Earlier": "Korábbi"
+  "Earlier": "Korábbi",
+  "Add another": "Még egy hozzáadása",
+  "Smaller than the reusable size": "A felhasználható méretnél kisebb",
+  "Filters": "Szűrők"
 }

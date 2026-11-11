@@ -600,5 +600,8 @@
   "Today": "Σήμερα",
   "Yesterday": "Χθες",
   "This week": "Αυτή την εβδομάδα",
-  "Earlier": "Παλαιότερα"
+  "Earlier": "Παλαιότερα",
+  "Add another": "Προσθήκη άλλου",
+  "Smaller than the reusable size": "Μικρότερο από το επαναχρησιμοποιήσιμο μέγεθος",
+  "Filters": "Φίλτρα"
 }

@@ -9,6 +9,8 @@ export function BottomBar() {
   const { t } = useTranslation();
   const view = useStore((s) => s.view);
   const tab = useStore((s) => s.phoneTab);
+  // Task screens (add forms, label printing) have their own back arrow and bottom action.
+  if (view === 'labels' || view.startsWith('add-')) return null;
   const projects = view === 'projects' || view === 'archive' || view === 'settings';
   const sections: { id: PhoneTab; label: string; icon: ReactNode }[] = [
     { id: 'parts', label: t('Parts'), icon: <PartsIcon size={24} /> },

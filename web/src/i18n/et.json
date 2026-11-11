@@ -600,5 +600,8 @@
   "Today": "Täna",
   "Yesterday": "Eile",
   "This week": "Sel nädalal",
-  "Earlier": "Varasemad"
+  "Earlier": "Varasemad",
+  "Add another": "Lisa veel üks",
+  "Smaller than the reusable size": "Väiksem kui taaskasutatav suurus",
+  "Filters": "Filtrid"
 }

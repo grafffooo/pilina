@@ -55,6 +55,7 @@ function SettingChip({
   }
   return (
     <Popover
+      title={label}
       triggerClassName={styles.chip}
       label={
         <>

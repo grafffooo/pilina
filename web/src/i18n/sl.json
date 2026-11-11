@@ -676,5 +676,8 @@
   "Today": "Danes",
   "Yesterday": "Včeraj",
   "This week": "Ta teden",
-  "Earlier": "Starejši"
+  "Earlier": "Starejši",
+  "Add another": "Dodaj še enega",
+  "Smaller than the reusable size": "Manjši od uporabne velikosti",
+  "Filters": "Filtri"
 }

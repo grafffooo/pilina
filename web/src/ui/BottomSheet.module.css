@@ -1,0 +1,96 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  background: rgb(42 33 25 / 0.5);
+}
+
+.sheet {
+  width: 100%;
+  max-height: 88dvh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  box-shadow: 0 -8px 32px rgb(0 0 0 / 0.22);
+}
+
+.grab {
+  flex: none;
+  align-self: center;
+  width: 40px;
+  height: 5px;
+  margin: 8px 0 6px;
+  border-radius: 3px;
+  background: var(--border);
+}
+
+.head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 4px 16px;
+}
+
+.titles {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.titles h2 {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.titles span {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--chip);
+  color: var(--text);
+}
+
+.content {
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 16px 16px;
+}
+
+.footer {
+  flex: none;
+  padding: 8px 16px 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* A full-width action under the content. */
+.primary {
+  width: 100%;
+  height: 52px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 16px;
+  font-weight: 600;
+}

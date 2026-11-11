@@ -676,5 +676,8 @@
   "Today": "Dnes",
   "Yesterday": "Včera",
   "This week": "Tento týždeň",
-  "Earlier": "Staršie"
+  "Earlier": "Staršie",
+  "Add another": "Pridať ďalšiu",
+  "Smaller than the reusable size": "Menšie než použiteľná veľkosť",
+  "Filters": "Filtre"
 }

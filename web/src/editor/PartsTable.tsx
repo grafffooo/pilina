@@ -3,7 +3,14 @@ import { swatch } from '../model/describe';
 import { missingPartFields } from '../model/job';
 import { isMultiCell, parsePartRows } from '../model/paste';
 import { countPieces, emptyPart, isBlankPart, type PartRow, type Project } from '../model/project';
-import { duplicatePart, insertParts, removePart, replacePart, updatePart } from '../store/store';
+import {
+  duplicatePart,
+  insertParts,
+  removePart,
+  replacePart,
+  updatePart,
+  useStore,
+} from '../store/store';
 import { MoreIcon, PlusIcon } from '../ui/icons';
 import { LengthInput, NumberInput } from '../ui/NumberInput';
 import { ProjectSettingChips } from './ProjectSettingChips';
@@ -50,6 +57,9 @@ export function PartsTable({ project }: { project: Project }) {
     );
   };
 
+  // The buttons: a phone has a screen for a new part; elsewhere a blank row is added to the table.
+  const onAdd = () => (phone ? useStore.getState().setView('add-part') : addRow());
+
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>, row: number) => {
     if (e.key !== 'Enter') return;
     e.preventDefault();
@@ -83,7 +93,7 @@ export function PartsTable({ project }: { project: Project }) {
         <span className={styles.spacer} />
         <span className={styles.headerActions}>
           <ProjectSettingChips project={project} />
-          <button type="button" className={ui.buttonPrimary} onClick={() => addRow()}>
+          <button type="button" className={ui.buttonPrimary} onClick={onAdd}>
             {t('Add part')}
           </button>
         </span>
@@ -222,7 +232,7 @@ export function PartsTable({ project }: { project: Project }) {
         </div>
       )}
       <div className={styles.cardFooter}>
-        <button type="button" className={styles.addRow} onClick={() => addRow()}>
+        <button type="button" className={styles.addRow} onClick={onAdd}>
           <PlusIcon size={16} />
           {t('Add a part, or paste rows from a spreadsheet')}
         </button>

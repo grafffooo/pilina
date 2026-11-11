@@ -638,5 +638,8 @@
   "Today": "Azi",
   "Yesterday": "Ieri",
   "This week": "Săptămâna aceasta",
-  "Earlier": "Mai vechi"
+  "Earlier": "Mai vechi",
+  "Add another": "Adaugă încă unul",
+  "Smaller than the reusable size": "Mai mic decât dimensiunea reutilizabilă",
+  "Filters": "Filtre"
 }

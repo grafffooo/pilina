@@ -638,5 +638,8 @@
   "Today": "Aujourd’hui",
   "Yesterday": "Hier",
   "This week": "Cette semaine",
-  "Earlier": "Plus ancien"
+  "Earlier": "Plus ancien",
+  "Add another": "Ajouter un autre",
+  "Smaller than the reusable size": "Plus petit que la taille réutilisable",
+  "Filters": "Filtres"
 }

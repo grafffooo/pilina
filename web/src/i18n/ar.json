@@ -752,5 +752,8 @@
   "Today": "اليوم",
   "Yesterday": "أمس",
   "This week": "هذا الأسبوع",
-  "Earlier": "أقدم"
+  "Earlier": "أقدم",
+  "Add another": "إضافة آخر",
+  "Smaller than the reusable size": "أصغر من الحجم القابل لإعادة الاستخدام",
+  "Filters": "عوامل التصفية"
 }

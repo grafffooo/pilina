@@ -87,8 +87,11 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
             type="button"
             className={ui.buttonPrimary}
             onClick={() => {
+              if (phone) {
+                useStore.getState().setView('add-board');
+                return;
+              }
               const m = addMaterial(t('New board'), { length: 2800, width: 2070 });
-              if (phone) setBoardOpen(m.id);
               requestAnimationFrame(() =>
                 document.querySelector<HTMLInputElement>(`[data-material="${m.id}"]`)?.select(),
               );
@@ -300,8 +303,11 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
             type="button"
             className={ui.button}
             onClick={() => {
+              if (phone) {
+                useStore.getState().setView('add-band');
+                return;
+              }
               const b = addEdgeBand();
-              if (phone) setBandOpen(b.id);
               requestAnimationFrame(() =>
                 document.querySelector<HTMLInputElement>(`[data-band="${b.id}"]`)?.select(),
               );

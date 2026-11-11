@@ -13,7 +13,10 @@ import ui from '../ui/ui.module.css';
 import { BackButton } from '../ui/BackButton';
 import editor from '../editor/Editor.module.css';
 import { MaterialSelect } from '../editor/MaterialSelect';
+import { usePlaces } from './places';
 import { useMediaQuery } from '../ui/hooks';
+import { BottomSheet } from '../ui/BottomSheet';
+import sheetStyles from '../ui/BottomSheet.module.css';
 import { CardActions, CardField, cardStyles, RowCard } from '../ui/RowCard';
 import { locale, t as i18nT } from '../i18n';
 import styles from './Offcuts.module.css';
@@ -25,19 +28,6 @@ const statusText = (s: OffcutStatus) =>
   s === 'available' ? i18nT('Available') : s === 'reserved' ? i18nT('Reserved') : i18nT('Used');
 
 const dateFormat = () => new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'short' });
-
-/** Places to offer: the saved ones, then any other place an offcut is stored in. */
-function usePlaces(): string[] {
-  const saved = useStore((s) => s.settings.locations);
-  const offcuts = useStore((s) => s.offcuts);
-  return useMemo(() => {
-    const seen = new Set(saved.map((l) => l.toLowerCase()));
-    const extra = [...new Set(offcuts.map((o) => o.location.trim()).filter(Boolean))]
-      .filter((l) => !seen.has(l.toLowerCase()))
-      .sort((a, b) => a.localeCompare(b));
-    return [...saved, ...extra];
-  }, [saved, offcuts]);
-}
 
 export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
   const { t } = useTranslation();
@@ -57,6 +47,7 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
   // On a phone the table is a list of cards.
   const phone = useMediaQuery('(max-width: 767px)');
   const [openId, setOpenId] = useState<string | null>(null);
+  const [filtering, setFiltering] = useState(false);
 
   const matName = (id: string | null) =>
     materials.find((m) => m.id === id)?.name ?? t('No material');
@@ -94,6 +85,46 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
       else next.add(id);
       return next;
     });
+
+  const filterControls = (
+    <>
+      <select
+        className={ui.fieldInput}
+        aria-label={t('Material')}
+        value={materialId ?? ''}
+        onChange={(e) => setMaterialId(e.target.value || null)}
+      >
+        <option value="">{t('All materials')}</option>
+        {materials.map((m) => (
+          <option key={m.id} value={m.id}>
+            {m.name}
+          </option>
+        ))}
+      </select>
+      <span className={styles.fits}>
+        {t('Fits')}
+        <LengthInput
+          className={`${ui.fieldInput} ${styles.fitInput}`}
+          aria-label={t('Must fit length')}
+          placeholder={t('L')}
+          value={minL}
+          onCommit={setMinL}
+        />
+        ×
+        <LengthInput
+          className={`${ui.fieldInput} ${styles.fitInput}`}
+          aria-label={t('Must fit width')}
+          placeholder={t('W')}
+          value={minW}
+          onCommit={setMinW}
+        />
+      </span>
+      <label className={styles.check}>
+        <input type="checkbox" checked={showUsed} onChange={(e) => setShowUsed(e.target.checked)} />
+        {t('Show used')}
+      </label>
+    </>
+  );
 
   return (
     <div className={styles.screen}>
@@ -169,45 +200,30 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
             />,
             document.body,
           )}
-        <select
-          className={ui.fieldInput}
-          aria-label={t('Material')}
-          value={materialId ?? ''}
-          onChange={(e) => setMaterialId(e.target.value || null)}
-        >
-          <option value="">{t('All materials')}</option>
-          {materials.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-        </select>
-        <span className={styles.fits}>
-          {t('Fits')}
-          <LengthInput
-            className={`${ui.fieldInput} ${styles.fitInput}`}
-            aria-label={t('Must fit length')}
-            placeholder={t('L')}
-            value={minL}
-            onCommit={setMinL}
-          />
-          ×
-          <LengthInput
-            className={`${ui.fieldInput} ${styles.fitInput}`}
-            aria-label={t('Must fit width')}
-            placeholder={t('W')}
-            value={minW}
-            onCommit={setMinW}
-          />
-        </span>
-        <label className={styles.check}>
-          <input
-            type="checkbox"
-            checked={showUsed}
-            onChange={(e) => setShowUsed(e.target.checked)}
-          />
-          {t('Show used')}
-        </label>
+        {phone ? (
+          <button type="button" className={ui.button} onClick={() => setFiltering(true)}>
+            {t('Filters')}
+          </button>
+        ) : (
+          filterControls
+        )}
+        {phone && filtering && (
+          <BottomSheet
+            title={t('Filters')}
+            onClose={() => setFiltering(false)}
+            footer={
+              <button
+                type="button"
+                className={sheetStyles.primary}
+                onClick={() => setFiltering(false)}
+              >
+                {t('Done')}
+              </button>
+            }
+          >
+            {filterControls}
+          </BottomSheet>
+        )}
         {selected.size > 0 && (
           <button
             type="button"
@@ -535,12 +551,25 @@ function Shape({ offcut, color }: { offcut: Offcut; color: string }) {
 function AddOffcut() {
   const places = usePlaces();
   const { t } = useTranslation();
+  const phone = useMediaQuery('(max-width: 767px)');
   const [length, setLength] = useState<number | null>(null);
   const [width, setWidth] = useState<number | null>(null);
   const [materialId, setMaterialId] = useState<string | null>(null);
   const [location, setLocation] = useState('');
   const [grain, setGrain] = useState<Grain>('length');
   const ok = !!length && !!width && length > 0 && width > 0;
+  if (phone) {
+    return (
+      <button
+        type="button"
+        className={ui.button}
+        onClick={() => useStore.getState().setView('add-offcut')}
+      >
+        <PlusIcon size={16} />
+        {t('Add offcut')}
+      </button>
+    );
+  }
   return (
     <Popover
       triggerClassName={ui.button}

@@ -19,6 +19,7 @@ import { LengthInput, NumberInput } from '../ui/NumberInput';
 import { Menu } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import { MaterialSelect } from './MaterialSelect';
+import { AddStockSheet } from './AddStockSheet';
 import styles from './Editor.module.css';
 import { useTranslation } from 'react-i18next';
 import type { Grain } from '../engine/types';
@@ -30,6 +31,7 @@ export function StockTable({ project }: { project: Project }) {
   // On a phone the rows are cards; a new sheet opens its card.
   const phone = useMediaQuery('(max-width: 767px)');
   const [openId, setOpenId] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
   return (
     <section className={styles.card} aria-labelledby="stock-h" data-cards={phone ? '' : undefined}>
       <div className={styles.cardHeader}>
@@ -40,9 +42,12 @@ export function StockTable({ project }: { project: Project }) {
           type="button"
           className={ui.button}
           onClick={() => {
+            if (phone) {
+              setAdding(true);
+              return;
+            }
             const sheet = emptyStock();
             addStock(sheet);
-            if (phone) setOpenId(sheet.id);
             requestAnimationFrame(() =>
               document
                 .querySelector<HTMLInputElement>(
@@ -169,6 +174,9 @@ export function StockTable({ project }: { project: Project }) {
         </div>
       )}
       <OffcutsFooter project={project} />
+      {adding && (
+        <AddStockSheet onClose={() => setAdding(false)} onAdded={(sheet) => setOpenId(sheet.id)} />
+      )}
     </section>
   );
 }

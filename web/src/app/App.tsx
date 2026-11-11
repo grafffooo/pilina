@@ -27,6 +27,7 @@ import ui from '../ui/ui.module.css';
 import { ProjectHeader, RunStatus } from './ProjectHeader';
 import { useProjectStatus } from './StatusBadge';
 import { Sidebar } from './Sidebar';
+import { AddBoardScreen, AddEdgeBandScreen, AddOffcutScreen, AddPartScreen } from './AddScreens';
 import { BottomBar } from './BottomBar';
 import { ImportHost } from './importHost';
 import { CutArchiveScreen, ProjectsScreen } from './ProjectsScreen';
@@ -120,6 +121,10 @@ function PhoneApp({ project }: { project: Project }) {
       {view === 'projects' && <ProjectsScreen />}
       {view === 'archive' && <CutArchiveScreen />}
       {view === 'settings' && <SettingsScreen />}
+      {view === 'add-part' && <AddPartScreen />}
+      {view === 'add-board' && <AddBoardScreen />}
+      {view === 'add-band' && <AddEdgeBandScreen />}
+      {view === 'add-offcut' && <AddOffcutScreen />}
       {(view === 'library' || view === 'offcuts' || view === 'labels' || view === 'stats') && (
         <div className={styles.phone}>
           {view === 'library' && <LibraryScreen />}

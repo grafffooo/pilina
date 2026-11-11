@@ -28,6 +28,25 @@ import styles from './Library.module.css';
 const grainName = (g: Grain, t: (k: string) => string) =>
   g === 'length' ? t('Along the length') : g === 'width' ? t('Along the width') : t('No grain');
 
+/** A board's price line and its "size · grain" line, for its card and the material picker. */
+export function boardSummary(m: Material, currency: string, t: (k: string) => string): string[] {
+  const shown =
+    m.price === null ? null : m.priceUnit === 'sqm' ? exact(areaPriceOut(m.price)) : m.price;
+  return [
+    shown === null
+      ? '—'
+      : `${formatMoney(shown, currency)} / ${m.priceUnit === 'sheet' ? t('sheet') : areaUnit()}`,
+    [
+      m.priceUnit === 'sheet' && m.sheetLength && m.sheetWidth
+        ? `${formatLength(m.sheetLength)} × ${formatLength(m.sheetWidth)}`
+        : null,
+      grainName(materialGrain(m), t),
+    ]
+      .filter(Boolean)
+      .join(' · '),
+  ];
+}
+
 export function BoardCards({
   materials,
   usage,
@@ -69,19 +88,7 @@ export function BoardCards({
               />
             }
             title={m.name}
-            lines={[
-              shownPrice === null
-                ? '—'
-                : `${formatMoney(shownPrice, currency)} / ${m.priceUnit === 'sheet' ? t('sheet') : areaUnit()}`,
-              [
-                m.priceUnit === 'sheet' && m.sheetLength && m.sheetWidth
-                  ? `${formatLength(m.sheetLength)} × ${formatLength(m.sheetWidth)}`
-                  : null,
-                grainName(materialGrain(m), t),
-              ]
-                .filter(Boolean)
-                .join(' · '),
-            ]}
+            lines={boardSummary(m, currency, t)}
           >
             <CardField label={t('Name')}>
               <input

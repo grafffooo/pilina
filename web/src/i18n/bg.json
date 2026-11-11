@@ -600,5 +600,8 @@
   "Today": "Днес",
   "Yesterday": "Вчера",
   "This week": "Тази седмица",
-  "Earlier": "По-стари"
+  "Earlier": "По-стари",
+  "Add another": "Добави още един",
+  "Smaller than the reusable size": "По-малко от годния размер",
+  "Filters": "Филтри"
 }

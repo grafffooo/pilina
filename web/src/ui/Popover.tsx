@@ -3,6 +3,8 @@
 // can't clip it.
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { BottomSheet } from './BottomSheet';
+import { useMediaQuery } from './hooks';
 import styles from './ui.module.css';
 
 interface PopoverProps {
@@ -12,6 +14,8 @@ interface PopoverProps {
   ariaLabel?: string;
   triggerClassName?: string;
   align?: 'start' | 'end';
+  /** The sheet's title on a phone (the panel is a bottom sheet there); defaults to `ariaLabel`. */
+  title?: string;
   children: (close: () => void) => ReactNode;
 }
 
@@ -20,9 +24,11 @@ export function Popover({
   ariaLabel,
   triggerClassName,
   align = 'start',
+  title,
   children,
 }: PopoverProps) {
   const [open, setOpen] = useState(false);
+  const phone = useMediaQuery('(max-width: 767px)');
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
@@ -31,7 +37,7 @@ export function Popover({
   // Place the panel under the trigger (or above it near the bottom of the window) and keep
   // it there while the page scrolls.
   useLayoutEffect(() => {
-    if (!open) return;
+    if (!open || phone) return;
     const place = () => {
       const t = trigger.current?.getBoundingClientRect();
       const el = panel.current;
@@ -54,10 +60,10 @@ export function Popover({
       window.removeEventListener('scroll', place, true);
       window.removeEventListener('resize', place);
     };
-  }, [open, align]);
+  }, [open, align, phone]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || phone) return;
     const onDown = (e: PointerEvent) => {
       const target = e.target as Node;
       if (!root.current?.contains(target) && !panel.current?.contains(target)) setOpen(false);
@@ -74,12 +80,12 @@ export function Popover({
       document.removeEventListener('pointerdown', onDown);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open]);
+  }, [open, phone]);
 
   // Move focus into the panel when it opens.
   useEffect(() => {
-    if (open) panel.current?.querySelector<HTMLElement>('input, select, button')?.focus();
-  }, [open]);
+    if (open && !phone) panel.current?.querySelector<HTMLElement>('input, select, button')?.focus();
+  }, [open, phone]);
 
   // Looked up by id (not the ref) because `close` is handed to the render function.
   const close = () => {
@@ -101,7 +107,13 @@ export function Popover({
       >
         {label}
       </button>
+      {open && phone && (
+        <BottomSheet title={title ?? ariaLabel ?? ''} onClose={close}>
+          {children(close)}
+        </BottomSheet>
+      )}
       {open &&
+        !phone &&
         createPortal(
           <div ref={panel} id={id} className={styles.popover}>
             {children(close)}

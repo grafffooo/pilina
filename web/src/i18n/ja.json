@@ -562,5 +562,8 @@
   "Today": "今日",
   "Yesterday": "昨日",
   "This week": "今週",
-  "Earlier": "それ以前"
+  "Earlier": "それ以前",
+  "Add another": "もう1つ追加",
+  "Smaller than the reusable size": "再利用できるサイズより小さい",
+  "Filters": "絞り込み"
 }

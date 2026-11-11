@@ -48,7 +48,7 @@ export function RowCard({
       data-highlight={highlight ? '' : undefined}
     >
       <div className={styles.row}>
-        {lead && <div className={styles.lead}>{lead}</div>}
+        {lead && <label className={styles.lead}>{lead}</label>}
         {/* Not a <button>: a locked (cut) project disables its form controls, but its cards
             must still open to be read. */}
         <div

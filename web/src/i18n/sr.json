@@ -638,5 +638,8 @@
   "Today": "Danas",
   "Yesterday": "Juče",
   "This week": "Ove nedelje",
-  "Earlier": "Stariji"
+  "Earlier": "Stariji",
+  "Add another": "Dodaj još jedan",
+  "Smaller than the reusable size": "Manji od iskoristive veličine",
+  "Filters": "Filteri"
 }

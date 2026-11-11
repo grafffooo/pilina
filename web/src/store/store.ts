@@ -43,7 +43,18 @@ export type SaveState = 'saved' | 'pending' | 'error';
  * printing. On a phone the Projects list, the Cut archive and Settings are screens too.
  */
 export type MainView =
-  'project' | 'projects' | 'archive' | 'settings' | 'library' | 'offcuts' | 'labels' | 'stats';
+  | 'project'
+  | 'projects'
+  | 'archive'
+  | 'settings'
+  | 'library'
+  | 'offcuts'
+  | 'labels'
+  | 'stats'
+  | 'add-part'
+  | 'add-board'
+  | 'add-band'
+  | 'add-offcut';
 
 /** The sections of an open project on a phone (the bottom bar). */
 export type PhoneTab = 'parts' | 'sheets' | 'cut';
@@ -56,6 +67,10 @@ const DRILL_DOWN: ReadonlySet<MainView> = new Set([
   'offcuts',
   'labels',
   'stats',
+  'add-part',
+  'add-board',
+  'add-band',
+  'add-offcut',
 ]);
 
 const onPhone = () =>

@@ -29,6 +29,17 @@ export async function enterParts(page: Page, parts: PartInput[]) {
   for (const [i, p] of parts.entries()) {
     const n = i + 1;
     const length = page.getByRole('textbox', { name: `Length, Part ${n}` });
+    if (onPhone() && !(await length.isVisible())) {
+      // A phone adds parts on their own screen (the first, blank card is open already).
+      await page.getByRole('button', { name: 'Add part' }).first().click();
+      if (p.label) await page.getByRole('textbox', { name: 'Label', exact: true }).fill(p.label);
+      await page.getByRole('textbox', { name: 'Length', exact: true }).fill(p.length);
+      await page.getByRole('textbox', { name: 'Width', exact: true }).fill(p.width);
+      if (p.qty) await page.getByRole('textbox', { name: 'Qty', exact: true }).fill(p.qty);
+      await page.getByRole('button', { name: 'Add part', exact: true }).click();
+      await expect(page.getByRole('textbox', { name: 'Length', exact: true })).toBeHidden();
+      continue;
+    }
     if (!(await length.isVisible())) await page.getByRole('button', { name: 'Add part' }).click();
     await length.fill(p.length);
     await page.getByRole('textbox', { name: `Width, Part ${n}` }).fill(p.width);

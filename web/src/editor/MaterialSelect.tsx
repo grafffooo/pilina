@@ -1,5 +1,9 @@
 import { addMaterial, useStore } from '../store/store';
+import { useState } from 'react';
 import { promptDialog } from '../ui/dialogs';
+import { useMediaQuery } from '../ui/hooks';
+import { ChevronDownIcon } from '../ui/icons';
+import { MaterialPickerSheet } from './MaterialPicker';
 import styles from './Editor.module.css';
 import { useTranslation } from 'react-i18next';
 
@@ -26,6 +30,42 @@ export function MaterialSelect({
   const { t } = useTranslation();
   const materials = useStore((s) => s.materials);
   const known = value === null || materials.some((m) => m.id === value);
+  const phone = useMediaQuery('(max-width: 767px)');
+  const [picking, setPicking] = useState(false);
+  if (phone) {
+    const current = materials.find((m) => m.id === value);
+    const name =
+      current?.name ?? (known ? (anyLabel ?? t('Choose material…')) : t('Deleted material'));
+    return (
+      <>
+        <button
+          type="button"
+          className={styles.picker}
+          aria-haspopup="dialog"
+          aria-label={`${ariaLabel}: ${name}`}
+          onClick={() => setPicking(true)}
+        >
+          <span
+            className={styles.pickerSwatch}
+            style={current ? { background: current.color } : undefined}
+            aria-hidden="true"
+          />
+          <span className={styles.pickerName}>{name}</span>
+          <ChevronDownIcon size={20} />
+        </button>
+        {picking && (
+          <MaterialPickerSheet
+            title={t('Material')}
+            value={value}
+            anyLabel={anyLabel}
+            sheet={sheet}
+            onPick={onChange}
+            onClose={() => setPicking(false)}
+          />
+        )}
+      </>
+    );
+  }
   return (
     <select
       className={styles.select}

@@ -600,5 +600,8 @@
   "Today": "Tänään",
   "Yesterday": "Eilen",
   "This week": "Tällä viikolla",
-  "Earlier": "Aiemmat"
+  "Earlier": "Aiemmat",
+  "Add another": "Lisää toinen",
+  "Smaller than the reusable size": "Pienempi kuin käyttökelpoinen koko",
+  "Filters": "Suodattimet"
 }

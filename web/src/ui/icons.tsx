@@ -121,11 +121,15 @@ export const SheetIcon = (p: IconProps) => (
     <path d="M10 3v18M10 10h10" />
   </Icon>
 );
+/** A circular saw blade: ten teeth around a disc with an arbor hole. */
 export const SawIcon = (p: IconProps) => (
   <Icon {...p}>
-    <circle cx="6" cy="6" r="3" />
-    <circle cx="6" cy="18" r="3" />
-    <path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12" />
+    <path
+      d="M12.00 3.60L13.53 1.11L14.32 3.93A8.4 8.4 0 0 1 16.94 5.20L16.94 5.20L19.64 4.09L18.62 6.83A8.4 8.4 0 0 1 19.99 9.40L19.99 9.40L22.83 10.09L20.39 11.71A8.4 8.4 0 0 1 19.99 14.60L19.99 14.60L21.89 16.82L18.96 16.70A8.4 8.4 0 0 1 16.94 18.80L16.94 18.80L17.16 21.71L14.87 19.89A8.4 8.4 0 0 1 12.00 20.40L12.00 20.40L10.47 22.89L9.68 20.07A8.4 8.4 0 0 1 7.06 18.80L7.06 18.80L4.36 19.91L5.38 17.17A8.4 8.4 0 0 1 4.01 14.60L4.01 14.60L1.17 13.91L3.61 12.29A8.4 8.4 0 0 1 4.01 9.40L4.01 9.40L2.11 7.18L5.04 7.30A8.4 8.4 0 0 1 7.06 5.20L7.06 5.20L6.84 2.29L9.13 4.11A8.4 8.4 0 0 1 12.00 3.60Z"
+      strokeWidth={1.6}
+      strokeLinejoin="round"
+    />
+    <circle cx="12" cy="12" r="2.2" strokeWidth={1.6} />
   </Icon>
 );
 export const LogoIcon = ({ size = 28 }: { size?: number }) => (

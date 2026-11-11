@@ -31,7 +31,7 @@
   height: 36px;
   padding: 0 10px;
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
   background: transparent;
   text-align: start;
 }
@@ -56,7 +56,7 @@
   gap: 6px;
   height: 32px;
   padding: 0 12px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
@@ -111,7 +111,7 @@
   height: 34px;
   padding: 0 10px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   background: var(--surface);
   color: var(--text);
   font-size: 13px;
@@ -123,10 +123,12 @@
 }
 
 .segmented {
+  --seg-pad: 2px;
   display: inline-flex;
-  padding: 2px;
+  padding: var(--seg-pad);
   gap: 2px;
-  border-radius: var(--radius-md);
+  /* Concentric with the buttons inside: the same 12 px radius plus the padding. */
+  border-radius: calc(var(--radius-control) + var(--seg-pad));
   background: var(--chip);
 }
 
@@ -134,7 +136,7 @@
   height: 28px;
   padding: 0 10px;
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--text-2);
   font-size: 12px;
@@ -187,4 +189,46 @@
 
 .option[aria-selected='true'] {
   background: var(--chip);
+}
+
+/* Phones: 44 px touch targets and 16 px fields (iOS zooms the page into smaller ones). */
+@media (max-width: 767px) {
+  .button,
+  .buttonPrimary,
+  .iconButton {
+    height: var(--tap);
+    padding-inline: 16px;
+    font-size: 14px;
+  }
+
+  .iconButton {
+    width: var(--tap);
+    padding: 0;
+  }
+
+  .fieldInput {
+    height: 48px;
+    padding: 0 12px;
+    font-size: 16px;
+  }
+
+  .segmented {
+    --seg-pad: 4px;
+  }
+
+  .segmented button {
+    height: var(--tap);
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
+  .menuItem,
+  .menuDanger {
+    height: 48px;
+    font-size: 15px;
+  }
+
+  .option {
+    height: var(--tap);
+  }
 }

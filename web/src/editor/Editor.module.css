@@ -531,3 +531,11 @@
 .offcutTitle {
   font-weight: 600;
 }
+
+/* Phones: 16 px so iOS doesn't zoom into a cell on focus. (Cards replace these rows in stage 3.) */
+@media (max-width: 767px) {
+  .cell,
+  .select {
+    font-size: 16px;
+  }
+}

@@ -8,7 +8,7 @@
 .chip {
   height: 28px;
   padding: 0 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-control);
   border: 1px solid var(--border);
   background: var(--surface);
   font-size: 12px;
@@ -39,4 +39,17 @@
 .fieldRow input {
   width: 100px;
   text-align: end;
+}
+
+@media (max-width: 767px) {
+  .chip {
+    height: var(--tap);
+    padding: 0 16px;
+    font-size: 14px;
+  }
+
+  .fieldRow input {
+    height: 48px;
+    font-size: 16px;
+  }
 }

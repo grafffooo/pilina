@@ -68,6 +68,11 @@ export const ChevronLeftIcon = (p: IconProps) => (
     <path d="m15 18-6-6 6-6" />
   </Icon>
 );
+export const ChevronDownIcon = (p: IconProps) => (
+  <Icon strokeWidth={2} {...p}>
+    <path d="m6 9 6 6 6-6" />
+  </Icon>
+);
 export const ChevronRightIcon = (p: IconProps) => (
   <Icon data-flip-rtl strokeWidth={2} {...p}>
     <path d="m9 18 6-6-6-6" />

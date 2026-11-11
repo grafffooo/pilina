@@ -10,6 +10,7 @@ import {
   otherDevice,
   section,
   sidebar,
+  openPart,
 } from './helpers';
 
 const OLD_MD = fileURLToPath(new URL('./fixtures/skrinky-do-dielne.md', import.meta.url));
@@ -56,6 +57,7 @@ test('the old app’s .md export imports, in millimetres', async ({ page }) => {
     'Skrinky do dielne',
   );
   await section(page, 'Parts');
+  await openPart(page, 'Sides');
   await expect(page.getByRole('textbox', { name: 'Length, Sides' })).toHaveValue('1000');
   // The disabled row comes along, still switched off.
   await expect(page.getByRole('checkbox', { name: 'Include Stretchers' })).not.toBeChecked();

@@ -67,9 +67,11 @@ test('cut a sheet, keep its offcuts and print their labels', async ({ page }) =>
   // The library has them, and the project is now marked cut.
   await page.getByRole('button', { name: 'Offcut library' }).first().click();
   await expect(
-    page.getByRole('row', { name: /OC-0001.*2070 × 1468.*Rack A.*Printed/ }),
+    page.getByRole(onPhone() ? 'button' : 'row', { name: /OC-0001.*2070 × 1468.*Rack A.*Printed/ }),
   ).toBeVisible();
-  await expect(page.getByRole('row', { name: /OC-0002.*622 × 560/ })).toBeVisible();
+  await expect(
+    page.getByRole(onPhone() ? 'button' : 'row', { name: /OC-0002.*622 × 560/ }),
+  ).toBeVisible();
 
   // A new project that fits the big offcut cuts it before any new sheet.
   if (onPhone()) await page.getByRole('button', { name: 'Projects' }).click();

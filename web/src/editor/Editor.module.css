@@ -542,3 +542,17 @@
     font-size: 16px;
   }
 }
+
+/* Phones: the cards inside a section are the surface, so the section drops its own border. */
+@media (max-width: 767px) {
+  .card[data-cards] {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .card[data-cards] > .cardHeader {
+    padding-inline: 4px;
+    border-bottom: 0;
+  }
+}

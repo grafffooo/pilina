@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 import {
   CABINET,
   closeDialog,
+  openPart,
   enterParts,
   expectSheets,
   openApp,
@@ -20,6 +21,7 @@ test('inches: sizes show in inches and typed fractions are understood', async ({
   await closeDialog(page);
 
   await section(page, 'Parts');
+  await openPart(page, 'Shelf');
   await expect(page.getByRole('textbox', { name: 'Length, Shelf' })).toHaveValue('30');
   await expect(page.getByRole('textbox', { name: 'Width, Shelf' })).toHaveValue('12');
   // Feet and inches, and a fraction.
@@ -33,6 +35,7 @@ test('inches: sizes show in inches and typed fractions are understood', async ({
   await page.getByRole('button', { name: 'Millimetres' }).click();
   await closeDialog(page);
   await section(page, 'Parts');
+  await openPart(page, 'Shelf');
   await expect(page.getByRole('textbox', { name: 'Length, Shelf' })).toHaveValue('901.7');
   await expect(page.getByRole('textbox', { name: 'Width, Shelf' })).toHaveValue('298.45');
 });
@@ -49,6 +52,7 @@ test('marking a project cut locks it until it goes back to draft', async ({ page
   await expect(page.getByRole('note').filter({ hasText: 'The project is locked' })).toBeVisible();
   await expect(page.getByTitle(/^Cut on /).first()).toBeVisible();
   await expect(name).not.toBeEditable();
+  await openPart(page, 'Side');
   await expect(page.getByRole('textbox', { name: 'Length, Side' })).toBeDisabled();
 
   await page.getByRole('button', { name: 'Edit as draft' }).click();

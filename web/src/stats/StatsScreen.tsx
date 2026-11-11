@@ -239,6 +239,22 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
                   ))}
                 </tbody>
               </table>
+              {/* On a phone the same rows are a list (the table is hidden by CSS). */}
+              <ul className={styles.projectCards}>
+                {stats.projects.map((p) => (
+                  <li key={p.projectId}>
+                    <strong>{p.name}</strong>
+                    <span>
+                      {[
+                        t('n_sheets', { count: p.sheets }),
+                        t('{{pct}}% used', { pct: formatNumber(Math.round(p.usedPct)) }),
+                        money(p.cost) + (p.unpriced > 0 ? ' +?' : ''),
+                        dayFormat().format(p.lastAt),
+                      ].join(' · ')}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </section>
           </div>
         </>

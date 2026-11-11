@@ -75,6 +75,13 @@ export async function waitForSaved(page: Page, text: string) {
   await expect.poll(() => savedProjects(page)).toContain(text);
 }
 
+/** On a phone a part is a card: opens the one named `name` (a label, or "Part 1") before its fields are used. */
+export async function openPart(page: Page, name: string) {
+  if (!onPhone()) return;
+  const card = page.getByRole('button', { name: new RegExp(`^${name},`), expanded: false });
+  if ((await card.count()) > 0) await card.first().click();
+}
+
 /** Opens Settings: a dialog on a desktop, a screen behind the Projects tab on a phone. */
 export async function openSettings(page: Page) {
   if (onPhone()) {

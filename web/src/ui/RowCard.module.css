@@ -1,0 +1,234 @@
+/* Phone cards for table rows: 14 px radius, 44 px+ targets, 16 px fields. */
+.card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.card[data-open] {
+  border-color: var(--accent);
+}
+
+.card[data-highlight] {
+  background: var(--accent-soft);
+}
+
+.row {
+  display: flex;
+  align-items: stretch;
+}
+
+.lead {
+  flex: none;
+  width: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lead input[type='checkbox'] {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.lead label,
+.lead > * {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.head {
+  flex: 1;
+  min-width: 0;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: start;
+  cursor: pointer;
+  user-select: none;
+}
+
+.lead + .head {
+  padding-inline-start: 0;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.card[data-muted] .title,
+.card[data-muted] .line {
+  color: var(--text-3);
+  text-decoration: line-through;
+}
+
+.badge {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--chip);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.line {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.chevron {
+  flex: none;
+  color: var(--text-2);
+  transition: transform 120ms;
+}
+
+.card[data-open] .chevron {
+  transform: rotate(180deg);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.field input,
+.field select {
+  width: 100%;
+  height: 48px;
+  min-width: 0;
+  padding: 0 12px;
+  border: 1px solid var(--field-border, var(--text-3));
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 16px;
+}
+
+.field input[type='color'] {
+  padding: 4px;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  grid-auto-flow: column;
+  gap: 10px;
+}
+
+.fields[data-narrow-last] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 80px;
+}
+
+.fields input {
+  text-align: end;
+}
+
+.actions {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 8px;
+}
+
+.actions button {
+  height: 48px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.actions button[data-danger] {
+  color: var(--danger);
+}
+
+.hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 0 8px;
+}
+
+.edgeRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+/* An on/off choice that is a whole button, such as "Used before other sheets". */
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 15px;
+  text-align: start;
+}
+
+.toggle[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-weight: 600;
+}

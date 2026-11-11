@@ -296,3 +296,18 @@
   color: var(--text);
   text-align: center;
 }
+
+/* The status of an offcut on its card (the colours come from .available, .reserved, .used). */
+.cardStatus {
+  flex: none;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.empty {
+  margin: 0;
+  padding: 16px 4px;
+  color: var(--text-2);
+}

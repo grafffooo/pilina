@@ -301,3 +301,43 @@
     grid-template-columns: 1fr;
   }
 }
+
+.projectCards {
+  display: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 767px) {
+  .projects {
+    display: none;
+  }
+
+  .projectCards {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .projectCards li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 56px;
+    justify-content: center;
+    border-top: 1px solid var(--border);
+  }
+
+  .projectCards li:first-child {
+    border-top: 0;
+  }
+
+  .projectCards strong {
+    font-size: 16px;
+  }
+
+  .projectCards span {
+    font-size: 13px;
+    color: var(--text-2);
+  }
+}

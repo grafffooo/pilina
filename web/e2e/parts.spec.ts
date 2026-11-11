@@ -1,6 +1,14 @@
 // Entering parts and getting a cutting plan.
 import { expect, test, type Page } from '@playwright/test';
-import { CABINET, enterParts, expectSheets, openApp, section, waitForSaved } from './helpers';
+import {
+  CABINET,
+  enterParts,
+  expectSheets,
+  openApp,
+  openPart,
+  section,
+  waitForSaved,
+} from './helpers';
 
 /** Pastes text into a field the way the clipboard would. */
 async function paste(page: Page, field: string, text: string) {
@@ -41,7 +49,9 @@ test('rows pasted from a spreadsheet fill the table', async ({ page }) => {
     'Length, Part 1',
     'Length\tWidth\tQty\tName\n600\t400\t2\tDoor\n500\t300\t1\tDrawer front\n',
   );
+  await openPart(page, 'Door');
   await expect(page.getByRole('textbox', { name: 'Label, part 1' })).toHaveValue('Door');
+  await openPart(page, 'Drawer front');
   await expect(page.getByRole('textbox', { name: 'Width, Drawer front' })).toHaveValue('300');
   await expect(page.getByText('3 pieces · 2 rows')).toBeVisible();
   await expectSheets(page, 1);
@@ -61,5 +71,6 @@ test('the project is still there after a reload', async ({ page }) => {
   await page.reload();
   await expect(page.getByRole('textbox', { name: 'Project name' })).toHaveValue('Kitchen');
   await section(page, 'Parts');
+  await openPart(page, 'Shelf');
   await expect(page.getByRole('textbox', { name: 'Label, part 3' })).toHaveValue('Shelf');
 });

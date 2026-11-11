@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PartsTable } from '../editor/PartsTable';
 import { StockTable } from '../editor/StockTable';
 import type { Project } from '../model/project';
@@ -116,6 +116,11 @@ export function App() {
 /** The phone: the bottom bar plus one screen at a time. */
 function PhoneApp({ project }: { project: Project }) {
   const view = useStore((s) => s.view);
+  const tab = useStore((s) => s.phoneTab);
+  // Every screen starts at its top (the page scrolls as one, so it would keep the last offset).
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [view, tab]);
   return (
     <>
       {view === 'project' && <PhoneLayout project={project} />}

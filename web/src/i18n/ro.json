@@ -628,5 +628,15 @@
   "Pick up strip {{n}} of {{total}}": "Ia fâșia {{n}} din {{total}}",
   "{{width}} wide, {{length}} long": "lată de {{width}}, lungă de {{length}}",
   "Rip cuts": "Tăieturi longitudinale",
-  "Strip {{n}} of {{total}}": "Fâșia {{n}} din {{total}}"
+  "Strip {{n}} of {{total}}": "Fâșia {{n}} din {{total}}",
+  "Import": "Importă",
+  "Cut projects": "Proiecte tăiate",
+  "Last cut: {{name}}, {{date}}": "Ultima tăiere: {{name}}, {{date}}",
+  "Active": "Active",
+  "Sort": "Sortează",
+  "Recent": "Recente",
+  "Today": "Azi",
+  "Yesterday": "Ieri",
+  "This week": "Săptămâna aceasta",
+  "Earlier": "Mai vechi"
 }

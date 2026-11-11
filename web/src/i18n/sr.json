@@ -628,5 +628,15 @@
   "Pick up strip {{n}} of {{total}}": "Uzmite traku {{n}} od {{total}}",
   "{{width}} wide, {{length}} long": "širina {{width}}, dužina {{length}}",
   "Rip cuts": "Uzdužni rezovi",
-  "Strip {{n}} of {{total}}": "Traka {{n}} od {{total}}"
+  "Strip {{n}} of {{total}}": "Traka {{n}} od {{total}}",
+  "Import": "Uvezi",
+  "Cut projects": "Isečeni projekti",
+  "Last cut: {{name}}, {{date}}": "Poslednje sečenje: {{name}}, {{date}}",
+  "Active": "Aktivni",
+  "Sort": "Poređaj",
+  "Recent": "Najnoviji",
+  "Today": "Danas",
+  "Yesterday": "Juče",
+  "This week": "Ove nedelje",
+  "Earlier": "Stariji"
 }

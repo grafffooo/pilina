@@ -17,9 +17,6 @@ import styles from './SettingsDialog.module.css';
 
 export function SettingsDialog({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
-  const settings = useStore((s) => s.settings);
-  const [appearance, setAppearance] = useState(loadAppearance);
-  const [language, setLanguage] = useState(loadLanguageChoice);
   const dialog = useRef<HTMLDivElement>(null);
   // The latest onClose, so the effect below runs only on open and close.
   const close = useRef(onClose);
@@ -37,12 +34,6 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
       opener?.focus();
     };
   }, []);
-
-  const setTheme = (theme: Theme) => {
-    const next = { ...appearance, theme };
-    setAppearance(next);
-    saveAppearance(next);
-  };
 
   return (
     <div
@@ -63,156 +54,7 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
-        <section className={styles.group} aria-labelledby="settings-device-h">
-          <h3 id="settings-device-h" className={styles.groupTitle}>
-            {t('This device')}
-          </h3>
-          <label className={styles.row}>
-            <span className={styles.label}>{t('Language')}</span>
-            <select
-              className={ui.fieldInput}
-              value={language}
-              onChange={(e) => {
-                const choice = e.target.value as LanguageChoice;
-                setLanguage(choice);
-                void setLanguageChoice(choice);
-              }}
-            >
-              <option value="auto">{t('Same as this device')}</option>
-              {LANGUAGES.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.name === l.english ? l.name : `${l.name} (${l.english})`}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className={styles.row}>
-            <span className={styles.label} id="theme-label">
-              {t('Theme')}
-            </span>
-            <div className={ui.segmented} role="group" aria-labelledby="theme-label">
-              {(['system', 'light', 'dark'] as const).map((th) => (
-                <button
-                  key={th}
-                  type="button"
-                  aria-pressed={appearance.theme === th}
-                  onClick={() => setTheme(th)}
-                >
-                  {th === 'system' ? t('Auto') : th === 'light' ? t('Light') : t('Dark')}
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.group} aria-labelledby="settings-workshop-h">
-          <h3 id="settings-workshop-h" className={styles.groupTitle}>
-            {t('Workshop')}
-          </h3>
-          <div className={styles.row}>
-            <span className={styles.label} id="units-label">
-              {t('Units')}
-            </span>
-            <div className={ui.segmented} role="group" aria-labelledby="units-label">
-              {UNITS.map((u) => (
-                <button
-                  key={u}
-                  type="button"
-                  aria-pressed={settings.units === u}
-                  onClick={() => updateSettings({ units: u })}
-                >
-                  {u === 'mm' ? t('Millimetres') : u === 'cm' ? t('Centimetres') : t('Inches')}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className={styles.row}>
-            <span className={styles.label} id="measure-label">
-              {t('Cut positions')}
-            </span>
-            <div className={ui.segmented} role="group" aria-labelledby="measure-label">
-              {(['piece', 'sheet'] as const).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  aria-pressed={settings.cutMeasure === m}
-                  onClick={() => updateSettings({ cutMeasure: m })}
-                >
-                  {m === 'piece' ? t('From the last cut') : t('From the sheet edge')}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className={styles.row}>
-            <span className={styles.label} id="order-label">
-              {t('Cut order')}
-            </span>
-            <div className={ui.segmented} role="group" aria-labelledby="order-label">
-              {(['ripsFirst', 'stripByStrip'] as const).map((o) => (
-                <button
-                  key={o}
-                  type="button"
-                  aria-pressed={settings.cutOrder === o}
-                  title={
-                    o === 'ripsFirst'
-                      ? t('Every rip on the whole sheet first, then each strip’s cross cuts')
-                      : t('Each rip followed by its strip’s cross cuts, as on a panel saw')
-                  }
-                  onClick={() => updateSettings({ cutOrder: o })}
-                >
-                  {o === 'ripsFirst' ? t('Rips first') : t('Strip by strip')}
-                </button>
-              ))}
-            </div>
-          </div>
-          <label className={styles.row}>
-            <span className={styles.label}>{t('Currency')}</span>
-            <select
-              className={ui.fieldInput}
-              value={settings.currency}
-              onChange={(e) => updateSettings({ currency: e.target.value })}
-            >
-              {CURRENCIES.map((c) => (
-                <option key={c} value={c}>
-                  {c} ({formatMoney(1234.5, c)})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={styles.row}>
-            <span className={styles.label}>{t('Edge band allowance')}</span>
-            <span className={styles.inline}>
-              <LengthInput
-                className={`${ui.fieldInput} ${styles.short}`}
-                value={settings.edgeAllowance}
-                onCommit={(v) => updateSettings({ edgeAllowance: Math.max(0, v ?? 0) })}
-              />
-              {t('{{unit}} extra per banded edge', { unit: unitLabel() })}
-            </span>
-          </label>
-          <div className={styles.row}>
-            <span className={styles.label}>{t('Reusable leftover')}</span>
-            <span className={styles.inline}>
-              {t('at least')}
-              <LengthInput
-                className={`${ui.fieldInput} ${styles.short}`}
-                aria-label={t('Minimum leftover length')}
-                value={settings.offcutMinLength}
-                onCommit={(v) => updateSettings({ offcutMinLength: Math.max(0, v ?? 0) })}
-              />
-              ×
-              <LengthInput
-                className={`${ui.fieldInput} ${styles.short}`}
-                aria-label={t('Minimum leftover width')}
-                value={settings.offcutMinWidth}
-                onCommit={(v) => updateSettings({ offcutMinWidth: Math.max(0, v ?? 0) })}
-              />
-              {unitLabel()}
-            </span>
-          </div>
-        </section>
-
-        <FolderSection />
+        <SettingsForm />
 
         <div className={styles.actions}>
           <button type="button" className={ui.buttonPrimary} onClick={onClose}>
@@ -221,6 +63,174 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/** Everything in Settings; the dialog (desktop) and the Settings screen (phone) both show it. */
+export function SettingsForm() {
+  const { t } = useTranslation();
+  const settings = useStore((s) => s.settings);
+  const [appearance, setAppearance] = useState(loadAppearance);
+  const [language, setLanguage] = useState(loadLanguageChoice);
+  const setTheme = (theme: Theme) => {
+    const next = { ...appearance, theme };
+    setAppearance(next);
+    saveAppearance(next);
+  };
+
+  return (
+    <>
+      <section className={styles.group} aria-labelledby="settings-device-h">
+        <h3 id="settings-device-h" className={styles.groupTitle}>
+          {t('This device')}
+        </h3>
+        <label className={styles.row}>
+          <span className={styles.label}>{t('Language')}</span>
+          <select
+            className={ui.fieldInput}
+            value={language}
+            onChange={(e) => {
+              const choice = e.target.value as LanguageChoice;
+              setLanguage(choice);
+              void setLanguageChoice(choice);
+            }}
+          >
+            <option value="auto">{t('Same as this device')}</option>
+            {LANGUAGES.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.name === l.english ? l.name : `${l.name} (${l.english})`}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className={styles.row}>
+          <span className={styles.label} id="theme-label">
+            {t('Theme')}
+          </span>
+          <div className={ui.segmented} role="group" aria-labelledby="theme-label">
+            {(['system', 'light', 'dark'] as const).map((th) => (
+              <button
+                key={th}
+                type="button"
+                aria-pressed={appearance.theme === th}
+                onClick={() => setTheme(th)}
+              >
+                {th === 'system' ? t('Auto') : th === 'light' ? t('Light') : t('Dark')}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.group} aria-labelledby="settings-workshop-h">
+        <h3 id="settings-workshop-h" className={styles.groupTitle}>
+          {t('Workshop')}
+        </h3>
+        <div className={styles.row}>
+          <span className={styles.label} id="units-label">
+            {t('Units')}
+          </span>
+          <div className={ui.segmented} role="group" aria-labelledby="units-label">
+            {UNITS.map((u) => (
+              <button
+                key={u}
+                type="button"
+                aria-pressed={settings.units === u}
+                onClick={() => updateSettings({ units: u })}
+              >
+                {u === 'mm' ? t('Millimetres') : u === 'cm' ? t('Centimetres') : t('Inches')}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className={styles.row}>
+          <span className={styles.label} id="measure-label">
+            {t('Cut positions')}
+          </span>
+          <div className={ui.segmented} role="group" aria-labelledby="measure-label">
+            {(['piece', 'sheet'] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                aria-pressed={settings.cutMeasure === m}
+                onClick={() => updateSettings({ cutMeasure: m })}
+              >
+                {m === 'piece' ? t('From the last cut') : t('From the sheet edge')}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className={styles.row}>
+          <span className={styles.label} id="order-label">
+            {t('Cut order')}
+          </span>
+          <div className={ui.segmented} role="group" aria-labelledby="order-label">
+            {(['ripsFirst', 'stripByStrip'] as const).map((o) => (
+              <button
+                key={o}
+                type="button"
+                aria-pressed={settings.cutOrder === o}
+                title={
+                  o === 'ripsFirst'
+                    ? t('Every rip on the whole sheet first, then each strip’s cross cuts')
+                    : t('Each rip followed by its strip’s cross cuts, as on a panel saw')
+                }
+                onClick={() => updateSettings({ cutOrder: o })}
+              >
+                {o === 'ripsFirst' ? t('Rips first') : t('Strip by strip')}
+              </button>
+            ))}
+          </div>
+        </div>
+        <label className={styles.row}>
+          <span className={styles.label}>{t('Currency')}</span>
+          <select
+            className={ui.fieldInput}
+            value={settings.currency}
+            onChange={(e) => updateSettings({ currency: e.target.value })}
+          >
+            {CURRENCIES.map((c) => (
+              <option key={c} value={c}>
+                {c} ({formatMoney(1234.5, c)})
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className={styles.row}>
+          <span className={styles.label}>{t('Edge band allowance')}</span>
+          <span className={styles.inline}>
+            <LengthInput
+              className={`${ui.fieldInput} ${styles.short}`}
+              value={settings.edgeAllowance}
+              onCommit={(v) => updateSettings({ edgeAllowance: Math.max(0, v ?? 0) })}
+            />
+            {t('{{unit}} extra per banded edge', { unit: unitLabel() })}
+          </span>
+        </label>
+        <div className={styles.row}>
+          <span className={styles.label}>{t('Reusable leftover')}</span>
+          <span className={styles.inline}>
+            {t('at least')}
+            <LengthInput
+              className={`${ui.fieldInput} ${styles.short}`}
+              aria-label={t('Minimum leftover length')}
+              value={settings.offcutMinLength}
+              onCommit={(v) => updateSettings({ offcutMinLength: Math.max(0, v ?? 0) })}
+            />
+            ×
+            <LengthInput
+              className={`${ui.fieldInput} ${styles.short}`}
+              aria-label={t('Minimum leftover width')}
+              value={settings.offcutMinWidth}
+              onCommit={(v) => updateSettings({ offcutMinWidth: Math.max(0, v ?? 0) })}
+            />
+            {unitLabel()}
+          </span>
+        </div>
+      </section>
+
+      <FolderSection />
+    </>
   );
 }
 

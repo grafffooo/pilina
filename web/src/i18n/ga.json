@@ -704,5 +704,15 @@
   "Pick up strip {{n}} of {{total}}": "Tóg stiall {{n}} de {{total}}",
   "{{width}} wide, {{length}} long": "{{width}} ar leithead, {{length}} ar fad",
   "Rip cuts": "Gearrthacha ar fad",
-  "Strip {{n}} of {{total}}": "Stiall {{n}} de {{total}}"
+  "Strip {{n}} of {{total}}": "Stiall {{n}} de {{total}}",
+  "Import": "Iompórtáil",
+  "Cut projects": "Tionscadail gearrtha",
+  "Last cut: {{name}}, {{date}}": "Gearradh deireanach: {{name}}, {{date}}",
+  "Active": "Gníomhach",
+  "Sort": "Sórtáil",
+  "Recent": "Is déanaí",
+  "Today": "Inniu",
+  "Yesterday": "Inné",
+  "This week": "An tseachtain seo",
+  "Earlier": "Níos luaithe"
 }

@@ -666,5 +666,15 @@
   "Pick up strip {{n}} of {{total}}": "Vezměte pás {{n}} z {{total}}",
   "{{width}} wide, {{length}} long": "šířka {{width}}, délka {{length}}",
   "Rip cuts": "Podélné řezy",
-  "Strip {{n}} of {{total}}": "Pás {{n}} z {{total}}"
+  "Strip {{n}} of {{total}}": "Pás {{n}} z {{total}}",
+  "Import": "Importovat",
+  "Cut projects": "Nařezané projekty",
+  "Last cut: {{name}}, {{date}}": "Poslední řez: {{name}}, {{date}}",
+  "Active": "Aktivní",
+  "Sort": "Řadit",
+  "Recent": "Nejnovější",
+  "Today": "Dnes",
+  "Yesterday": "Včera",
+  "This week": "Tento týden",
+  "Earlier": "Starší"
 }

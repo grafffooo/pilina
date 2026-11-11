@@ -552,5 +552,15 @@
   "Pick up strip {{n}} of {{total}}": "Lấy dải {{n}}/{{total}}",
   "{{width}} wide, {{length}} long": "rộng {{width}}, dài {{length}}",
   "Rip cuts": "Cắt dọc",
-  "Strip {{n}} of {{total}}": "Dải {{n}}/{{total}}"
+  "Strip {{n}} of {{total}}": "Dải {{n}}/{{total}}",
+  "Import": "Nhập",
+  "Cut projects": "Dự án đã cắt",
+  "Last cut: {{name}}, {{date}}": "Lần cắt gần nhất: {{name}}, {{date}}",
+  "Active": "Đang làm",
+  "Sort": "Sắp xếp",
+  "Recent": "Gần đây",
+  "Today": "Hôm nay",
+  "Yesterday": "Hôm qua",
+  "This week": "Tuần này",
+  "Earlier": "Cũ hơn"
 }

@@ -590,5 +590,15 @@
   "Pick up strip {{n}} of {{total}}": "Hartu {{n}}. zerrenda ({{total}}etik)",
   "{{width}} wide, {{length}} long": "{{width}} zabal, {{length}} luze",
   "Rip cuts": "Luzetarako ebakiak",
-  "Strip {{n}} of {{total}}": "{{n}}. zerrenda / {{total}}"
+  "Strip {{n}} of {{total}}": "{{n}}. zerrenda / {{total}}",
+  "Import": "Inportatu",
+  "Cut projects": "Moztutako proiektuak",
+  "Last cut: {{name}}, {{date}}": "Azken mozketa: {{name}}, {{date}}",
+  "Active": "Aktiboak",
+  "Sort": "Ordenatu",
+  "Recent": "Berrienak",
+  "Today": "Gaur",
+  "Yesterday": "Atzo",
+  "This week": "Aste honetan",
+  "Earlier": "Lehenagokoak"
 }

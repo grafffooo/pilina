@@ -590,5 +590,15 @@
   "Pick up strip {{n}} of {{total}}": "Вземете ивица {{n}} от {{total}}",
   "{{width}} wide, {{length}} long": "широка {{width}}, дълга {{length}}",
   "Rip cuts": "Надлъжни резове",
-  "Strip {{n}} of {{total}}": "Ивица {{n}} от {{total}}"
+  "Strip {{n}} of {{total}}": "Ивица {{n}} от {{total}}",
+  "Import": "Импорт",
+  "Cut projects": "Разкроени проекти",
+  "Last cut: {{name}}, {{date}}": "Последен разкрой: {{name}}, {{date}}",
+  "Active": "Активни",
+  "Sort": "Подреди",
+  "Recent": "Последни",
+  "Today": "Днес",
+  "Yesterday": "Вчера",
+  "This week": "Тази седмица",
+  "Earlier": "По-стари"
 }

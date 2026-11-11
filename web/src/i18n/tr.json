@@ -590,5 +590,15 @@
   "Pick up strip {{n}} of {{total}}": "Şerit {{n}}/{{total}} alın",
   "{{width}} wide, {{length}} long": "{{width}} genişlik, {{length}} uzunluk",
   "Rip cuts": "Boyuna kesimler",
-  "Strip {{n}} of {{total}}": "Şerit {{n}}/{{total}}"
+  "Strip {{n}} of {{total}}": "Şerit {{n}}/{{total}}",
+  "Import": "İçe aktar",
+  "Cut projects": "Kesilen projeler",
+  "Last cut: {{name}}, {{date}}": "Son kesim: {{name}}, {{date}}",
+  "Active": "Etkin",
+  "Sort": "Sırala",
+  "Recent": "En yeni",
+  "Today": "Bugün",
+  "Yesterday": "Dün",
+  "This week": "Bu hafta",
+  "Earlier": "Daha eski"
 }

@@ -101,3 +101,28 @@
   font-size: 12px;
   color: var(--warn-text);
 }
+
+/* Phones: a label above its control, segmented controls across the full width. */
+@media (max-width: 767px) {
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .label {
+    width: auto;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .row [role='group'] {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+  }
+
+  .inline .short {
+    flex: 1;
+  }
+}

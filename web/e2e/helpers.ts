@@ -75,15 +75,21 @@ export async function waitForSaved(page: Page, text: string) {
   await expect.poll(() => savedProjects(page)).toContain(text);
 }
 
-/** Opens Settings (on a phone it's in the projects drawer). */
+/** Opens Settings: a dialog on a desktop, a screen behind the Projects tab on a phone. */
 export async function openSettings(page: Page) {
-  if (onPhone()) await page.getByRole('button', { name: 'Projects' }).click();
-  await page.getByRole('button', { name: 'Settings' }).click();
-  await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
+  if (onPhone()) {
+    await page.getByRole('button', { name: 'Projects' }).click();
+    await page.getByRole('button', { name: 'Settings' }).click();
+    await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
+  } else {
+    await page.getByRole('button', { name: 'Settings' }).click();
+    await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
+  }
 }
 
+/** Closes Settings. On a phone it is a screen: the next step picks a section from the bottom bar. */
 export async function closeDialog(page: Page) {
-  await page.keyboard.press('Escape');
+  if (!onPhone()) await page.keyboard.press('Escape');
 }
 
 /** Picks an item from the header's ⋯ menu. */
@@ -92,7 +98,7 @@ export async function projectAction(page: Page, item: string) {
   await page.getByRole('menuitem', { name: item }).click();
 }
 
-/** Opens a sidebar item (on a phone the sidebar is the projects drawer). */
+/** Opens a sidebar item (on a phone: a tile on the Projects tab). */
 export async function sidebar(page: Page, item: string | RegExp) {
   if (onPhone()) await page.getByRole('button', { name: 'Projects' }).click();
   await page.getByRole('button', { name: item }).first().click();

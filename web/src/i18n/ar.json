@@ -742,5 +742,15 @@
   "Pick up strip {{n}} of {{total}}": "التقط الشريحة {{n}} من {{total}}",
   "{{width}} wide, {{length}} long": "بعرض {{width}} وطول {{length}}",
   "Rip cuts": "القطوع الطولية",
-  "Strip {{n}} of {{total}}": "الشريحة {{n}} من {{total}}"
+  "Strip {{n}} of {{total}}": "الشريحة {{n}} من {{total}}",
+  "Import": "استيراد",
+  "Cut projects": "المشاريع المقطوعة",
+  "Last cut: {{name}}, {{date}}": "آخر قطع: {{name}}، {{date}}",
+  "Active": "النشطة",
+  "Sort": "ترتيب",
+  "Recent": "الأحدث",
+  "Today": "اليوم",
+  "Yesterday": "أمس",
+  "This week": "هذا الأسبوع",
+  "Earlier": "أقدم"
 }

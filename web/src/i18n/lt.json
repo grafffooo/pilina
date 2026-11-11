@@ -666,5 +666,15 @@
   "Pick up strip {{n}} of {{total}}": "Paimkite ruožą {{n}} iš {{total}}",
   "{{width}} wide, {{length}} long": "plotis {{width}}, ilgis {{length}}",
   "Rip cuts": "Išilginiai pjūviai",
-  "Strip {{n}} of {{total}}": "Ruožas {{n}} iš {{total}}"
+  "Strip {{n}} of {{total}}": "Ruožas {{n}} iš {{total}}",
+  "Import": "Importuoti",
+  "Cut projects": "Supjaustyti projektai",
+  "Last cut: {{name}}, {{date}}": "Paskutinis pjovimas: {{name}}, {{date}}",
+  "Active": "Aktyvūs",
+  "Sort": "Rūšiuoti",
+  "Recent": "Naujausi",
+  "Today": "Šiandien",
+  "Yesterday": "Vakar",
+  "This week": "Šią savaitę",
+  "Earlier": "Senesni"
 }

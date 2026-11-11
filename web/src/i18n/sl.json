@@ -666,5 +666,15 @@
   "Pick up strip {{n}} of {{total}}": "Vzemite pas {{n}} od {{total}}",
   "{{width}} wide, {{length}} long": "širina {{width}}, dolžina {{length}}",
   "Rip cuts": "Vzdolžni rezi",
-  "Strip {{n}} of {{total}}": "Pas {{n}} od {{total}}"
+  "Strip {{n}} of {{total}}": "Pas {{n}} od {{total}}",
+  "Import": "Uvozi",
+  "Cut projects": "Razrezani projekti",
+  "Last cut: {{name}}, {{date}}": "Zadnji razrez: {{name}}, {{date}}",
+  "Active": "Aktivni",
+  "Sort": "Razvrsti",
+  "Recent": "Najnovejši",
+  "Today": "Danes",
+  "Yesterday": "Včeraj",
+  "This week": "Ta teden",
+  "Earlier": "Starejši"
 }

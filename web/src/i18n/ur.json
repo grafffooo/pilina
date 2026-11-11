@@ -590,5 +590,15 @@
   "Pick up strip {{n}} of {{total}}": "پٹی {{n}} از {{total}} اٹھائیں",
   "{{width}} wide, {{length}} long": "{{width}} چوڑی، {{length}} لمبی",
   "Rip cuts": "لمبائی کی کٹائیاں",
-  "Strip {{n}} of {{total}}": "پٹی {{n}} از {{total}}"
+  "Strip {{n}} of {{total}}": "پٹی {{n}} از {{total}}",
+  "Import": "درآمد",
+  "Cut projects": "کٹے ہوئے پروجیکٹ",
+  "Last cut: {{name}}, {{date}}": "آخری کٹائی: {{name}}، {{date}}",
+  "Active": "فعال",
+  "Sort": "ترتیب",
+  "Recent": "حالیہ",
+  "Today": "آج",
+  "Yesterday": "کل",
+  "This week": "اس ہفتے",
+  "Earlier": "پہلے کے"
 }

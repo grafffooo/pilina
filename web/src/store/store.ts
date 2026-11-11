@@ -38,12 +38,42 @@ export interface ResultState {
 
 export type SaveState = 'saved' | 'pending' | 'error';
 
-/** Main area: the open project, the material and price library, the offcut library or label printing. */
-export type MainView = 'project' | 'library' | 'offcuts' | 'labels' | 'stats';
+/**
+ * Main area: the open project, the material and price library, the offcut library or label
+ * printing. On a phone the Projects list, the Cut archive and Settings are screens too.
+ */
+export type MainView =
+  'project' | 'projects' | 'archive' | 'settings' | 'library' | 'offcuts' | 'labels' | 'stats';
+
+/** The sections of an open project on a phone (the bottom bar). */
+export type PhoneTab = 'parts' | 'sheets' | 'cut';
+
+/** Screens reached from another one: opening them adds a history entry, so Back returns. */
+const DRILL_DOWN: ReadonlySet<MainView> = new Set([
+  'archive',
+  'settings',
+  'library',
+  'offcuts',
+  'labels',
+  'stats',
+]);
+
+const onPhone = () =>
+  typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+
+/** Keeps the browser's history in step with the screen, so a phone's Back button goes back in the app. */
+function recordView(view: MainView, push: boolean) {
+  if (!onPhone()) return;
+  const state = { pilina: view };
+  if (push) history.pushState(state, '');
+  else history.replaceState(state, '');
+}
 
 interface AppState {
   ready: boolean;
   view: MainView;
+  /** The section shown on a phone while a project is open. */
+  phoneTab: PhoneTab;
   projects: Project[];
   materials: Material[];
   edgeBands: EdgeBand[];
@@ -72,6 +102,7 @@ interface AppState {
   setSummary(id: string, summary: Partial<ProjectSummary>): void;
   setCost(cost: CostBreakdown | null): void;
   setView(view: MainView): void;
+  setPhoneTab(tab: PhoneTab): void;
   /** Edits the shared library (not part of a project's undo history). */
   editLibrary(fn: (lib: Library) => Library): void;
   /** Adds offcuts, numbering them OC-0001, OC-0002, … in order. */
@@ -254,6 +285,14 @@ export const useStore = create<AppState>()((set, get) => {
     const current = projects.find((p) => p.id === last) ?? projects[0]!;
     set({ projects, materials, edgeBands, settings, offcuts, ready: true, savedAt: Date.now() });
     open(current.id);
+    // The phone's Back button and the back swipe return to the previous screen.
+    if (typeof window !== 'undefined') {
+      window.addEventListener('popstate', (e: PopStateEvent) => {
+        const view = (e.state as { pilina?: MainView } | null)?.pilina;
+        if (view) set({ view });
+        else if (onPhone()) set({ view: 'project' });
+      });
+    }
   }
 
   function open(id: string) {
@@ -266,11 +305,13 @@ export const useStore = create<AppState>()((set, get) => {
       view: 'project',
       cutting: false,
     });
+    recordView('project', false);
   }
 
   return {
     ready: false,
     view: 'project',
+    phoneTab: 'parts',
     projects: [],
     materials: [],
     edgeBands: [],
@@ -292,7 +333,10 @@ export const useStore = create<AppState>()((set, get) => {
 
     select(id) {
       if (id !== get().currentId) open(id);
-      else set({ view: 'project' });
+      else {
+        set({ view: 'project' });
+        recordView('project', false);
+      }
     },
 
     createProject() {
@@ -396,7 +440,12 @@ export const useStore = create<AppState>()((set, get) => {
     },
 
     setView(view) {
+      recordView(view, DRILL_DOWN.has(view) && get().view !== view);
       set({ view });
+    },
+
+    setPhoneTab(phoneTab) {
+      set({ phoneTab });
     },
 
     addOffcuts(items) {

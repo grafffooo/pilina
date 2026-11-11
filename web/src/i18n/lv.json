@@ -628,5 +628,15 @@
   "Pick up strip {{n}} of {{total}}": "Paņemiet sloksni {{n}} no {{total}}",
   "{{width}} wide, {{length}} long": "platums {{width}}, garums {{length}}",
   "Rip cuts": "Garenzāģējumi",
-  "Strip {{n}} of {{total}}": "Sloksne {{n}} no {{total}}"
+  "Strip {{n}} of {{total}}": "Sloksne {{n}} no {{total}}",
+  "Import": "Importēt",
+  "Cut projects": "Sagriezti projekti",
+  "Last cut: {{name}}, {{date}}": "Pēdējais griezums: {{name}}, {{date}}",
+  "Active": "Aktīvie",
+  "Sort": "Kārtot",
+  "Recent": "Jaunākie",
+  "Today": "Šodien",
+  "Yesterday": "Vakar",
+  "This week": "Šonedēļ",
+  "Earlier": "Agrāk"
 }

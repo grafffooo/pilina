@@ -54,6 +54,9 @@
 }
 
 .tableWrap {
+  /* Positioned, so the hidden screen-reader labels in far columns stay inside the scroller
+     instead of widening the whole page. */
+  position: relative;
   overflow-x: auto;
 }
 

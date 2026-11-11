@@ -666,5 +666,15 @@
   "Pick up strip {{n}} of {{total}}": "Weź pas {{n}} z {{total}}",
   "{{width}} wide, {{length}} long": "szerokość {{width}}, długość {{length}}",
   "Rip cuts": "Cięcia wzdłużne",
-  "Strip {{n}} of {{total}}": "Pas {{n}} z {{total}}"
+  "Strip {{n}} of {{total}}": "Pas {{n}} z {{total}}",
+  "Import": "Importuj",
+  "Cut projects": "Pocięte projekty",
+  "Last cut: {{name}}, {{date}}": "Ostatnie cięcie: {{name}}, {{date}}",
+  "Active": "Aktywne",
+  "Sort": "Sortuj",
+  "Recent": "Najnowsze",
+  "Today": "Dziś",
+  "Yesterday": "Wczoraj",
+  "This week": "Ten tydzień",
+  "Earlier": "Starsze"
 }

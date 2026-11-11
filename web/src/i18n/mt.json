@@ -704,5 +704,15 @@
   "Pick up strip {{n}} of {{total}}": "Ħu l-faxxa {{n}} minn {{total}}",
   "{{width}} wide, {{length}} long": "{{width}} wisa’, {{length}} tul",
   "Rip cuts": "Qtugħ fit-tul",
-  "Strip {{n}} of {{total}}": "Faxxa {{n}} minn {{total}}"
+  "Strip {{n}} of {{total}}": "Faxxa {{n}} minn {{total}}",
+  "Import": "Importa",
+  "Cut projects": "Proġetti maqtugħa",
+  "Last cut: {{name}}, {{date}}": "L-aħħar qtugħ: {{name}}, {{date}}",
+  "Active": "Attivi",
+  "Sort": "Ordna",
+  "Recent": "L-aktar reċenti",
+  "Today": "Illum",
+  "Yesterday": "Ilbieraħ",
+  "This week": "Din il-ġimgħa",
+  "Earlier": "Qabel"
 }

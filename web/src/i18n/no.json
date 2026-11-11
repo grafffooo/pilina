@@ -590,5 +590,15 @@
   "Pick up strip {{n}} of {{total}}": "Ta stripe {{n}} av {{total}}",
   "{{width}} wide, {{length}} long": "{{width}} bred, {{length}} lang",
   "Rip cuts": "Kløyvsnitt",
-  "Strip {{n}} of {{total}}": "Stripe {{n}} av {{total}}"
+  "Strip {{n}} of {{total}}": "Stripe {{n}} av {{total}}",
+  "Import": "Importer",
+  "Cut projects": "Skårne prosjekter",
+  "Last cut: {{name}}, {{date}}": "Sist skåret: {{name}}, {{date}}",
+  "Active": "Aktive",
+  "Sort": "Sorter",
+  "Recent": "Nyeste",
+  "Today": "I dag",
+  "Yesterday": "I går",
+  "This week": "Denne uken",
+  "Earlier": "Eldre"
 }

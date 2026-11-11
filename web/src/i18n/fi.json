@@ -590,5 +590,15 @@
   "Pick up strip {{n}} of {{total}}": "Ota kaista {{n}}/{{total}}",
   "{{width}} wide, {{length}} long": "leveys {{width}}, pituus {{length}}",
   "Rip cuts": "Pitkittäissahaukset",
-  "Strip {{n}} of {{total}}": "Kaista {{n}}/{{total}}"
+  "Strip {{n}} of {{total}}": "Kaista {{n}}/{{total}}",
+  "Import": "Tuo",
+  "Cut projects": "Sahatut projektit",
+  "Last cut: {{name}}, {{date}}": "Viimeksi sahattu: {{name}}, {{date}}",
+  "Active": "Aktiiviset",
+  "Sort": "Järjestä",
+  "Recent": "Uusimmat",
+  "Today": "Tänään",
+  "Yesterday": "Eilen",
+  "This week": "Tällä viikolla",
+  "Earlier": "Aiemmat"
 }

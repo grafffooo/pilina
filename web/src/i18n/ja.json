@@ -552,5 +552,15 @@
   "Pick up strip {{n}} of {{total}}": "短冊 {{n}} / {{total}} を取る",
   "{{width}} wide, {{length}} long": "幅 {{width}}、長さ {{length}}",
   "Rip cuts": "縦挽き",
-  "Strip {{n}} of {{total}}": "短冊 {{n}} / {{total}}"
+  "Strip {{n}} of {{total}}": "短冊 {{n}} / {{total}}",
+  "Import": "読み込む",
+  "Cut projects": "切断済みプロジェクト",
+  "Last cut: {{name}}, {{date}}": "最後の切断: {{name}}、{{date}}",
+  "Active": "進行中",
+  "Sort": "並べ替え",
+  "Recent": "最近",
+  "Today": "今日",
+  "Yesterday": "昨日",
+  "This week": "今週",
+  "Earlier": "それ以前"
 }

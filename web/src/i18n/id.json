@@ -552,5 +552,15 @@
   "Pick up strip {{n}} of {{total}}": "Ambil lajur {{n}} dari {{total}}",
   "{{width}} wide, {{length}} long": "lebar {{width}}, panjang {{length}}",
   "Rip cuts": "Potongan membujur",
-  "Strip {{n}} of {{total}}": "Lajur {{n}} dari {{total}}"
+  "Strip {{n}} of {{total}}": "Lajur {{n}} dari {{total}}",
+  "Import": "Impor",
+  "Cut projects": "Proyek yang sudah dipotong",
+  "Last cut: {{name}}, {{date}}": "Potongan terakhir: {{name}}, {{date}}",
+  "Active": "Aktif",
+  "Sort": "Urutkan",
+  "Recent": "Terbaru",
+  "Today": "Hari ini",
+  "Yesterday": "Kemarin",
+  "This week": "Minggu ini",
+  "Earlier": "Lebih lama"
 }

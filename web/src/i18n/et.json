@@ -590,5 +590,15 @@
   "Pick up strip {{n}} of {{total}}": "Võta riba {{n}}/{{total}}",
   "{{width}} wide, {{length}} long": "laius {{width}}, pikkus {{length}}",
   "Rip cuts": "Pikilõiked",
-  "Strip {{n}} of {{total}}": "Riba {{n}}/{{total}}"
+  "Strip {{n}} of {{total}}": "Riba {{n}}/{{total}}",
+  "Import": "Impordi",
+  "Cut projects": "Lõigatud projektid",
+  "Last cut: {{name}}, {{date}}": "Viimati lõigatud: {{name}}, {{date}}",
+  "Active": "Aktiivsed",
+  "Sort": "Sorteeri",
+  "Recent": "Hiljutised",
+  "Today": "Täna",
+  "Yesterday": "Eile",
+  "This week": "Sel nädalal",
+  "Earlier": "Varasemad"
 }

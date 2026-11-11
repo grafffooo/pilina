@@ -628,5 +628,15 @@
   "Pick up strip {{n}} of {{total}}": "Prendi la striscia {{n}} di {{total}}",
   "{{width}} wide, {{length}} long": "larga {{width}}, lunga {{length}}",
   "Rip cuts": "Tagli longitudinali",
-  "Strip {{n}} of {{total}}": "Striscia {{n}} di {{total}}"
+  "Strip {{n}} of {{total}}": "Striscia {{n}} di {{total}}",
+  "Import": "Importa",
+  "Cut projects": "Progetti tagliati",
+  "Last cut: {{name}}, {{date}}": "Ultimo taglio: {{name}}, {{date}}",
+  "Active": "Attivi",
+  "Sort": "Ordina",
+  "Recent": "Recenti",
+  "Today": "Oggi",
+  "Yesterday": "Ieri",
+  "This week": "Questa settimana",
+  "Earlier": "Precedenti"
 }

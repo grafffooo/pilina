@@ -552,5 +552,15 @@
   "Pick up strip {{n}} of {{total}}": "띠 {{n}}/{{total}} 집기",
   "{{width}} wide, {{length}} long": "폭 {{width}}, 길이 {{length}}",
   "Rip cuts": "켜기",
-  "Strip {{n}} of {{total}}": "띠 {{n}}/{{total}}"
+  "Strip {{n}} of {{total}}": "띠 {{n}}/{{total}}",
+  "Import": "가져오기",
+  "Cut projects": "재단 완료 프로젝트",
+  "Last cut: {{name}}, {{date}}": "마지막 재단: {{name}}, {{date}}",
+  "Active": "진행 중",
+  "Sort": "정렬",
+  "Recent": "최근",
+  "Today": "오늘",
+  "Yesterday": "어제",
+  "This week": "이번 주",
+  "Earlier": "이전"
 }

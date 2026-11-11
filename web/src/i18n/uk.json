@@ -666,5 +666,15 @@
   "Pick up strip {{n}} of {{total}}": "Візьміть смугу {{n}} з {{total}}",
   "{{width}} wide, {{length}} long": "ширина {{width}}, довжина {{length}}",
   "Rip cuts": "Поздовжні різи",
-  "Strip {{n}} of {{total}}": "Смуга {{n}} з {{total}}"
+  "Strip {{n}} of {{total}}": "Смуга {{n}} з {{total}}",
+  "Import": "Імпорт",
+  "Cut projects": "Розкроєні проєкти",
+  "Last cut: {{name}}, {{date}}": "Останній розкрій: {{name}}, {{date}}",
+  "Active": "Активні",
+  "Sort": "Сортувати",
+  "Recent": "Нещодавні",
+  "Today": "Сьогодні",
+  "Yesterday": "Учора",
+  "This week": "Цього тижня",
+  "Earlier": "Раніше"
 }

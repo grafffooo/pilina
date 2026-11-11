@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PartsTable } from '../editor/PartsTable';
 import { StockTable } from '../editor/StockTable';
 import type { Project } from '../model/project';
@@ -22,11 +22,15 @@ import { OffcutLibrary } from '../offcuts/OffcutLibrary';
 import { StatsScreen } from '../stats/StatsScreen';
 import { useCurrentProject, useStore } from '../store/store';
 import { useMediaQuery } from '../ui/hooks';
-import { CloseIcon, MenuIcon, PartsIcon, SawIcon, SheetIcon } from '../ui/icons';
+import { CloseIcon } from '../ui/icons';
 import ui from '../ui/ui.module.css';
 import { ProjectHeader, RunStatus } from './ProjectHeader';
 import { useProjectStatus } from './StatusBadge';
 import { Sidebar } from './Sidebar';
+import { BottomBar } from './BottomBar';
+import { ImportHost } from './importHost';
+import { CutArchiveScreen, ProjectsScreen } from './ProjectsScreen';
+import { SettingsScreen } from './SettingsScreen';
 import { PwaNotices } from './Pwa';
 import { isDesktopApp } from '../lib/platform';
 import { confirmDialog, DialogHost } from '../ui/dialogs';
@@ -69,24 +73,24 @@ export function App() {
     return <div className={styles.loading}>{t('Loading…')}</div>;
   }
 
-  const openDrawer = wide ? undefined : () => setDrawer(true);
+  // The drawer is for desktop layouts narrower than the wide one; a phone has the bottom bar.
+  const openDrawer = wide || phone ? undefined : () => setDrawer(true);
+  // Phone-only screens fall back to the project when the window grows past a phone.
+  const deskView =
+    view === 'projects' || view === 'archive' || view === 'settings' ? 'project' : view;
 
   return (
     <>
-      {view !== 'project' ? (
+      {phone ? (
+        <PhoneApp project={project} />
+      ) : deskView !== 'project' ? (
         <div className={styles.desktop}>
           {wide && <Sidebar />}
-          {view === 'library' && (
-            <LibraryScreen onMenu={wide ? undefined : () => setDrawer(true)} />
-          )}
-          {view === 'offcuts' && (
-            <OffcutLibrary onMenu={wide ? undefined : () => setDrawer(true)} />
-          )}
-          {view === 'labels' && <LabelPrint onMenu={wide ? undefined : () => setDrawer(true)} />}
-          {view === 'stats' && <StatsScreen onMenu={wide ? undefined : () => setDrawer(true)} />}
+          {deskView === 'library' && <LibraryScreen onMenu={openDrawer} />}
+          {deskView === 'offcuts' && <OffcutLibrary onMenu={openDrawer} />}
+          {deskView === 'labels' && <LabelPrint onMenu={openDrawer} />}
+          {deskView === 'stats' && <StatsScreen onMenu={openDrawer} />}
         </div>
-      ) : phone ? (
-        <PhoneLayout project={project} onMenu={() => setDrawer(true)} />
       ) : (
         <div className={styles.desktop}>
           {wide && <Sidebar />}
@@ -99,10 +103,33 @@ export function App() {
           </div>
         </div>
       )}
-      {drawer && !wide && <Drawer onClose={() => setDrawer(false)} />}
+      {drawer && !wide && !phone && <Drawer onClose={() => setDrawer(false)} />}
       {cutting && <CutMode />}
       {!isDesktopApp() && <PwaNotices />}
       <DialogHost />
+    </>
+  );
+}
+
+/** The phone: the bottom bar plus one screen at a time. */
+function PhoneApp({ project }: { project: Project }) {
+  const view = useStore((s) => s.view);
+  return (
+    <>
+      {view === 'project' && <PhoneLayout project={project} />}
+      {view === 'projects' && <ProjectsScreen />}
+      {view === 'archive' && <CutArchiveScreen />}
+      {view === 'settings' && <SettingsScreen />}
+      {(view === 'library' || view === 'offcuts' || view === 'labels' || view === 'stats') && (
+        <div className={styles.phone}>
+          {view === 'library' && <LibraryScreen />}
+          {view === 'offcuts' && <OffcutLibrary />}
+          {view === 'labels' && <LabelPrint />}
+          {view === 'stats' && <StatsScreen />}
+        </div>
+      )}
+      <BottomBar />
+      <ImportHost />
     </>
   );
 }
@@ -119,37 +146,22 @@ function ProjectEditor({ project }: { project: Project }) {
   );
 }
 
-type Tab = 'parts' | 'sheets' | 'cut';
-
-function PhoneLayout({ project, onMenu }: { project: Project; onMenu: () => void }) {
+function PhoneLayout({ project }: { project: Project }) {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<Tab>('parts');
+  const tab = useStore((s) => s.phoneTab);
   const { plan, job, status } = useStore((s) => s.result);
-  const tabs: { id: Tab; label: string; icon: ReactNode }[] = [
-    { id: 'parts', label: t('Parts'), icon: <PartsIcon size={22} /> },
-    { id: 'sheets', label: t('Sheets'), icon: <SheetIcon size={22} /> },
-    { id: 'cut', label: t('Cut'), icon: <SawIcon size={22} /> },
-  ];
 
   return (
     <div className={styles.phone}>
       <div className={styles.phoneBody}>
         {tab === 'parts' && (
           <>
-            <ProjectHeader project={project} onMenu={onMenu} />
+            <ProjectHeader project={project} />
             <ProjectEditor project={project} />
           </>
         )}
         {tab !== 'parts' && (
           <div className={styles.phoneTop}>
-            <button
-              type="button"
-              className={ui.iconButton}
-              aria-label={t('Projects')}
-              onClick={onMenu}
-            >
-              <MenuIcon size={22} />
-            </button>
             <span className={styles.phoneTitle}>{project.name || t('Untitled project')}</span>
             <RunStatus />
             <ExportPdfButton compact />
@@ -177,19 +189,6 @@ function PhoneLayout({ project, onMenu }: { project: Project; onMenu: () => void
             <EmptyResults running={status === 'running'} />
           ))}
       </div>
-      <nav className={styles.tabs} aria-label={t('Sections')}>
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            aria-current={tab === t.id ? 'page' : undefined}
-            onClick={() => setTab(t.id)}
-          >
-            {t.icon}
-            {t.label}
-          </button>
-        ))}
-      </nav>
     </div>
   );
 }

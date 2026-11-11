@@ -590,5 +590,15 @@
   "Pick up strip {{n}} of {{total}}": "Ta remsa {{n}} av {{total}}",
   "{{width}} wide, {{length}} long": "{{width}} bred, {{length}} lång",
   "Rip cuts": "Klyvsnitt",
-  "Strip {{n}} of {{total}}": "Remsa {{n}} av {{total}}"
+  "Strip {{n}} of {{total}}": "Remsa {{n}} av {{total}}",
+  "Import": "Importera",
+  "Cut projects": "Sågade projekt",
+  "Last cut: {{name}}, {{date}}": "Senast sågad: {{name}}, {{date}}",
+  "Active": "Aktiva",
+  "Sort": "Sortera",
+  "Recent": "Senaste",
+  "Today": "I dag",
+  "Yesterday": "I går",
+  "This week": "Den här veckan",
+  "Earlier": "Äldre"
 }

@@ -552,5 +552,15 @@
   "Pick up strip {{n}} of {{total}}": "取第 {{n}} 条（共 {{total}} 条）",
   "{{width}} wide, {{length}} long": "宽 {{width}}，长 {{length}}",
   "Rip cuts": "纵切",
-  "Strip {{n}} of {{total}}": "条料 {{n}}/{{total}}"
+  "Strip {{n}} of {{total}}": "条料 {{n}}/{{total}}",
+  "Import": "导入",
+  "Cut projects": "已开料项目",
+  "Last cut: {{name}}, {{date}}": "最近开料：{{name}}，{{date}}",
+  "Active": "进行中",
+  "Sort": "排序",
+  "Recent": "最近",
+  "Today": "今天",
+  "Yesterday": "昨天",
+  "This week": "本周",
+  "Earlier": "更早"
 }

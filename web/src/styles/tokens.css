@@ -18,6 +18,8 @@
   --radius-sheet: 20px;
   /* Minimum touch target on phones (Apple 44 pt, Android 48 dp). */
   --tap: 44px;
+  /* Height of the phone's bottom bar (without the safe area under it). */
+  --bar-h: 64px;
 
   /* Drawing colors: identical in both themes (the sheet sits on light "paper"). */
   --cut-rip: #dd6b0b;
@@ -150,6 +152,14 @@ label {
 html,
 body {
   overscroll-behavior-y: none;
+}
+
+/* A phone never pans sideways: a stray wide element must not move the fixed bottom bar. */
+@media (max-width: 767px) {
+  html,
+  body {
+    overflow-x: clip;
+  }
 }
 
 :focus-visible {

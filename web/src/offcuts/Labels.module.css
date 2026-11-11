@@ -296,6 +296,22 @@
   .screen {
     padding: 12px 12px 32px;
   }
+
+  /* The previews fit the screen instead of making the page wider than the phone. */
+  .settings,
+  .preview,
+  .zoom {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .paperFrame {
+    max-width: 100%;
+  }
+
+  .zoomFrame {
+    width: 100%;
+  }
 }
 
 .custom {

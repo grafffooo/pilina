@@ -590,5 +590,15 @@
   "Pick up strip {{n}} of {{total}}": "ফালি {{n}} / {{total}} তুলুন",
   "{{width}} wide, {{length}} long": "প্রস্থ {{width}}, দৈর্ঘ্য {{length}}",
   "Rip cuts": "লম্বালম্বি কাট",
-  "Strip {{n}} of {{total}}": "ফালি {{n}} / {{total}}"
+  "Strip {{n}} of {{total}}": "ফালি {{n}} / {{total}}",
+  "Import": "আমদানি",
+  "Cut projects": "কাটা প্রকল্প",
+  "Last cut: {{name}}, {{date}}": "শেষ কাটা: {{name}}, {{date}}",
+  "Active": "চলমান",
+  "Sort": "সাজান",
+  "Recent": "সাম্প্রতিক",
+  "Today": "আজ",
+  "Yesterday": "গতকাল",
+  "This week": "এই সপ্তাহ",
+  "Earlier": "আগের"
 }

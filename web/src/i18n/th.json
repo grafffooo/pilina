@@ -552,5 +552,15 @@
   "Pick up strip {{n}} of {{total}}": "หยิบแถบ {{n}} จาก {{total}}",
   "{{width}} wide, {{length}} long": "กว้าง {{width}} ยาว {{length}}",
   "Rip cuts": "ผ่าตามยาว",
-  "Strip {{n}} of {{total}}": "แถบ {{n}} จาก {{total}}"
+  "Strip {{n}} of {{total}}": "แถบ {{n}} จาก {{total}}",
+  "Import": "นำเข้า",
+  "Cut projects": "โปรเจกต์ที่ตัดแล้ว",
+  "Last cut: {{name}}, {{date}}": "ตัดล่าสุด: {{name}}, {{date}}",
+  "Active": "กำลังทำ",
+  "Sort": "เรียง",
+  "Recent": "ล่าสุด",
+  "Today": "วันนี้",
+  "Yesterday": "เมื่อวาน",
+  "This week": "สัปดาห์นี้",
+  "Earlier": "เก่ากว่า"
 }

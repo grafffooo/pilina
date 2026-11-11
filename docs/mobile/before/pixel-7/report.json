@@ -1,0 +1,4791 @@
+[
+  {
+    "screen": "01-parts-empty",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Project name”",
+        "w": 344,
+        "h": 34
+      },
+      {
+        "what": "button “Undo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Redo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Share”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Project actions”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 82,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 112,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 74,
+        "h": 32
+      },
+      {
+        "what": "input “Include Part 1”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Part 1”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Part 1”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Part 1”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Part 1: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Part 1”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 314,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 84,
+        "h": 32
+      },
+      {
+        "what": "input “Use Chipboard 18mm”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Use Chipboard 18mm first”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Chipboard 18mm”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "button",
+        "w": 86,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 129,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 99,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 77,
+        "h": 28
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Length, Part 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Part 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Part 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "select",
+        "fontPx": 13
+      }
+    ],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "02-parts-filled",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Project name”",
+        "w": 344,
+        "h": 34
+      },
+      {
+        "what": "button “Undo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Redo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Share”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Project actions”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 82,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 112,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 74,
+        "h": 32
+      },
+      {
+        "what": "input “Include Side”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Side”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Side: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Side”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Top and bottom”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 2”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Top and bottom: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Top and bottom”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Shelf”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 3”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Shelf: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Shelf”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 314,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 84,
+        "h": 32
+      },
+      {
+        "what": "input “Use Chipboard 18mm”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Use Chipboard 18mm first”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Chipboard 18mm”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "button",
+        "w": 86,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 129,
+        "h": 32
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Length, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 2”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 3”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "fontPx": 13
+      }
+    ],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "03-stock-sheets",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Project name”",
+        "w": 344,
+        "h": 34
+      },
+      {
+        "what": "button “Undo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Redo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Share”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Project actions”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 82,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 112,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 74,
+        "h": 32
+      },
+      {
+        "what": "input “Include Side”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Side”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Side: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Side”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Top and bottom”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 2”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Top and bottom: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Top and bottom”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Shelf”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 3”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Shelf: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Shelf”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 314,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 84,
+        "h": 32
+      },
+      {
+        "what": "input “Use Chipboard 18mm”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Use Chipboard 18mm first”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Chipboard 18mm”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "button",
+        "w": 86,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 129,
+        "h": 32
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Length, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 2”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 3”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "fontPx": 13
+      }
+    ],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "04-costs",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Project name”",
+        "w": 344,
+        "h": 34
+      },
+      {
+        "what": "button “Undo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Redo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Share”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Project actions”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 82,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 112,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 74,
+        "h": 32
+      },
+      {
+        "what": "input “Include Side”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Side”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Side: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Side”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Top and bottom”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 2”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Top and bottom: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Top and bottom”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Shelf”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 3”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Shelf: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Shelf”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 314,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 84,
+        "h": 32
+      },
+      {
+        "what": "input “Use Chipboard 18mm”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Use Chipboard 18mm first”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Chipboard 18mm”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "button",
+        "w": 86,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 129,
+        "h": 32
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Length, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 2”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 3”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "fontPx": 13
+      }
+    ],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "05-parts-row-menu",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Project name”",
+        "w": 344,
+        "h": 34
+      },
+      {
+        "what": "button “Undo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Redo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Share”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Project actions”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 82,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 112,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 74,
+        "h": 32
+      },
+      {
+        "what": "input “Include Side”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Side”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Side: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Side”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Top and bottom”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 2”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Top and bottom: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Top and bottom”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Shelf”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 3”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Shelf: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Shelf”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 314,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 84,
+        "h": 32
+      },
+      {
+        "what": "input “Use Chipboard 18mm”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Use Chipboard 18mm first”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Chipboard 18mm”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "button",
+        "w": 86,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 129,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 186,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 186,
+        "h": 36
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Length, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 2”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 3”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "fontPx": 13
+      }
+    ],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "06-edge-picker",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Project name”",
+        "w": 344,
+        "h": 34
+      },
+      {
+        "what": "button “Undo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Redo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Share”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Project actions”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 82,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 112,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 74,
+        "h": 32
+      },
+      {
+        "what": "input “Include Side”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Side”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Side: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Side”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Top and bottom”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 2”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Top and bottom: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Top and bottom”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Shelf”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 3”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Shelf: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Shelf”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 314,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 84,
+        "h": 32
+      },
+      {
+        "what": "input “Use Chipboard 18mm”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Use Chipboard 18mm first”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Chipboard 18mm”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "button",
+        "w": 86,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 129,
+        "h": 32
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Length, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 2”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 3”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input",
+        "fontPx": 13
+      }
+    ],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "07-input-focused",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Project name”",
+        "w": 344,
+        "h": 34
+      },
+      {
+        "what": "button “Undo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Redo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Share”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Project actions”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 82,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 112,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 74,
+        "h": 32
+      },
+      {
+        "what": "input “Include Side”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Side”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Side: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Side”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Top and bottom”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 2”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Top and bottom: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Top and bottom”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Shelf”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 3”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Shelf: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Shelf”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 314,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 84,
+        "h": 32
+      },
+      {
+        "what": "input “Use Chipboard 18mm”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Use Chipboard 18mm first”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Chipboard 18mm”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "button",
+        "w": 86,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 129,
+        "h": 32
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Length, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 2”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 3”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "fontPx": 13
+      }
+    ],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "08-share",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Project name”",
+        "w": 344,
+        "h": 34
+      },
+      {
+        "what": "button “Undo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Redo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Share”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Project actions”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 82,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 112,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 74,
+        "h": 32
+      },
+      {
+        "what": "input “Include Side”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Side”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Side: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Side”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Top and bottom”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 2”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Top and bottom: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Top and bottom”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Shelf”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 3”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Shelf: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Shelf”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 314,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 84,
+        "h": 32
+      },
+      {
+        "what": "input “Use Chipboard 18mm”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Use Chipboard 18mm first”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Chipboard 18mm”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "button",
+        "w": 86,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 129,
+        "h": 32
+      },
+      {
+        "what": "button “Close”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 75,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 81,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 79,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 79,
+        "h": 32
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Length, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 2”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 3”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "fontPx": 13
+      }
+    ],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "09-sheets",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Export PDF”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Previous sheet”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Next sheet”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 47,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 51,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 55,
+        "h": 28
+      },
+      {
+        "what": "button “Zoom out”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Fit sheet”",
+        "w": 44,
+        "h": 28
+      },
+      {
+        "what": "button “Zoom in”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Full screen”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 56,
+        "h": 16
+      }
+    ],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "10-sheets-scrolled",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Export PDF”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Previous sheet”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Next sheet”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 47,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 51,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 55,
+        "h": 28
+      },
+      {
+        "what": "button “Zoom out”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Fit sheet”",
+        "w": 44,
+        "h": 28
+      },
+      {
+        "what": "button “Zoom in”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Full screen”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 56,
+        "h": 16
+      }
+    ],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "11-cut-list",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Export PDF”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Previous sheet”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Next sheet”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      }
+    ],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "12-cut-mode",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Export PDF”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Previous sheet”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Next sheet”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      }
+    ],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "13-cut-mode-strip",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Export PDF”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Previous sheet”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Next sheet”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      }
+    ],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "14-cut-mode-keep-offcuts",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Export PDF”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Previous sheet”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Next sheet”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      }
+    ],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "15-cut-mode-done",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Export PDF”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Previous sheet”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Next sheet”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      },
+      {
+        "what": "button",
+        "w": 386,
+        "h": 38
+      }
+    ],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "16-labels",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 124,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 152,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "what": "input",
+        "w": 270,
+        "h": 31
+      },
+      {
+        "what": "input",
+        "w": 270,
+        "h": 31
+      },
+      {
+        "what": "input",
+        "w": 270,
+        "h": 31
+      },
+      {
+        "what": "input",
+        "w": 270,
+        "h": 31
+      },
+      {
+        "what": "button “Start at sticker 1”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 2”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 3”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 4”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 5”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 6”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 7”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 8”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 9”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 10”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 11”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 12”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 13”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 14”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 15”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 16”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 17”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 18”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 19”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 20”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 21”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 22”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 23”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "button “Start at sticker 24”",
+        "w": 41,
+        "h": 18
+      },
+      {
+        "what": "input",
+        "w": 270,
+        "h": 18
+      },
+      {
+        "what": "input",
+        "w": 270,
+        "h": 18
+      },
+      {
+        "what": "input",
+        "w": 270,
+        "h": 18
+      },
+      {
+        "what": "input",
+        "w": 270,
+        "h": 18
+      }
+    ],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "17-menu",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Project name”",
+        "w": 344,
+        "h": 34
+      },
+      {
+        "what": "button “Undo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Redo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Share”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Project actions”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 95,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 74,
+        "h": 32
+      },
+      {
+        "what": "input “Include Side”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Side”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Side: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Side”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Top and bottom”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 2”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Top and bottom: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Top and bottom”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Shelf”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 3”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Shelf: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Shelf”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 314,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 84,
+        "h": 32
+      },
+      {
+        "what": "input “Use Chipboard 18mm”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Use Chipboard 18mm first”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Chipboard 18mm”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "button",
+        "w": 86,
+        "h": 32
+      },
+      {
+        "what": "button “Close”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Settings”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Search projects and parts”",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 27
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Length, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 2”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 3”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Search projects and parts”",
+        "fontPx": 13
+      }
+    ],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "18-offcut-library",
+    "overflowX": 0,
+    "scrollers": [
+      "div (719 px of 386)"
+    ],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 134,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 108,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "what": "input “Search offcuts”",
+        "w": 388,
+        "h": 34
+      },
+      {
+        "what": "button “Scan a label”",
+        "w": 388,
+        "h": 34
+      },
+      {
+        "what": "select “Material”",
+        "w": 146,
+        "h": 34
+      },
+      {
+        "what": "input “Must fit length”",
+        "w": 72,
+        "h": 34
+      },
+      {
+        "what": "input “Must fit width”",
+        "w": 72,
+        "h": 34
+      },
+      {
+        "what": "input",
+        "w": 92,
+        "h": 22
+      },
+      {
+        "what": "input “Select OC-0001”",
+        "w": 16,
+        "h": 16
+      },
+      {
+        "what": "input “Place of OC-0001”",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "what": "select “Status of OC-0001”",
+        "w": 83,
+        "h": 26
+      },
+      {
+        "what": "button “More actions for OC-0001”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Select OC-0002”",
+        "w": 16,
+        "h": 16
+      },
+      {
+        "what": "input “Place of OC-0002”",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "what": "select “Status of OC-0002”",
+        "w": 83,
+        "h": 26
+      },
+      {
+        "what": "button “More actions for OC-0002”",
+        "w": 32,
+        "h": 32
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Search offcuts”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Material”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Must fit length”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Must fit width”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Place of OC-0001”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Status of OC-0001”",
+        "fontPx": 12
+      },
+      {
+        "what": "input “Place of OC-0002”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Status of OC-0002”",
+        "fontPx": 12
+      }
+    ],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "19-materials",
+    "overflowX": 0,
+    "scrollers": [
+      "div (539 px of 386)"
+    ],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 134,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 85,
+        "h": 32
+      },
+      {
+        "what": "input “Colour of Chipboard 18mm”",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "what": "input “Board name”",
+        "w": 54,
+        "h": 32
+      },
+      {
+        "what": "input “Thickness of Chipboard 18mm”",
+        "w": 56,
+        "h": 32
+      },
+      {
+        "what": "select “Grain of Chipboard 18mm”",
+        "w": 45,
+        "h": 32
+      },
+      {
+        "what": "input “Price of Chipboard 18mm”",
+        "w": 56,
+        "h": 32
+      },
+      {
+        "what": "select “Price unit of Chipboard 18mm”",
+        "w": 30,
+        "h": 32
+      },
+      {
+        "what": "input “Sheet length for the price of Chipboard ”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Sheet width for the price of Chipboard 1”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Chipboard 18mm”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 114,
+        "h": 32
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Colour of Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Board name”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Thickness of Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Grain of Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Price of Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Price unit of Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Sheet length for the price of Chipboard ”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Sheet width for the price of Chipboard 1”",
+        "fontPx": 13
+      }
+    ],
+    "tinySelects": [
+      {
+        "what": "select “Grain of Chipboard 18mm”",
+        "w": 45
+      },
+      {
+        "what": "select “Price unit of Chipboard 18mm”",
+        "w": 30
+      }
+    ],
+    "clipped": []
+  },
+  {
+    "screen": "20-materials-adding",
+    "overflowX": 0,
+    "scrollers": [
+      "div (539 px of 386)"
+    ],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 134,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 85,
+        "h": 32
+      },
+      {
+        "what": "input “Colour of Chipboard 18mm”",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "what": "input “Board name”",
+        "w": 54,
+        "h": 32
+      },
+      {
+        "what": "input “Thickness of Chipboard 18mm”",
+        "w": 56,
+        "h": 32
+      },
+      {
+        "what": "select “Grain of Chipboard 18mm”",
+        "w": 45,
+        "h": 32
+      },
+      {
+        "what": "input “Price of Chipboard 18mm”",
+        "w": 56,
+        "h": 32
+      },
+      {
+        "what": "select “Price unit of Chipboard 18mm”",
+        "w": 30,
+        "h": 32
+      },
+      {
+        "what": "input “Sheet length for the price of Chipboard ”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Sheet width for the price of Chipboard 1”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Chipboard 18mm”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 114,
+        "h": 32
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Colour of Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Board name”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Thickness of Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Grain of Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Price of Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Price unit of Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Sheet length for the price of Chipboard ”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Sheet width for the price of Chipboard 1”",
+        "fontPx": 13
+      }
+    ],
+    "tinySelects": [
+      {
+        "what": "select “Grain of Chipboard 18mm”",
+        "w": 45
+      },
+      {
+        "what": "select “Price unit of Chipboard 18mm”",
+        "w": 30
+      }
+    ],
+    "clipped": []
+  },
+  {
+    "screen": "21-statistics",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 134,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 93,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 93,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 110,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 62,
+        "h": 28
+      },
+      {
+        "what": "summary",
+        "w": 354,
+        "h": 15
+      }
+    ],
+    "zoomInputs": [],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "22-import",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 134,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 93,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 93,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 110,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 62,
+        "h": 28
+      },
+      {
+        "what": "summary",
+        "w": 354,
+        "h": 15
+      },
+      {
+        "what": "button “Close”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Settings”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Search projects and parts”",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 27
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button “Close”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "summary",
+        "w": 340,
+        "h": 16
+      },
+      {
+        "what": "button",
+        "w": 134,
+        "h": 32
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Search projects and parts”",
+        "fontPx": 13
+      },
+      {
+        "what": "input",
+        "fontPx": 13
+      },
+      {
+        "what": "textarea “Old CutList data”",
+        "fontPx": 12
+      }
+    ],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "23-settings",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Project name”",
+        "w": 344,
+        "h": 34
+      },
+      {
+        "what": "button “Undo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Redo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Share”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Project actions”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 95,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 74,
+        "h": 32
+      },
+      {
+        "what": "input “Include Side”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Side”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Side: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Side”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Top and bottom”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 2”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Top and bottom: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Top and bottom”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Shelf”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 3”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Shelf: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Shelf”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 314,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 84,
+        "h": 32
+      },
+      {
+        "what": "input “Use Chipboard 18mm”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Use Chipboard 18mm first”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Chipboard 18mm”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "button",
+        "w": 86,
+        "h": 32
+      },
+      {
+        "what": "button “Close”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Settings”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Search projects and parts”",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 27
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button “Close”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 46,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 49,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 47,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 84,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 89,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 58,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 117,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 137,
+        "h": 28
+      },
+      {
+        "what": "button “Every rip on the whole sheet first, then”",
+        "w": 72,
+        "h": 28
+      },
+      {
+        "what": "button “Each rip followed by its strip’s cross c”",
+        "w": 92,
+        "h": 28
+      },
+      {
+        "what": "select",
+        "w": 340,
+        "h": 34
+      },
+      {
+        "what": "input “Minimum leftover length”",
+        "w": 84,
+        "h": 34
+      },
+      {
+        "what": "input “Minimum leftover width”",
+        "w": 84,
+        "h": 34
+      },
+      {
+        "what": "button",
+        "w": 107,
+        "h": 32
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Length, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 2”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 3”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Search projects and parts”",
+        "fontPx": 13
+      },
+      {
+        "what": "select",
+        "fontPx": 13
+      },
+      {
+        "what": "select",
+        "fontPx": 13
+      },
+      {
+        "what": "input",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Minimum leftover length”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Minimum leftover width”",
+        "fontPx": 13
+      }
+    ],
+    "tinySelects": [],
+    "clipped": []
+  },
+  {
+    "screen": "24-settings-end",
+    "overflowX": 0,
+    "scrollers": [],
+    "small": [
+      {
+        "what": "button “Projects”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Project name”",
+        "w": 344,
+        "h": 34
+      },
+      {
+        "what": "button “Undo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Redo”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Share”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Project actions”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 95,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 74,
+        "h": 32
+      },
+      {
+        "what": "input “Include Side”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Side”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Side”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Side: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Side”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Top and bottom”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 2”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Top and bottom: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Top and bottom”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Include Shelf”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "input “Label, part 3”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Grain: any direction (the part may be ro”",
+        "w": 40,
+        "h": 28
+      },
+      {
+        "what": "button “Edge banding for Shelf: none”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Shelf”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 314,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 84,
+        "h": 32
+      },
+      {
+        "what": "input “Use Chipboard 18mm”",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "w": 110,
+        "h": 32
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "w": 224,
+        "h": 32
+      },
+      {
+        "what": "button “Use Chipboard 18mm first”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “More actions for Chipboard 18mm”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input",
+        "w": 18,
+        "h": 18
+      },
+      {
+        "what": "button",
+        "w": 86,
+        "h": 32
+      },
+      {
+        "what": "button “Close”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "button “Settings”",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "what": "input “Search projects and parts”",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 27
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 275,
+        "h": 36
+      },
+      {
+        "what": "button",
+        "w": 46,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 49,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 47,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 84,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 89,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 58,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 117,
+        "h": 28
+      },
+      {
+        "what": "button",
+        "w": 137,
+        "h": 28
+      },
+      {
+        "what": "button “Every rip on the whole sheet first, then”",
+        "w": 72,
+        "h": 28
+      },
+      {
+        "what": "button “Each rip followed by its strip’s cross c”",
+        "w": 92,
+        "h": 28
+      },
+      {
+        "what": "select",
+        "w": 340,
+        "h": 34
+      },
+      {
+        "what": "input “Minimum leftover length”",
+        "w": 84,
+        "h": 34
+      },
+      {
+        "what": "input “Minimum leftover width”",
+        "w": 84,
+        "h": 34
+      },
+      {
+        "what": "button",
+        "w": 107,
+        "h": 32
+      },
+      {
+        "what": "button",
+        "w": 66,
+        "h": 36
+      }
+    ],
+    "zoomInputs": [
+      {
+        "what": "input “Length, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Side”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Top and bottom”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 2”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Qty, Shelf”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Label, part 3”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Length, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Width, Chipboard 18mm”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Quantity, Chipboard 18mm. Leave empty fo”",
+        "fontPx": 13
+      },
+      {
+        "what": "select “Material, sheet 1”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Search projects and parts”",
+        "fontPx": 13
+      },
+      {
+        "what": "select",
+        "fontPx": 13
+      },
+      {
+        "what": "select",
+        "fontPx": 13
+      },
+      {
+        "what": "input",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Minimum leftover length”",
+        "fontPx": 13
+      },
+      {
+        "what": "input “Minimum leftover width”",
+        "fontPx": 13
+      }
+    ],
+    "tinySelects": [],
+    "clipped": []
+  }
+]

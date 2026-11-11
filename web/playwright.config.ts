@@ -7,7 +7,7 @@ const PORT = 5174;
 
 export default defineConfig({
   testDir: 'e2e',
-  testIgnore: process.env.SCREENSHOTS ? undefined : ['**/screenshots.spec.ts'],
+  testIgnore: process.env.SCREENSHOTS ? undefined : ['**/screenshots*.spec.ts'],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

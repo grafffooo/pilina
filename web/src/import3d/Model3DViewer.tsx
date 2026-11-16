@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { Model3DBody } from '../model/model3d';
@@ -71,6 +72,7 @@ export function Model3DViewer({
   onToggleBody,
   onHoverBody,
 }: Model3DViewerProps) {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const entriesRef = useRef<MeshEntry[]>([]);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -299,17 +301,17 @@ export function Model3DViewer({
       <div ref={containerRef} className={styles.viewerCanvas} />
       <div className={styles.viewerOverlay}>
         <button type="button" className={styles.viewBtn} onClick={() => applyViewPreset('iso')}>
-          Iso
+          {t('Iso')}
         </button>
         <button type="button" className={styles.viewBtn} onClick={() => applyViewPreset('top')}>
-          Top
+          {t('Top')}
         </button>
         <button type="button" className={styles.viewBtn} onClick={() => applyViewPreset('front')}>
-          Front
+          {t('Front')}
         </button>
       </div>
       <div className={styles.viewerHint}>
-        Click to toggle part · Shift+click to toggle component · Drag to orbit
+        {t('Click to toggle part · Shift+click to toggle component · Drag to orbit')}
       </div>
     </div>
   );

@@ -745,5 +745,9 @@
   "Import {{count}} parts_two": "Import {{count}} parts",
   "Import {{count}} parts_few": "Import {{count}} parts",
   "Import {{count}} parts_many": "Import {{count}} parts",
-  "Import {{count}} parts_other": "Import {{count}} parts"
+  "Import {{count}} parts_other": "Import {{count}} parts",
+  "Click to toggle part · Shift+click to toggle component · Drag to orbit": "Click to toggle part · Shift+click to toggle component · Drag to orbit",
+  "Front": "Front",
+  "Iso": "Iso",
+  "Top": "Top"
 }

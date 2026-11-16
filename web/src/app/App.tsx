@@ -109,6 +109,7 @@ export function App() {
       {cutting && <CutMode />}
       {!isDesktopApp() && <PwaNotices />}
       <DialogHost />
+      <ImportHost />
     </>
   );
 }
@@ -140,7 +141,6 @@ function PhoneApp({ project }: { project: Project }) {
         </div>
       )}
       <BottomBar />
-      <ImportHost />
     </>
   );
 }

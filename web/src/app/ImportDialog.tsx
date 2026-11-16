@@ -15,6 +15,8 @@ import { updateSettings, useStore } from '../store/store';
 import type { Unit } from '../lib/units';
 import { CloseIcon } from '../ui/icons';
 import ui from '../ui/ui.module.css';
+import { isSupported3DFileName } from '../model/model3d';
+import { useImport3DDialog } from './importHost';
 import styles from './ImportDialog.module.css';
 import { useTranslation } from 'react-i18next';
 
@@ -82,6 +84,11 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
     const state = useStore.getState();
     const ids = new Set(state.projects.map((p) => p.id));
     for (const file of Array.from(files)) {
+      if (isSupported3DFileName(file.name)) {
+        onClose();
+        useImport3DDialog.getState().show(file);
+        return;
+      }
       try {
         const text = await file.text();
         if (/\.(md|markdown|txt)$/i.test(file.name)) {
@@ -163,7 +170,7 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
           <input
             type="file"
             multiple
-            accept=".md,.markdown,.txt,.json,application/json,text/markdown"
+            accept=".md,.markdown,.txt,.json,.sc,application/json,text/markdown"
             className="sr-only"
             onChange={(e) => {
               if (e.target.files) void importFiles(e.target.files);

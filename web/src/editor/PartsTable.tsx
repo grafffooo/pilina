@@ -21,6 +21,7 @@ import { MaterialSelect } from './MaterialSelect';
 import { PartCards } from './PartCards';
 import { useMediaQuery } from '../ui/hooks';
 import { focusCell, grainHelp, grainText, GRAIN_NEXT } from './partFields';
+import { useImport3DDialog } from '../app/importHost';
 import styles from './Editor.module.css';
 import { useTranslation } from 'react-i18next';
 
@@ -93,6 +94,13 @@ export function PartsTable({ project }: { project: Project }) {
         <span className={styles.spacer} />
         <span className={styles.headerActions}>
           <ProjectSettingChips project={project} />
+          <button
+            type="button"
+            className={ui.button}
+            onClick={() => useImport3DDialog.getState().show()}
+          >
+            {t('Import 3D (.sc)')}
+          </button>
           <button type="button" className={ui.buttonPrimary} onClick={onAdd}>
             {t('Add part')}
           </button>

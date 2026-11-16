@@ -22,12 +22,41 @@ import { PartCards } from './PartCards';
 import { useMediaQuery } from '../ui/hooks';
 import { focusCell, grainHelp, grainText, GRAIN_NEXT } from './partFields';
 import { useImport3DDialog } from '../app/importHost';
+import { SortTh, useTableSort } from '../ui/tableSort';
 import styles from './Editor.module.css';
 import { useTranslation } from 'react-i18next';
 
 export function PartsTable({ project }: { project: Project }) {
   const { t } = useTranslation();
+  const materials = useStore((s) => s.materials);
   const parts = project.parts;
+  const { sortKey, sortDir, toggle, sortRows } = useTableSort<
+    'enabled' | 'length' | 'width' | 'qty' | 'label' | 'material' | 'grain' | 'edges'
+  >();
+  const sortedParts = sortRows(
+    parts,
+    (p, key) => {
+      switch (key) {
+        case 'enabled':
+          return p.enabled;
+        case 'length':
+          return p.length;
+        case 'width':
+          return p.width;
+        case 'qty':
+          return p.qty;
+        case 'label':
+          return p.label;
+        case 'material':
+          return materials.find((m) => m.id === p.materialId)?.name ?? null;
+        case 'grain':
+          return p.grain;
+        case 'edges':
+          return [p.edges.top, p.edges.bottom, p.edges.left, p.edges.right].filter(Boolean).length;
+      }
+    },
+    isBlankPart,
+  );
   const pieces = countPieces(project);
   const rowsWithData = parts.filter((p) => !isBlankPart(p)).length;
   // Only ask for a material per part once the project cuts more than one board type.
@@ -120,23 +149,39 @@ export function PartsTable({ project }: { project: Project }) {
           <table id="parts-table" className={`${styles.table} ${styles.partsTable}`}>
             <thead>
               <tr>
-                <th className={styles.colCheck}>
+                <SortTh col="enabled" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.colCheck}>
                   <span className="sr-only">{t('Use')}</span>
-                </th>
-                <th className={styles.num}>{t('Length')}</th>
-                <th className={styles.num}>{t('Width')}</th>
-                <th className={`${styles.num} ${styles.colQty}`}>{t('Qty')}</th>
-                <th>{t('Label')}</th>
-                {showMaterial && <th>{t('Material')}</th>}
-                <th className={styles.colGrain}>{t('Grain')}</th>
-                <th className={styles.colEdges}>{t('Edges')}</th>
+                </SortTh>
+                <SortTh col="length" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.num} numeric>
+                  {t('Length')}
+                </SortTh>
+                <SortTh col="width" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.num} numeric>
+                  {t('Width')}
+                </SortTh>
+                <SortTh col="qty" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={`${styles.num} ${styles.colQty}`} numeric>
+                  {t('Qty')}
+                </SortTh>
+                <SortTh col="label" sortKey={sortKey} sortDir={sortDir} onSort={toggle}>
+                  {t('Label')}
+                </SortTh>
+                {showMaterial && (
+                  <SortTh col="material" sortKey={sortKey} sortDir={sortDir} onSort={toggle}>
+                    {t('Material')}
+                  </SortTh>
+                )}
+                <SortTh col="grain" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.colGrain}>
+                  {t('Grain')}
+                </SortTh>
+                <SortTh col="edges" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.colEdges}>
+                  {t('Edges')}
+                </SortTh>
                 <th className={styles.colMore}>
                   <span className="sr-only">{t('More')}</span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {parts.map((p, i) => {
+              {sortedParts.map((p, i) => {
                 const missing = missingPartFields(p);
                 const name = p.label || t('Part {{n}}', { n: i + 1 });
                 const cell = (col: 'length' | 'width' | 'qty', label: string) => {

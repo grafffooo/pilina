@@ -4,6 +4,7 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { niceTicks } from '../model/stats';
 import { t } from '../i18n';
+import { SortTh, useTableSort } from '../ui/tableSort';
 import styles from './Stats.module.css';
 
 export interface Point {
@@ -278,8 +279,17 @@ export function BarList({
   );
 }
 
+function nodeText(node: ReactNode): string {
+  if (node == null || typeof node === 'boolean') return '';
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(nodeText).join('');
+  return '';
+}
+
 /** Data table behind a chart, so no value depends on hovering. */
 export function TableView({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
+  const { sortKey, sortDir, toggle, sortRows } = useTableSort<string>();
+  const sorted = sortRows(rows, (r, key) => nodeText(r[Number(key)]));
   return (
     <details className={styles.tableView}>
       <summary>{t('Show as table')}</summary>
@@ -287,14 +297,22 @@ export function TableView({ head, rows }: { head: string[]; rows: ReactNode[][] 
         <thead>
           <tr>
             {head.map((h, i) => (
-              <th key={h} className={i > 0 ? styles.num : undefined}>
+              <SortTh
+                key={h}
+                col={String(i)}
+                sortKey={sortKey}
+                sortDir={sortDir}
+                onSort={toggle}
+                className={i > 0 ? styles.num : undefined}
+                numeric={i > 0}
+              >
                 {h}
-              </th>
+              </SortTh>
             ))}
           </tr>
         </thead>
         <tbody>
-          {rows.map((r, i) => (
+          {sorted.map((r, i) => (
             <tr key={i}>
               {r.map((c, j) => (
                 <td key={j} className={j > 0 ? styles.num : undefined}>

@@ -19,6 +19,7 @@ import { BottomSheet } from '../ui/BottomSheet';
 import sheetStyles from '../ui/BottomSheet.module.css';
 import { CardActions, CardField, cardStyles, RowCard } from '../ui/RowCard';
 import { locale, t as i18nT } from '../i18n';
+import { SortTh, useTableSort } from '../ui/tableSort';
 import styles from './Offcuts.module.css';
 import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
@@ -52,6 +53,7 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
   const matName = (id: string | null) =>
     materials.find((m) => m.id === id)?.name ?? t('No material');
   const matColor = (id: string | null) => materials.find((m) => m.id === id)?.color ?? '#CDBEA6';
+  const offcutSort = useTableSort<'code' | 'size' | 'material' | 'place' | 'added' | 'status' | 'label'>();
 
   const available = offcuts.filter((o) => o.status === 'available');
   const area = available.reduce((a, o) => a + o.length * o.width, 0);
@@ -280,13 +282,27 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
                   <th className={styles.colShape}>
                     <span className="sr-only">{t('Shape')}</span>
                   </th>
-                  <th>{t('ID')}</th>
-                  <th>{t('Size ({{unit}})', { unit: unitLabel() })}</th>
-                  <th>{t('Material')}</th>
-                  <th>{t('Place')}</th>
-                  <th>{t('Added')}</th>
-                  <th>{t('Status')}</th>
-                  <th>{t('Label')}</th>
+                  <SortTh col="code" sortKey={offcutSort.sortKey} sortDir={offcutSort.sortDir} onSort={offcutSort.toggle}>
+                    {t('ID')}
+                  </SortTh>
+                  <SortTh col="size" sortKey={offcutSort.sortKey} sortDir={offcutSort.sortDir} onSort={offcutSort.toggle}>
+                    {t('Size ({{unit}})', { unit: unitLabel() })}
+                  </SortTh>
+                  <SortTh col="material" sortKey={offcutSort.sortKey} sortDir={offcutSort.sortDir} onSort={offcutSort.toggle}>
+                    {t('Material')}
+                  </SortTh>
+                  <SortTh col="place" sortKey={offcutSort.sortKey} sortDir={offcutSort.sortDir} onSort={offcutSort.toggle}>
+                    {t('Place')}
+                  </SortTh>
+                  <SortTh col="added" sortKey={offcutSort.sortKey} sortDir={offcutSort.sortDir} onSort={offcutSort.toggle}>
+                    {t('Added')}
+                  </SortTh>
+                  <SortTh col="status" sortKey={offcutSort.sortKey} sortDir={offcutSort.sortDir} onSort={offcutSort.toggle}>
+                    {t('Status')}
+                  </SortTh>
+                  <SortTh col="label" sortKey={offcutSort.sortKey} sortDir={offcutSort.sortDir} onSort={offcutSort.toggle}>
+                    {t('Label')}
+                  </SortTh>
                   <th className={editor.colMore}>
                     <span className="sr-only">{t('More')}</span>
                   </th>
@@ -304,7 +320,26 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
                     </td>
                   </tr>
                 )}
-                {shown.map((o) => (
+                {offcutSort
+                  .sortRows(shown, (o, key) => {
+                    switch (key) {
+                      case 'code':
+                        return o.code;
+                      case 'size':
+                        return o.length * o.width;
+                      case 'material':
+                        return matName(o.materialId);
+                      case 'place':
+                        return o.location;
+                      case 'added':
+                        return o.createdAt;
+                      case 'status':
+                        return statusText(o.status);
+                      case 'label':
+                        return o.label;
+                    }
+                  })
+                  .map((o) => (
                   <tr
                     key={o.id}
                     className={

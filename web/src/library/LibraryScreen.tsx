@@ -32,6 +32,7 @@ import { Menu } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import editor from '../editor/Editor.module.css';
 import styles from './Library.module.css';
+import { SortTh, useTableSort } from '../ui/tableSort';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -43,6 +44,27 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
   const projects = useStore((s) => s.projects);
   // On a phone the tables are cards; a new board or band opens its card.
   const phone = useMediaQuery('(max-width: 767px)');
+  const matSort = useTableSort<'name' | 'thickness' | 'grain' | 'price' | 'per' | 'size'>();
+  const sortedMaterials = matSort.sortRows(materials, (m, key) => {
+    switch (key) {
+      case 'name':
+        return m.name;
+      case 'thickness':
+        return m.thickness;
+      case 'grain':
+        return materialGrain(m);
+      case 'price':
+        return m.price;
+      case 'per':
+        return m.priceUnit;
+      case 'size':
+        return m.sheetLength != null && m.sheetWidth != null ? m.sheetLength * m.sheetWidth : null;
+    }
+  });
+  const bandSort = useTableSort<'name' | 'price'>();
+  const sortedBands = bandSort.sortRows(bands, (b, key) =>
+    key === 'name' ? b.name : b.pricePerMetre,
+  );
   const [boardOpen, setBoardOpen] = useState<string | null>(null);
   const [bandOpen, setBandOpen] = useState<string | null>(null);
 
@@ -115,12 +137,24 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                   <th className={styles.colColor}>
                     <span className="sr-only">{t('Colour')}</span>
                   </th>
-                  <th>{t('Name')}</th>
-                  <th className={editor.num}>{t('Thickness')}</th>
-                  <th>{t('Grain')}</th>
-                  <th className={editor.num}>{t('Price')}</th>
-                  <th>{t('Per')}</th>
-                  <th>{t('For sheet size')}</th>
+                  <SortTh col="name" sortKey={matSort.sortKey} sortDir={matSort.sortDir} onSort={matSort.toggle}>
+                    {t('Name')}
+                  </SortTh>
+                  <SortTh col="thickness" sortKey={matSort.sortKey} sortDir={matSort.sortDir} onSort={matSort.toggle} className={editor.num} numeric>
+                    {t('Thickness')}
+                  </SortTh>
+                  <SortTh col="grain" sortKey={matSort.sortKey} sortDir={matSort.sortDir} onSort={matSort.toggle}>
+                    {t('Grain')}
+                  </SortTh>
+                  <SortTh col="price" sortKey={matSort.sortKey} sortDir={matSort.sortDir} onSort={matSort.toggle} className={editor.num} numeric>
+                    {t('Price')}
+                  </SortTh>
+                  <SortTh col="per" sortKey={matSort.sortKey} sortDir={matSort.sortDir} onSort={matSort.toggle}>
+                    {t('Per')}
+                  </SortTh>
+                  <SortTh col="size" sortKey={matSort.sortKey} sortDir={matSort.sortDir} onSort={matSort.toggle}>
+                    {t('For sheet size')}
+                  </SortTh>
                   <th className={editor.colMore}>
                     <span className="sr-only">{t('More')}</span>
                   </th>
@@ -134,7 +168,7 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                     </td>
                   </tr>
                 )}
-                {materials.map((m) => {
+                {sortedMaterials.map((m) => {
                   const used = usage(m.id);
                   return (
                     <tr key={m.id}>
@@ -323,10 +357,12 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
             <table className={`${editor.table} ${styles.table}`}>
               <thead>
                 <tr>
-                  <th>{t('Name')}</th>
-                  <th className={editor.num}>
+                  <SortTh col="name" sortKey={bandSort.sortKey} sortDir={bandSort.sortDir} onSort={bandSort.toggle}>
+                    {t('Name')}
+                  </SortTh>
+                  <SortTh col="price" sortKey={bandSort.sortKey} sortDir={bandSort.sortDir} onSort={bandSort.toggle} className={editor.num} numeric>
                     {isImperial() ? t('Price per foot') : t('Price per metre')}
-                  </th>
+                  </SortTh>
                   <th className={editor.colMore}>
                     <span className="sr-only">{t('More')}</span>
                   </th>
@@ -340,7 +376,7 @@ export function LibraryScreen({ onMenu }: { onMenu?: () => void }) {
                     </td>
                   </tr>
                 )}
-                {bands.map((b) => (
+                {sortedBands.map((b) => (
                   <tr key={b.id}>
                     <td>
                       <input

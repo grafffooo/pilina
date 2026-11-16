@@ -13,6 +13,7 @@ import { BackButton } from '../ui/BackButton';
 import { BarList, ColumnChart, LineChart, TableView, type Point } from './Charts';
 import { locale, t as i18nT } from '../i18n';
 import { useTranslation } from 'react-i18next';
+import { SortTh, useTableSort } from '../ui/tableSort';
 import styles from './Stats.module.css';
 
 const RANGES: { id: Range; label: () => string }[] = [
@@ -31,6 +32,7 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
   const { t, i18n } = useTranslation();
   const [records, setRecords] = useState<CutRecord[] | null>(null);
   const [range, setRange] = useState<Range>('12m');
+  const projectSort = useTableSort<'name' | 'sheets' | 'usedPct' | 'cost' | 'lastAt'>();
   const offcuts = useStore((s) => s.offcuts);
   const materials = useStore((s) => s.materials);
   const currency = useStore((s) => s.settings.currency);
@@ -217,15 +219,40 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
               <table className={styles.projects}>
                 <thead>
                   <tr>
-                    <th>{t('Project')}</th>
-                    <th className={styles.num}>{t('Sheets')}</th>
-                    <th className={styles.num}>{t('Used')}</th>
-                    <th className={styles.num}>{t('Board cost')}</th>
-                    <th className={styles.num}>{t('Cut')}</th>
+                    <SortTh col="name" sortKey={projectSort.sortKey} sortDir={projectSort.sortDir} onSort={projectSort.toggle}>
+                      {t('Project')}
+                    </SortTh>
+                    <SortTh col="sheets" sortKey={projectSort.sortKey} sortDir={projectSort.sortDir} onSort={projectSort.toggle} className={styles.num} numeric>
+                      {t('Sheets')}
+                    </SortTh>
+                    <SortTh col="usedPct" sortKey={projectSort.sortKey} sortDir={projectSort.sortDir} onSort={projectSort.toggle} className={styles.num} numeric>
+                      {t('Used')}
+                    </SortTh>
+                    <SortTh col="cost" sortKey={projectSort.sortKey} sortDir={projectSort.sortDir} onSort={projectSort.toggle} className={styles.num} numeric>
+                      {t('Board cost')}
+                    </SortTh>
+                    <SortTh col="lastAt" sortKey={projectSort.sortKey} sortDir={projectSort.sortDir} onSort={projectSort.toggle} className={styles.num} numeric>
+                      {t('Cut')}
+                    </SortTh>
                   </tr>
                 </thead>
                 <tbody>
-                  {stats.projects.map((p) => (
+                  {projectSort
+                    .sortRows(stats.projects, (p, key) => {
+                      switch (key) {
+                        case 'name':
+                          return p.name;
+                        case 'sheets':
+                          return p.sheets;
+                        case 'usedPct':
+                          return p.usedPct;
+                        case 'cost':
+                          return p.cost;
+                        case 'lastAt':
+                          return p.lastAt;
+                      }
+                    })
+                    .map((p) => (
                     <tr key={p.projectId}>
                       <td>{p.name}</td>
                       <td className={styles.num}>{formatNumber(p.sheets)}</td>

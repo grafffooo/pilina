@@ -132,7 +132,7 @@ export async function walkScreens(page: Page, shot: (screen: string) => Promise<
   await page.keyboard.press('Tab');
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await shot('parts-filled');
-  await bring('Stock sheets');
+  await bring('Material');
   await shot('stock-sheets');
   await bring('Costs');
   await shot('costs');

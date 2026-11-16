@@ -20,6 +20,7 @@ import { Menu } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
 import { MaterialSelect } from './MaterialSelect';
 import { AddStockSheet } from './AddStockSheet';
+import { SortTh, useTableSort } from '../ui/tableSort';
 import styles from './Editor.module.css';
 import { useTranslation } from 'react-i18next';
 import type { Grain } from '../engine/types';
@@ -28,6 +29,27 @@ export function StockTable({ project }: { project: Project }) {
   const { t } = useTranslation();
   const materials = useStore((s) => s.materials);
   const nameOf = (id: string | null) => materials.find((m) => m.id === id)?.name;
+  const { sortKey, sortDir, toggle, sortRows } = useTableSort<
+    'enabled' | 'length' | 'width' | 'qty' | 'material' | 'grain' | 'priority'
+  >();
+  const sortedStock = sortRows(project.stock, (s, key) => {
+    switch (key) {
+      case 'enabled':
+        return s.enabled;
+      case 'length':
+        return s.length;
+      case 'width':
+        return s.width;
+      case 'qty':
+        return s.qty;
+      case 'material':
+        return nameOf(s.materialId) ?? null;
+      case 'grain':
+        return materialGrain(materials.find((m) => m.id === s.materialId));
+      case 'priority':
+        return s.priority;
+    }
+  });
   // On a phone the rows are cards; a new sheet opens its card.
   const phone = useMediaQuery('(max-width: 767px)');
   const [openId, setOpenId] = useState<string | null>(null);
@@ -35,7 +57,7 @@ export function StockTable({ project }: { project: Project }) {
   return (
     <section className={styles.card} aria-labelledby="stock-h" data-cards={phone ? '' : undefined}>
       <div className={styles.cardHeader}>
-        <h2 id="stock-h">{t('Stock sheets')}</h2>
+        <h2 id="stock-h">{t('Material')}</h2>
         <span className={styles.cardMeta}>{t('Starred first, then largest')}</span>
         <span className={styles.spacer} />
         <button
@@ -67,22 +89,34 @@ export function StockTable({ project }: { project: Project }) {
           <table id="stock-table" className={`${styles.table} ${styles.stockTable}`}>
             <thead>
               <tr>
-                <th className={styles.colCheck}>
+                <SortTh col="enabled" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.colCheck}>
                   <span className="sr-only">{t('Use')}</span>
-                </th>
-                <th className={styles.num}>{t('Length')}</th>
-                <th className={styles.num}>{t('Width')}</th>
-                <th className={`${styles.num} ${styles.colQty}`}>{t('Qty')}</th>
-                <th>{t('Material')}</th>
-                <th className={styles.colSheetGrain}>{t('Grain')}</th>
-                <th className={styles.colStar}>{t('Priority')}</th>
+                </SortTh>
+                <SortTh col="length" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.num} numeric>
+                  {t('Length')}
+                </SortTh>
+                <SortTh col="width" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.num} numeric>
+                  {t('Width')}
+                </SortTh>
+                <SortTh col="qty" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={`${styles.num} ${styles.colQty}`} numeric>
+                  {t('Qty')}
+                </SortTh>
+                <SortTh col="material" sortKey={sortKey} sortDir={sortDir} onSort={toggle}>
+                  {t('Material')}
+                </SortTh>
+                <SortTh col="grain" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.colSheetGrain}>
+                  {t('Grain')}
+                </SortTh>
+                <SortTh col="priority" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.colStar}>
+                  {t('Priority')}
+                </SortTh>
                 <th className={styles.colMore}>
                   <span className="sr-only">{t('More')}</span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {project.stock.map((s, i) => {
+              {sortedStock.map((s, i) => {
                 const name = nameOf(s.materialId) || t('Sheet {{n}}', { n: i + 1 });
                 const started = s.length !== null || s.width !== null;
                 const bad = started && !stockIsComplete(s);

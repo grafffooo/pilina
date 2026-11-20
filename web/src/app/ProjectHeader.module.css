@@ -1,8 +1,9 @@
 .header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  min-height: 36px;
 }
 
 .titleBlock {
@@ -37,6 +38,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+@media (min-width: 1100px) {
+  .headerActions {
+    display: none;
+  }
 }
 
 .statusOk,

@@ -41,6 +41,33 @@ async function enterLinearParts(page: Page, parts: LinearPartInput[]) {
   await page.keyboard.press('Tab');
 }
 
+async function openLinearTabAndAddBar(page: Page, length = '3000', materialName?: string) {
+  await page
+    .getByRole('group', { name: 'Stock type' })
+    .first()
+    .getByRole('button', { name: 'Linear stock' })
+    .click();
+  await expect(page.getByRole('heading', { name: 'Linear stock' })).toBeVisible();
+  if (length) {
+    await page.getByRole('button', { name: 'Add bar' }).click();
+    if (onPhone()) {
+      if (materialName) {
+        await page.getByRole('button', { name: new RegExp(materialName) }).click();
+      } else {
+        await page.getByRole('button', { name: 'Custom length' }).click();
+      }
+    } else {
+      await page.getByRole('textbox', { name: /Length, Bar 1/ }).fill(length);
+      if (materialName) {
+        await page.getByRole('combobox', { name: 'Material, bar 1' }).selectOption({
+          label: materialName,
+        });
+      }
+      await page.keyboard.press('Tab');
+    }
+  }
+}
+
 test.beforeEach(async ({ page }) => {
   // Printing opens the system dialog; record what the print sheet holds instead.
   await page.addInitScript(() => {
@@ -56,16 +83,32 @@ test.beforeEach(async ({ page }) => {
 const prints = (page: Page) =>
   page.evaluate(() => (window as unknown as { __prints: string[] }).__prints);
 
-test('starts in Sheets view with Add linear stock and builds a 1D bar cutting plan', async ({
+test('starts in Sheets view with Linear stock tab always visible and empty by default', async ({
   page,
 }) => {
   await section(page, 'Parts');
   await expect(page.getByRole('heading', { name: 'Parts' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Linear parts' })).toBeHidden();
+  await expect(
+    page.getByRole('group', { name: 'Stock type' }).first().getByRole('button', { name: 'Linear stock' }),
+  ).toBeVisible();
 
-  await page.getByRole('button', { name: 'Add linear stock' }).click();
+  await page
+    .getByRole('group', { name: 'Stock type' })
+    .first()
+    .getByRole('button', { name: 'Linear stock' })
+    .click();
   await expect(page.getByRole('heading', { name: 'Linear parts' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Linear stock' })).toBeVisible();
+  await expect(page.getByRole('textbox', { name: /Length, Bar 1/ })).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Add bar' }).click();
+  if (onPhone()) {
+    await page.getByRole('button', { name: 'Custom length' }).click();
+  } else {
+    await page.getByRole('textbox', { name: /Length, Bar 1/ }).fill('3000');
+    await page.keyboard.press('Tab');
+  }
 
   await enterLinearParts(page, [
     { length: '1200', qty: '2', label: 'Leg' },
@@ -84,7 +127,7 @@ test('starts in Sheets view with Add linear stock and builds a 1D bar cutting pl
 test('reopens linear-only projects directly in linear view after reload', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Project name' }).fill('Sawhorse');
   await section(page, 'Parts');
-  await page.getByRole('button', { name: 'Add linear stock' }).click();
+  await openLinearTabAndAddBar(page);
   await enterLinearParts(page, [{ length: '1200', qty: '4', label: 'Leg' }]);
   await waitForSaved(page, 'Sawhorse');
 
@@ -103,7 +146,7 @@ test('handles mixed 2D + 1D projects and explains oversized linear parts', async
   await expectSheets(page, 1);
 
   await section(page, 'Parts');
-  await page.getByRole('button', { name: 'Add linear stock' }).click();
+  await openLinearTabAndAddBar(page);
   await enterLinearParts(page, [{ length: '3500', qty: '1', label: 'Beam' }]);
   await waitForSaved(page, 'Workbench');
 
@@ -131,7 +174,7 @@ test('handles mixed 2D + 1D projects and explains oversized linear parts', async
 
 test('cut a bar, keep its tail offcut, print its QR label and reuse it', async ({ page }) => {
   await section(page, 'Parts');
-  await page.getByRole('button', { name: 'Add linear stock' }).click();
+  await openLinearTabAndAddBar(page);
   await enterLinearParts(page, [{ length: '1200', qty: '2', label: 'Leg' }]);
 
   await section(page, 'Sheets');
@@ -184,7 +227,7 @@ test('cut a bar, keep its tail offcut, print its QR label and reuse it', async (
   if (onPhone()) await page.getByRole('button', { name: 'Projects' }).click();
   await page.getByRole('button', { name: 'New project' }).click();
   await section(page, 'Parts');
-  await page.getByRole('button', { name: 'Add linear stock' }).click();
+  await openLinearTabAndAddBar(page);
   await enterLinearParts(page, [{ length: '500', qty: '1', label: 'Block' }]);
   await section(page, 'Sheets');
   await expect(page.getByText(/^594 mm · OC-0001 · .* · 1 part ·/)).toBeVisible();
@@ -223,7 +266,7 @@ test('configures linear materials and threshold, exports mixed PDF, and records 
   await expectSheets(page, 1);
 
   await section(page, 'Parts');
-  await page.getByRole('button', { name: 'Add linear stock' }).click();
+  await openLinearTabAndAddBar(page, '3000', 'KVH 45x95');
   await enterLinearParts(page, [{ length: '1000', qty: '1', label: 'Rail' }]);
 
   await section(page, 'Sheets');

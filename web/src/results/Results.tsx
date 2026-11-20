@@ -8,11 +8,12 @@ import { formatLength, formatLengthUnit, formatLong } from '../lib/units';
 import { cutKindLabel, isRipLike, sizeOf } from '../model/describe';
 import { keepAdvice, type KeepAdvice } from '../model/offcut';
 import { unplacedReason, usedPercent } from '../model/job';
-import { hasLinearContent, type Project } from '../model/project';
+import type { Project } from '../model/project';
 import { updateSettings, useStore } from '../store/store';
 import { useMediaQuery } from '../ui/hooks';
 import { SegmentedControl } from '../ui/SegmentedControl';
 import { useView } from '../store/view';
+import { ProjectActions } from '../app/ProjectHeader';
 import {
   CheckIcon,
   ChevronLeftIcon,
@@ -52,29 +53,30 @@ export function Results({ project }: { project: Project }) {
   } = useStore((s) => s.linearResult);
   const activeKind = useView((s) => s.activeKind);
   const setActiveKind = useView((s) => s.setActiveKind);
-  const hasLinear = hasLinearContent(project);
-  const effectiveKind = hasLinear ? activeKind : 'sheets';
 
   return (
     <section className={styles.results} aria-labelledby="results-h">
       <div className={styles.resultsHeader}>
-        <h2 id="results-h">{t('Results')}</h2>
         <span className={styles.spacer} />
+        <ProjectActions project={project} className={styles.desktopProjectActions} />
         <ExportPdfButton />
         <StartCuttingButton />
       </div>
-      {hasLinear && (
+      <div className={styles.modeBar}>
         <SegmentedControl
           label={t('Stock type')}
-          value={effectiveKind}
+          value={activeKind}
           options={[
             { value: 'sheets', label: t('Sheets') },
             { value: 'linear', label: t('Linear stock') },
           ]}
           onChange={setActiveKind}
         />
-      )}
-      {effectiveKind === 'linear' ? (
+      </div>
+      <h2 id="results-h" className={styles.resultsTitle}>
+        {t('Results')}
+      </h2>
+      {activeKind === 'linear' ? (
         !linearPlan || !linearJob ? (
           <EmptyLinearResults running={linearStatus === 'running'} />
         ) : (

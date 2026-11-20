@@ -1,6 +1,6 @@
 // Per-project pricing choices: how board is charged, default edge band and extra cost lines.
 import { formatLength, formatLengthUnit } from '../lib/units';
-import { emptyExtra, hasLinearContent, type ExtraLine, type Project } from '../model/project';
+import { emptyExtra, type ExtraLine, type Project } from '../model/project';
 import { addEdgeBand, updatePricing, updateProject, useStore } from '../store/store';
 import { useView } from '../store/view';
 import { CloseIcon, PlusIcon } from '../ui/icons';
@@ -17,7 +17,7 @@ export function PricingCard({ project }: { project: Project }) {
   const bands = useStore((s) => s.edgeBands);
   const settings = useStore((s) => s.settings);
   const activeKind = useView((s) => s.activeKind);
-  const linearMin = hasLinearContent(project) && activeKind === 'linear';
+  const linearMin = activeKind === 'linear';
 
   const setExtras = (extras: ExtraLine[], key: string | null = null) =>
     updatePricing({ extras }, key);

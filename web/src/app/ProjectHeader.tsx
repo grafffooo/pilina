@@ -23,7 +23,6 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
   const { t } = useTranslation();
   const status = useProjectStatus(project);
   const locked = status.kind === 'cut';
-  const [sharing, setSharing] = useState(false);
   return (
     <div className={styles.header}>
       {onMenu && (
@@ -41,7 +40,38 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
           onChange={(e) => updateProject({ name: e.target.value }, 'name')}
         />
       </div>
-      <div className={styles.actions}>
+      <ProjectActions project={project} className={styles.headerActions} />
+      {status.kind === 'cut' && (
+        <div className={styles.cutBanner} role="note">
+          <CheckIcon size={16} />
+          <span>
+            {t('Cut on {{date}}. The project is locked so its layout and costs stay as cut.', {
+              date: cutDate(status.at),
+            })}
+          </span>
+          <button type="button" className={ui.button} onClick={() => setProjectCut(project, false)}>
+            {t('Edit as draft')}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function ProjectActions({
+  project,
+  className,
+}: {
+  project: Project;
+  className?: string;
+}) {
+  const { t } = useTranslation();
+  const status = useProjectStatus(project);
+  const locked = status.kind === 'cut';
+  const [sharing, setSharing] = useState(false);
+  return (
+    <>
+      <div className={className ? `${styles.actions} ${className}` : styles.actions}>
         <RunStatus />
         <StatusBadge status={status} large />
         <UndoRedo />
@@ -90,20 +120,7 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
           <ShareDialog project={project} onClose={() => setSharing(false)} />,
           document.body,
         )}
-      {status.kind === 'cut' && (
-        <div className={styles.cutBanner} role="note">
-          <CheckIcon size={16} />
-          <span>
-            {t('Cut on {{date}}. The project is locked so its layout and costs stay as cut.', {
-              date: cutDate(status.at),
-            })}
-          </span>
-          <button type="button" className={ui.button} onClick={() => setProjectCut(project, false)}>
-            {t('Edit as draft')}
-          </button>
-        </div>
-      )}
-    </div>
+    </>
   );
 }
 

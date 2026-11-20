@@ -4,9 +4,7 @@ import { LinearStockTable } from '../editor/LinearStockTable';
 import { PartsTable } from '../editor/PartsTable';
 import { StockTable } from '../editor/StockTable';
 import editorStyles from '../editor/Editor.module.css';
-import { materialKind } from '../model/library';
 import {
-  emptyLinearStock,
   hasLinearContent,
   isBlankPart,
   type Project,
@@ -38,10 +36,10 @@ import { StartCuttingButton } from '../cutting/StartCuttingButton';
 import { LabelPrint } from '../offcuts/LabelPrint';
 import { OffcutLibrary } from '../offcuts/OffcutLibrary';
 import { StatsScreen } from '../stats/StatsScreen';
-import { addLinearStock, useCurrentProject, useStore } from '../store/store';
+import { useCurrentProject, useStore } from '../store/store';
 import { useView } from '../store/view';
 import { useMediaQuery } from '../ui/hooks';
-import { CloseIcon, PlusIcon } from '../ui/icons';
+import { CloseIcon } from '../ui/icons';
 import { SegmentedControl } from '../ui/SegmentedControl';
 import ui from '../ui/ui.module.css';
 import { ProjectHeader, RunStatus } from './ProjectHeader';
@@ -189,41 +187,24 @@ function ProjectEditor({ project }: { project: Project }) {
   const { t } = useTranslation();
   const phone = useMediaQuery('(max-width: 767px)');
   const locked = useProjectStatus(project).kind === 'cut';
-  const hasLinear = hasLinearContent(project);
   const activeKind = useView((s) => s.activeKind);
   const setActiveKind = useView((s) => s.setActiveKind);
-  const effectiveKind = hasLinear ? activeKind : 'sheets';
-
-  const enableLinear = () => {
-    const firstLinear = useStore
-      .getState()
-      .materials.find((m) => materialKind(m) === 'linear');
-    addLinearStock({
-      ...emptyLinearStock(),
-      length: firstLinear?.stockLength ?? 3000,
-      materialId: firstLinear?.id ?? null,
-      priority: true,
-    });
-    setActiveKind('linear');
-  };
 
   return (
     <fieldset className={styles.editorFields} disabled={locked}>
-      {hasLinear && (
-        <div className={editorStyles.modeBar}>
-          <SegmentedControl
-            full={phone}
-            label={t('Stock type')}
-            value={effectiveKind}
-            options={[
-              { value: 'sheets', label: t('Sheets') },
-              { value: 'linear', label: t('Linear stock') },
-            ]}
-            onChange={setActiveKind}
-          />
-        </div>
-      )}
-      {effectiveKind === 'linear' ? (
+      <div className={editorStyles.modeBar}>
+        <SegmentedControl
+          full={phone}
+          label={t('Stock type')}
+          value={activeKind}
+          options={[
+            { value: 'sheets', label: t('Sheets') },
+            { value: 'linear', label: t('Linear stock') },
+          ]}
+          onChange={setActiveKind}
+        />
+      </div>
+      {activeKind === 'linear' ? (
         <>
           <LinearPartsTable project={project} />
           <LinearStockTable project={project} />
@@ -232,12 +213,6 @@ function ProjectEditor({ project }: { project: Project }) {
         <>
           <PartsTable project={project} />
           <StockTable project={project} />
-          {!hasLinear && (
-            <button type="button" className={editorStyles.addLinearTrigger} onClick={enableLinear}>
-              <PlusIcon size={16} />
-              {t('Add linear stock')}
-            </button>
-          )}
         </>
       )}
       <PricingCard project={project} />
@@ -254,10 +229,8 @@ function PhoneLayout({ project }: { project: Project }) {
     job: linearJob,
     status: linearStatus,
   } = useStore((s) => s.linearResult);
-  const hasLinear = hasLinearContent(project);
   const activeKind = useView((s) => s.activeKind);
   const setActiveKind = useView((s) => s.setActiveKind);
-  const effectiveKind = hasLinear ? activeKind : 'sheets';
 
   return (
     <div className={styles.phone}>
@@ -275,22 +248,20 @@ function PhoneLayout({ project }: { project: Project }) {
               <RunStatus />
               <ExportPdfButton compact />
             </div>
-            {hasLinear && (
-              <SegmentedControl
-                full
-                label={t('Stock type')}
-                value={effectiveKind}
-                options={[
-                  { value: 'sheets', label: t('Sheets') },
-                  { value: 'linear', label: t('Linear stock') },
-                ]}
-                onChange={setActiveKind}
-              />
-            )}
+            <SegmentedControl
+              full
+              label={t('Stock type')}
+              value={activeKind}
+              options={[
+                { value: 'sheets', label: t('Sheets') },
+                { value: 'linear', label: t('Linear stock') },
+              ]}
+              onChange={setActiveKind}
+            />
           </>
         )}
         {tab === 'sheets' &&
-          (effectiveKind === 'linear' ? (
+          (activeKind === 'linear' ? (
             linearPlan && linearJob ? (
               <>
                 <LinearStatCards plan={linearPlan} job={linearJob} compact />
@@ -312,7 +283,7 @@ function PhoneLayout({ project }: { project: Project }) {
             <EmptyResults running={status === 'running'} />
           ))}
         {tab === 'cut' &&
-          (effectiveKind === 'linear' ? (
+          (activeKind === 'linear' ? (
             linearPlan && linearPlan.bars.length > 0 ? (
               <>
                 <BarPager plan={linearPlan} />

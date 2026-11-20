@@ -1,4 +1,3 @@
-import { hasLinearContent } from '../model/project';
 import { useCurrentProject, useStore } from '../store/store';
 import { useView, type ActiveKind } from '../store/view';
 import { PlayIcon } from '../ui/icons';
@@ -11,8 +10,7 @@ export function StartCuttingButton({ large, kind }: { large?: boolean; kind?: Ac
   const { t } = useTranslation();
   const project = useCurrentProject();
   const activeKind = useView((s) => s.activeKind);
-  const targetKind: ActiveKind =
-    kind ?? (project && hasLinearContent(project) ? activeKind : 'sheets');
+  const targetKind: ActiveKind = kind ?? activeKind;
   const ready = useStore((s) =>
     targetKind === 'linear'
       ? s.linearResult.status === 'ready' && (s.linearResult.plan?.bars.length ?? 0) > 0

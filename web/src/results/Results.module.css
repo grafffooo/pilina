@@ -2,7 +2,7 @@
   container: results / inline-size;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   min-width: 0;
 }
 
@@ -10,13 +10,27 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
   min-height: 36px;
 }
 
-.resultsHeader h2 {
+.modeBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resultsTitle {
+  margin: 0;
   font-size: var(--text-lg);
   font-weight: 700;
   letter-spacing: -0.01em;
+}
+
+@media (max-width: 1099px) {
+  .desktopProjectActions {
+    display: none;
+  }
 }
 
 .spacer {

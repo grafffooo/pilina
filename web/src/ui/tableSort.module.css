@@ -41,3 +41,9 @@
 .sortBtn:hover .indicatorIdle {
   opacity: 0.4;
 }
+
+@media (max-width: 767px) {
+  .sortBtn {
+    min-height: var(--tap);
+  }
+}

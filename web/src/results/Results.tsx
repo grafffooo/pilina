@@ -11,7 +11,6 @@ import { unplacedReason, usedPercent } from '../model/job';
 import type { Project } from '../model/project';
 import { updateSettings, useStore } from '../store/store';
 import { useMediaQuery } from '../ui/hooks';
-import { SegmentedControl } from '../ui/SegmentedControl';
 import { useView } from '../store/view';
 import { ProjectActions } from '../app/ProjectHeader';
 import {
@@ -52,30 +51,15 @@ export function Results({ project }: { project: Project }) {
     status: linearStatus,
   } = useStore((s) => s.linearResult);
   const activeKind = useView((s) => s.activeKind);
-  const setActiveKind = useView((s) => s.setActiveKind);
 
   return (
-    <section className={styles.results} aria-labelledby="results-h">
+    <section className={styles.results} aria-label={t('Results')}>
       <div className={styles.resultsHeader}>
         <span className={styles.spacer} />
         <ProjectActions project={project} className={styles.desktopProjectActions} />
         <ExportPdfButton />
         <StartCuttingButton />
       </div>
-      <div className={styles.modeBar}>
-        <SegmentedControl
-          label={t('Stock type')}
-          value={activeKind}
-          options={[
-            { value: 'sheets', label: t('Sheets') },
-            { value: 'linear', label: t('Linear stock') },
-          ]}
-          onChange={setActiveKind}
-        />
-      </div>
-      <h2 id="results-h" className={styles.resultsTitle}>
-        {t('Results')}
-      </h2>
       {activeKind === 'linear' ? (
         !linearPlan || !linearJob ? (
           <EmptyLinearResults running={linearStatus === 'running'} />

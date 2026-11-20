@@ -30,7 +30,6 @@
 
 .editor {
   flex: 1 1 580px;
-  border-inline-end: 1px solid var(--border);
 }
 
 .resultsCol {
@@ -45,7 +44,6 @@
 
   .editor {
     flex: none;
-    border-inline-end: 0;
     border-bottom: 1px solid var(--border);
   }
 

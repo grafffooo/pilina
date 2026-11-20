@@ -86,8 +86,12 @@ export function projectToJob(
       edges: p.edges,
       material: p.materialId,
     }));
-  const stock: StockSpec[] = project.stock
+  if (parts.length === 0) return null;
+  const usedMaterials = new Set(parts.map((p) => p.material).filter((id): id is string => id !== null));
+  const hasUnassigned = parts.some((p) => p.material === null);
+  const legacyStock: StockSpec[] = project.stock
     .filter((s) => s.enabled && stockIsComplete(s))
+    .filter((s) => hasUnassigned || (s.materialId !== null && usedMaterials.has(s.materialId)))
     .map((s) => ({
       id: s.id,
       length: s.length!,
@@ -99,7 +103,28 @@ export function projectToJob(
       // Stock without a material keeps the old rule: grain along the sheet's length.
       grain: s.materialId ? materialGrain(byId.get(s.materialId)) : 'length',
     }));
-  if (parts.length === 0 || stock.length === 0) return null;
+  const coveredMaterials = new Set(
+    legacyStock.map((s) => s.material).filter((id): id is string => id !== null),
+  );
+  const synthesized: StockSpec[] = [];
+  for (const id of usedMaterials) {
+    if (coveredMaterials.has(id)) continue;
+    const m = byId.get(id);
+    if (m && m.sheetLength && m.sheetLength > 0 && m.sheetWidth && m.sheetWidth > 0) {
+      synthesized.push({
+        id: `mat:${m.id}`,
+        length: m.sheetLength,
+        width: m.sheetWidth,
+        qty: null,
+        priority: true,
+        material: m.id,
+        label: m.name,
+        grain: materialGrain(m),
+      });
+    }
+  }
+  const stock = [...synthesized, ...legacyStock];
+  if (stock.length === 0) return null;
   return {
     parts,
     stock: project.useOffcuts ? [...offcuts, ...stock] : stock,
@@ -148,6 +173,7 @@ export function projectToLinearJob(
   { timeBudgetMs = 600 }: { timeBudgetMs?: number } = {},
 ): LinearJob | null {
   const names = new Map(materials.map((m) => [m.id, m.name]));
+  const byId = new Map(materials.map((m) => [m.id, m]));
   const parts: LinearPartSpec[] = (project.linearParts ?? [])
     .filter((p) => p.enabled && linearPartIsComplete(p))
     .map((p) => ({
@@ -157,8 +183,12 @@ export function projectToLinearJob(
       label: p.label,
       material: p.materialId,
     }));
-  const stock: LinearStockSpec[] = (project.linearStock ?? [])
+  if (parts.length === 0) return null;
+  const usedMaterials = new Set(parts.map((p) => p.material).filter((id): id is string => id !== null));
+  const hasUnassigned = parts.some((p) => p.material === null);
+  const legacyStock: LinearStockSpec[] = (project.linearStock ?? [])
     .filter((s) => s.enabled && linearStockIsComplete(s))
+    .filter((s) => hasUnassigned || (s.materialId !== null && usedMaterials.has(s.materialId)))
     .map((s) => ({
       id: s.id,
       length: s.length!,
@@ -167,8 +197,27 @@ export function projectToLinearJob(
       material: s.materialId,
       label: (s.materialId && names.get(s.materialId)) || '',
     }));
+  const coveredMaterials = new Set(
+    legacyStock.map((s) => s.material).filter((id): id is string => id !== null),
+  );
+  const synthesized: LinearStockSpec[] = [];
+  for (const id of usedMaterials) {
+    if (coveredMaterials.has(id)) continue;
+    const m = byId.get(id);
+    if (m && m.stockLength && m.stockLength > 0) {
+      synthesized.push({
+        id: `mat:${m.id}`,
+        length: m.stockLength,
+        qty: null,
+        priority: true,
+        material: m.id,
+        label: m.name,
+      });
+    }
+  }
+  const stock = [...synthesized, ...legacyStock];
   const allStock = project.useOffcuts ? [...offcuts, ...stock] : stock;
-  if (parts.length === 0 || allStock.length === 0) return null;
+  if (allStock.length === 0) return null;
   return {
     parts,
     stock: allStock,

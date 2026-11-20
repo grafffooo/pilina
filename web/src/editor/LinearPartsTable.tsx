@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { formatLength } from '../lib/units';
 import { swatch } from '../model/describe';
 import { missingLinearPartFields } from '../model/job';
+import { materialKind } from '../model/library';
+import { matchingLinearOffcuts } from '../model/offcut';
 import { isMultiCell, parseLinearPartRows } from '../model/paste';
 import {
   emptyLinearPart,
@@ -16,6 +18,7 @@ import {
   removeLinearPart,
   replaceLinearPart,
   updateLinearPart,
+  updateProject,
   useStore,
 } from '../store/store';
 import { useMediaQuery } from '../ui/hooks';
@@ -57,8 +60,7 @@ export function LinearPartsTable({ project }: { project: Project }) {
   );
   const pieces = parts.reduce((n, p) => n + (p.enabled && p.length && p.qty ? p.qty : 0), 0);
   const rowsWithData = parts.filter((p) => !isBlankLinearPart(p)).length;
-  const stockMaterials = new Set(project.linearStock.map((s) => s.materialId).filter(Boolean));
-  const showMaterial = stockMaterials.size > 1 || parts.some((p) => p.materialId);
+  const showMaterial = true;
 
   const phone = useMediaQuery('(max-width: 767px)');
   const blank = parts.find(isBlankLinearPart);
@@ -70,7 +72,11 @@ export function LinearPartsTable({ project }: { project: Project }) {
   const setOpenId = (id: string | null) => setOpen({ project: project.id, id });
 
   const addRow = (focusCol = 'length') => {
-    const part = emptyLinearPart();
+    const defaultMaterialId =
+      [...parts].reverse().find((p) => p.materialId)?.materialId ??
+      materials.find((m) => materialKind(m) === 'linear')?.id ??
+      null;
+    const part = { ...emptyLinearPart(), materialId: defaultMaterialId };
     insertLinearParts([part]);
     if (phone) setOpenId(part.id);
     requestAnimationFrame(() =>
@@ -254,7 +260,41 @@ export function LinearPartsTable({ project }: { project: Project }) {
           {t('Add a part, or paste rows from a spreadsheet')}
         </button>
       </div>
+      <LinearOffcutsFooter project={project} />
     </section>
+  );
+}
+
+function LinearOffcutsFooter({ project }: { project: Project }) {
+  const { t } = useTranslation();
+  const offcuts = useStore((s) => s.offcuts);
+  const matching = matchingLinearOffcuts(project, offcuts).length;
+  return (
+    <div className={styles.offcutFooter}>
+      <label className={styles.offcutLabel}>
+        <input
+          type="checkbox"
+          className={styles.checkbox}
+          checked={project.useOffcuts}
+          onChange={(e) => updateProject({ useOffcuts: e.target.checked })}
+        />
+        <span className={styles.offcutText}>
+          <span className={styles.offcutTitle}>{t('Use matching library offcuts first')}</span>
+          <span className={styles.cardMeta}>
+            {matching === 0
+              ? t('No offcuts in these materials are in the library yet.')
+              : t('n_matching_offcuts', { count: matching })}
+          </span>
+        </span>
+      </label>
+      <button
+        type="button"
+        className={styles.addRow}
+        onClick={() => useStore.getState().setView('offcuts')}
+      >
+        {t('Open library')}
+      </button>
+    </div>
   );
 }
 

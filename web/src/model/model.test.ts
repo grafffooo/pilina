@@ -11,7 +11,7 @@ import {
   projectToLinearJob,
   unplacedReason,
 } from './job';
-import { newLinearMaterial } from './library';
+import { newLinearMaterial, newMaterial } from './library';
 import { isMultiCell, parseLinearPartRows, parseNumber, parsePartRows } from './paste';
 import {
   countPieces,
@@ -240,5 +240,38 @@ describe('linear project and job helpers', () => {
         },
       }),
     ).toBeCloseTo(75, 6);
+  });
+
+  it('synthesizes 2D and 1D stock from library materials when project stock arrays are empty', () => {
+    const ply = newMaterial('Birch 18');
+    ply.sheetLength = 2500;
+    ply.sheetWidth = 1250;
+    const kvh = newLinearMaterial('KVH 45x95');
+    kvh.stockLength = 4000;
+
+    const p = newProject('Synthesized');
+    p.stock = [];
+    p.linearStock = [];
+    p.parts = [{ ...emptyPart(), length: 800, width: 400, qty: 2, materialId: ply.id }];
+    p.linearParts = [{ ...emptyLinearPart(), length: 1200, qty: 2, materialId: kvh.id }];
+
+    const job2d = projectToJob(p, [ply])!;
+    expect(job2d.stock).toHaveLength(1);
+    expect(job2d.stock[0]).toMatchObject({
+      id: `mat:${ply.id}`,
+      length: 2500,
+      width: 1250,
+      qty: null,
+      material: ply.id,
+    });
+
+    const job1d = projectToLinearJob(p, [kvh])!;
+    expect(job1d.stock).toHaveLength(1);
+    expect(job1d.stock[0]).toMatchObject({
+      id: `mat:${kvh.id}`,
+      length: 4000,
+      qty: null,
+      material: kvh.id,
+    });
   });
 });

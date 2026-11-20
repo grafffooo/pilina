@@ -117,9 +117,10 @@ export function offcutIdFromStock(stockId: string): string | null {
  * the project has enabled sized stock without a material), excluding the project's own leftovers.
  */
 export function matchingOffcuts(project: Project, offcuts: Offcut[]): Offcut[] {
-  const materials = new Set(
-    project.stock.filter((s) => s.enabled && s.materialId).map((s) => s.materialId!),
-  );
+  const materials = new Set([
+    ...project.parts.filter((p) => p.enabled && p.materialId).map((p) => p.materialId!),
+    ...project.stock.filter((s) => s.enabled && s.materialId).map((s) => s.materialId!),
+  ]);
   const hasUnassigned = project.stock.some(
     (s) => s.enabled && s.length !== null && s.length > 0 && s.width !== null && s.width > 0 && s.materialId === null,
   );
@@ -139,9 +140,11 @@ export function matchingOffcuts(project: Project, offcuts: Offcut[]): Offcut[] {
  */
 export function matchingLinearOffcuts(project: Project, offcuts: Offcut[]): Offcut[] {
   const linearStock = project.linearStock ?? [];
-  const materials = new Set(
-    linearStock.filter((s) => s.enabled && s.materialId).map((s) => s.materialId!),
-  );
+  const linearParts = project.linearParts ?? [];
+  const materials = new Set([
+    ...linearParts.filter((p) => p.enabled && p.materialId).map((p) => p.materialId!),
+    ...linearStock.filter((s) => s.enabled && s.materialId).map((s) => s.materialId!),
+  ]);
   const hasUnassigned = linearStock.some(
     (s) => s.enabled && s.length !== null && s.length > 0 && s.materialId === null,
   );

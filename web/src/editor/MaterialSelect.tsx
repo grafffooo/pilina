@@ -1,24 +1,43 @@
-import { materialKind, type MaterialKind } from '../model/library';
-import { addLinearMaterial, addMaterial, useStore } from '../store/store';
 import { useState } from 'react';
-import { promptDialog } from '../ui/dialogs';
-import { useMediaQuery } from '../ui/hooks';
-import { ChevronDownIcon } from '../ui/icons';
-import { MaterialPickerSheet } from './MaterialPicker';
-import styles from './Editor.module.css';
 import { useTranslation } from 'react-i18next';
+import { formatLength, formatLengthUnit } from '../lib/units';
+import { materialKind, type Material, type MaterialKind } from '../model/library';
+import { useStore } from '../store/store';
+import { useMediaQuery } from '../ui/hooks';
+import { CheckIcon, ChevronDownIcon, PlusIcon } from '../ui/icons';
+import { Popover } from '../ui/Popover';
+import styles from './Editor.module.css';
+import { MaterialPickerSheet } from './MaterialPicker';
+import { NewMaterialModal } from './NewMaterialModal';
 
-const NEW = '__new__';
+function materialTitle(m: Material): string {
+  if (materialKind(m) === 'linear') {
+    if (m.thickness && m.profileWidth) {
+      return `${m.name} · ${formatLength(m.thickness)} × ${formatLengthUnit(m.profileWidth)}`;
+    }
+    if (m.thickness) return `${m.name} · ${formatLengthUnit(m.thickness)}`;
+    return m.name;
+  }
+  return m.thickness ? `${m.name} · ${formatLengthUnit(m.thickness)}` : m.name;
+}
+
+function materialSubtitle(m: Material): string {
+  if (materialKind(m) === 'linear') {
+    return m.stockLength ? formatLengthUnit(m.stockLength) : '';
+  }
+  if (m.sheetLength && m.sheetWidth) {
+    return `${formatLength(m.sheetLength)} × ${formatLengthUnit(m.sheetWidth)}`;
+  }
+  return '';
+}
 
 /**
- * Picks a material from the library, or creates one. `anyLabel` adds an empty choice
- * (for parts: "any board" / "any bar").
+ * Picks a material from the library, or creates a new one via the NewMaterialModal.
  */
 export function MaterialSelect({
   value,
   onChange,
   ariaLabel,
-  anyLabel,
   sheet,
   kind = 'sheet',
   stockLength,
@@ -26,47 +45,34 @@ export function MaterialSelect({
   value: string | null;
   onChange: (id: string | null) => void;
   ariaLabel: string;
+  /** Retained for compatibility; library materials are always listed without an empty option. */
   anyLabel?: string;
-  /** Sheet size for a new sheet material's per-sheet price. */
+  /** Default sheet size for a new sheet material. */
   sheet?: { length: number; width: number };
   /** Material kind offered by this selector. */
   kind?: MaterialKind;
-  /** Bar length for a new linear material's per-piece price. */
+  /** Default bar length for a new linear material. */
   stockLength?: number;
 }) {
   const { t } = useTranslation();
   const materials = useStore((s) => s.materials);
   const filtered = materials.filter((m) => materialKind(m) === kind);
-  const known = value === null || filtered.some((m) => m.id === value);
+  const current = filtered.find((m) => m.id === value) ?? materials.find((m) => m.id === value);
+  const known = value === null || Boolean(current);
   const phone = useMediaQuery('(max-width: 767px)');
   const [picking, setPicking] = useState(false);
+  const [creating, setCreating] = useState(false);
 
-  const createNew = async (): Promise<string | null> => {
-    const name = await promptDialog({
-      title: t('New material'),
-      label:
-        kind === 'linear'
-          ? t('Name of the new linear stock, e.g. “KVH 45x95”')
-          : t('Name of the new material, e.g. “DTD White 18mm”'),
-      confirmLabel: t('Add'),
-    });
-    if (!name) return null;
-    return kind === 'linear'
-      ? addLinearMaterial(name, stockLength ? { stockLength } : undefined).id
-      : addMaterial(name, sheet).id;
-  };
+  const labelText = current?.name ?? (known ? t('Choose material…') : t('Deleted material'));
 
   if (phone) {
-    const current = filtered.find((m) => m.id === value) ?? materials.find((m) => m.id === value);
-    const name =
-      current?.name ?? (known ? (anyLabel ?? t('Choose material…')) : t('Deleted material'));
     return (
       <>
         <button
           type="button"
           className={styles.picker}
           aria-haspopup="dialog"
-          aria-label={`${ariaLabel}: ${name}`}
+          aria-label={`${ariaLabel}: ${labelText}`}
           onClick={() => setPicking(true)}
         >
           <span
@@ -74,14 +80,13 @@ export function MaterialSelect({
             style={current ? { background: current.color } : undefined}
             aria-hidden="true"
           />
-          <span className={styles.pickerName}>{name}</span>
+          <span className={styles.pickerName}>{labelText}</span>
           <ChevronDownIcon size={20} />
         </button>
         {picking && (
           <MaterialPickerSheet
             title={t('Material')}
             value={value}
-            anyLabel={anyLabel}
             sheet={sheet}
             kind={kind}
             stockLength={stockLength}
@@ -92,31 +97,80 @@ export function MaterialSelect({
       </>
     );
   }
+
   return (
-    <select
-      className={styles.select}
-      aria-label={ariaLabel}
-      value={value ?? ''}
-      onChange={async (e) => {
-        const v = e.target.value;
-        if (v !== NEW) {
-          onChange(v || null);
-          return;
+    <>
+      <Popover
+        ariaLabel={`${ariaLabel}: ${labelText}`}
+        triggerClassName={styles.materialTrigger}
+        label={
+          <>
+            <span
+              className={styles.materialCircle}
+              data-none={current ? undefined : ''}
+              style={current ? { background: current.color } : undefined}
+              aria-hidden="true"
+            />
+            <span className={styles.materialTriggerName}>{labelText}</span>
+            <ChevronDownIcon size={14} />
+          </>
         }
-        const id = await createNew();
-        if (id) onChange(id);
-      }}
-    >
-      {(anyLabel || value === null) && (
-        <option value="">{anyLabel ?? t('Choose material…')}</option>
+      >
+        {(close) => (
+          <div className={styles.materialMenu} role="listbox" aria-label={ariaLabel}>
+            {filtered.map((m) => {
+              const selected = m.id === value;
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  className={styles.materialOption}
+                  onClick={() => {
+                    onChange(m.id);
+                    close();
+                  }}
+                >
+                  <span
+                    className={styles.materialOptionCircle}
+                    style={{ background: m.color }}
+                    aria-hidden="true"
+                  />
+                  <span className={styles.materialOptionText}>
+                    <span className={styles.materialOptionTitle}>{materialTitle(m)}</span>
+                    {materialSubtitle(m) && (
+                      <span className={styles.materialOptionSub}>{materialSubtitle(m)}</span>
+                    )}
+                  </span>
+                  {selected && <CheckIcon size={16} />}
+                </button>
+              );
+            })}
+            {filtered.length > 0 && <div className={styles.materialMenuDivider} />}
+            <button
+              type="button"
+              className={styles.materialAddBtn}
+              onClick={() => {
+                close();
+                setCreating(true);
+              }}
+            >
+              <PlusIcon size={16} />
+              {kind === 'linear' ? t('Add linear stock') : t('+ New material…')}
+            </button>
+          </div>
+        )}
+      </Popover>
+      {creating && (
+        <NewMaterialModal
+          kind={kind}
+          sheet={sheet}
+          stockLength={stockLength}
+          onCreated={(id) => onChange(id)}
+          onClose={() => setCreating(false)}
+        />
       )}
-      {!known && <option value={value ?? ''}>{t('Deleted material')}</option>}
-      {filtered.map((m) => (
-        <option key={m.id} value={m.id}>
-          {m.name}
-        </option>
-      ))}
-      <option value={NEW}>{t('+ New material…')}</option>
-    </select>
+    </>
   );
 }

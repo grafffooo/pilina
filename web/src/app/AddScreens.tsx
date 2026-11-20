@@ -20,7 +20,7 @@ import {
   longUnit,
   unitLabel,
 } from '../lib/units';
-import { formatMoney, materialKind } from '../model/library';
+import { formatMoney } from '../model/library';
 import type { OffcutKind } from '../model/offcut';
 import {
   emptyLinearPart,
@@ -705,14 +705,10 @@ function BarPreview({ part }: { part: LinearPartRow }) {
 export function AddLinearPartScreen() {
   const { t } = useTranslation();
   const project = useCurrentProject();
-  const materials = useStore((s) => s.materials);
   const [part, setPart] = useState<LinearPartRow>(() => emptyLinearPart());
   const set = (patch: Partial<LinearPartRow>) => setPart((p) => ({ ...p, ...patch }));
   const ok = !!part.length && (part.qty ?? 0) > 0;
   const size = (v: number | null) => (v === null ? '—' : formatLength(v));
-  const linearMats = materials.filter((m) => materialKind(m) === 'linear');
-  const stockMats = new Set(project?.linearStock.map((s) => s.materialId).filter(Boolean));
-  const showMaterial = linearMats.length > 0 || stockMats.size > 1 || !!part.materialId;
 
   const save = (again: boolean) => {
     const blank = project?.linearParts.find(isBlankLinearPart);
@@ -772,17 +768,14 @@ export function AddLinearPartScreen() {
           />
         </CardField>
       </CardFields>
-      {showMaterial && (
-        <CardField label={t('Material')}>
-          <MaterialSelect
-            kind="linear"
-            value={part.materialId}
-            anyLabel={t('Any bar')}
-            ariaLabel={t('Material')}
-            onChange={(materialId) => set({ materialId })}
-          />
-        </CardField>
-      )}
+      <CardField label={t('Material')}>
+        <MaterialSelect
+          kind="linear"
+          value={part.materialId}
+          ariaLabel={t('Material')}
+          onChange={(materialId) => set({ materialId })}
+        />
+      </CardField>
     </TaskScreen>
   );
 }

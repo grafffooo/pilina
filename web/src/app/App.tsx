@@ -1,8 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { LinearPartsTable } from '../editor/LinearPartsTable';
-import { LinearStockTable } from '../editor/LinearStockTable';
 import { PartsTable } from '../editor/PartsTable';
-import { StockTable } from '../editor/StockTable';
 import editorStyles from '../editor/Editor.module.css';
 import {
   hasLinearContent,
@@ -205,15 +203,9 @@ function ProjectEditor({ project }: { project: Project }) {
         />
       </div>
       {activeKind === 'linear' ? (
-        <>
-          <LinearPartsTable project={project} />
-          <LinearStockTable project={project} />
-        </>
+        <LinearPartsTable project={project} />
       ) : (
-        <>
-          <PartsTable project={project} />
-          <StockTable project={project} />
-        </>
+        <PartsTable project={project} />
       )}
       <PricingCard project={project} />
     </fieldset>

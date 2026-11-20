@@ -1,6 +1,8 @@
 import { useState, type ClipboardEvent, type KeyboardEvent } from 'react';
 import { swatch } from '../model/describe';
 import { missingPartFields } from '../model/job';
+import { materialKind } from '../model/library';
+import { matchingOffcuts } from '../model/offcut';
 import { isMultiCell, parsePartRows } from '../model/paste';
 import { emptyPart, isBlankPart, type PartRow, type Project } from '../model/project';
 import {
@@ -9,6 +11,7 @@ import {
   removePart,
   replacePart,
   updatePart,
+  updateProject,
   useStore,
 } from '../store/store';
 import { MoreIcon, PlusIcon } from '../ui/icons';
@@ -62,9 +65,7 @@ export function PartsTable({ project }: { project: Project }) {
     0,
   );
   const rowsWithData = parts.filter((p) => !isBlankPart(p)).length;
-  // Only ask for a material per part once the project cuts more than one board type.
-  const stockMaterials = new Set(project.stock.map((s) => s.materialId).filter(Boolean));
-  const showMaterial = stockMaterials.size > 1 || parts.some((p) => p.materialId);
+  const showMaterial = true;
 
   // On a phone the rows are cards; a new part opens its card.
   const phone = useMediaQuery('(max-width: 767px)');
@@ -81,7 +82,11 @@ export function PartsTable({ project }: { project: Project }) {
   const setOpenId = (id: string | null) => setOpen({ project: project.id, id });
 
   const addRow = (focusCol = 'length') => {
-    const part = emptyPart();
+    const defaultMaterialId =
+      [...parts].reverse().find((p) => p.materialId)?.materialId ??
+      materials.find((m) => materialKind(m) === 'sheet')?.id ??
+      null;
+    const part = { ...emptyPart(), materialId: defaultMaterialId };
     insertParts([part]);
     if (phone) setOpenId(part.id);
     // Focus after React renders the new row.
@@ -293,6 +298,40 @@ export function PartsTable({ project }: { project: Project }) {
           {t('Add a part, or paste rows from a spreadsheet')}
         </button>
       </div>
+      <OffcutsFooter project={project} />
     </section>
+  );
+}
+
+function OffcutsFooter({ project }: { project: Project }) {
+  const { t } = useTranslation();
+  const offcuts = useStore((s) => s.offcuts);
+  const matching = matchingOffcuts(project, offcuts).length;
+  return (
+    <div className={styles.offcutFooter}>
+      <label className={styles.offcutLabel}>
+        <input
+          type="checkbox"
+          className={styles.checkbox}
+          checked={project.useOffcuts}
+          onChange={(e) => updateProject({ useOffcuts: e.target.checked })}
+        />
+        <span className={styles.offcutText}>
+          <span className={styles.offcutTitle}>{t('Use matching library offcuts first')}</span>
+          <span className={styles.cardMeta}>
+            {matching === 0
+              ? t('No offcuts in these materials are in the library yet.')
+              : t('n_matching_offcuts', { count: matching })}
+          </span>
+        </span>
+      </label>
+      <button
+        type="button"
+        className={styles.addRow}
+        onClick={() => useStore.getState().setView('offcuts')}
+      >
+        {t('Open library')}
+      </button>
+    </div>
   );
 }

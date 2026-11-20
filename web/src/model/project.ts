@@ -178,7 +178,7 @@ export function newProject(name = '', now = Date.now(), materialId: string | nul
     trim: 0,
     linearKerf: 3,
     linearEndTrim: 0,
-    parts: [emptyPart()],
+    parts: [{ ...emptyPart(), materialId }],
     stock: [
       {
         ...emptyStock(),

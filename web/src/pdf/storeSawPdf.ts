@@ -29,45 +29,45 @@ export async function buildStoreSawPdf(
   doc.setCreator('Pilina');
   doc.setProducer('Pilina');
 
-  const page = doc.addPage([W, H]);
-  let y = H - M;
+  let page = doc.addPage([W, H]);
+  let top = M;
 
-  // Header
-  text(page, bold, tr('Store Saw PDF').toUpperCase(), M, y, 8, INK_3);
-  y -= 18;
-  text(page, bold, input.project.name || tr('Untitled project'), M, y, 18, INK);
-  y -= 18;
+  // Header (top-down coordinates for `text` and `rule`)
+  text(page, bold, tr('Store Saw PDF').toUpperCase(), M, top, 8, INK_3);
+  top += 16;
+  text(page, bold, input.project.name || tr('Untitled project'), M, top, 18, INK);
+  top += 22;
   text(
     page,
     regular,
     `${tr('Vehicle')}: ${input.profile.name} (${formatLength(input.profile.maxLength)} × ${formatLengthUnit(input.profile.maxWidth)})`,
     M,
-    y,
+    top,
     10,
     INK_2,
   );
-  y -= 12;
-  rule(page, M, y, W - M, 0.75);
-  y -= 20;
+  top += 16;
+  rule(page, top);
+  top += 18;
 
   // 2D Sheet breakdown diagrams
   for (const sheet of input.preCuts2d) {
-    if (y < 220) {
-      // Simple page break if multiple oversized sheets
-      const next = doc.addPage([W, H]);
-      y = H - M;
-      drawSheetPreCut(next, bold, regular, sheet, y);
-      y -= 230;
-      continue;
+    if (top + 220 > H - M) {
+      page = doc.addPage([W, H]);
+      top = M;
     }
-    drawSheetPreCut(page, bold, regular, sheet, y);
-    y -= 230;
+    drawSheetPreCut(page, bold, regular, sheet, top);
+    top += 230;
   }
 
   // 1D Bar breakdown diagrams
   for (const bar of input.preCuts1d) {
-    drawBarPreCut(page, bold, regular, bar, y);
-    y -= 86;
+    if (top + 86 > H - M) {
+      page = doc.addPage([W, H]);
+      top = M;
+    }
+    drawBarPreCut(page, bold, regular, bar, top);
+    top += 86;
   }
 
   return doc.save();
@@ -78,18 +78,19 @@ function drawSheetPreCut(
   bold: Awaited<ReturnType<PDFDocument['embedFont']>>,
   regular: Awaited<ReturnType<PDFDocument['embedFont']>>,
   sheet: PreCutSheet,
-  topY: number,
+  top: number,
 ) {
   const title = `${sheet.label || tr('Material')} · ${formatLength(sheet.length)} × ${formatLengthUnit(sheet.width)}`;
-  text(page, bold, title, M, topY, 11, INK);
+  text(page, bold, title, M, top, 11, INK);
   text(
     page,
     regular,
     `${tr('Store saw kerf')}: ${formatLengthUnit(sheet.storeKerf)}`,
-    W - M - 140,
-    topY,
+    W - M,
+    top,
     9,
     INK_3,
+    'right',
   );
 
   // Draw sheet diagram on left, cut list on right
@@ -99,7 +100,7 @@ function drawSheetPreCut(
   const dw = sheet.width * scale;
   const dh = sheet.length * scale;
   const ox = M;
-  const oy = topY - 16 - dh;
+  const oy = H - (top + 20 + dh);
 
   page.drawRectangle({
     x: ox,
@@ -127,7 +128,8 @@ function drawSheetPreCut(
     });
     const dim = `${formatLength(p.length)}×${formatLength(p.width)}`;
     if (pw > 38 && ph > 16) {
-      text(page, regular, dim, px + 4, py + ph / 2 - 3, 7.5, INK_2);
+      const labelTop = top + 20 + (p.y + p.length / 2) * scale - 4;
+      text(page, regular, dim, px + 4, labelTop, 7.5, INK_2);
     }
   }
 
@@ -147,20 +149,12 @@ function drawSheetPreCut(
   }
 
   // Breakdown cut list on the right
-  let cy = topY - 24;
+  let cutTop = top + 24;
   const lx = M + dw + 24;
   sheet.cuts.forEach((c, i) => {
     const dir = c.axis === 'y' ? tr('Cross cut') : tr('Rip');
-    text(
-      page,
-      bold,
-      `${i + 1}. ${dir} @ ${formatLengthUnit(c.pos)}`,
-      lx,
-      cy,
-      9.5,
-      INK,
-    );
-    cy -= 15;
+    text(page, bold, `${i + 1}. ${dir} @ ${formatLengthUnit(c.pos)}`, lx, cutTop, 9.5, INK);
+    cutTop += 15;
   });
 }
 
@@ -169,13 +163,13 @@ function drawBarPreCut(
   bold: Awaited<ReturnType<PDFDocument['embedFont']>>,
   regular: Awaited<ReturnType<PDFDocument['embedFont']>>,
   bar: PreCutBar,
-  topY: number,
+  top: number,
 ) {
   const title = `${bar.label || tr('Linear stock')} · ${formatLengthUnit(bar.length)}`;
-  text(page, bold, title, M, topY, 11, INK);
+  text(page, bold, title, M, top, 11, INK);
   const bw = W - M * 2;
   const bh = 22;
-  const oy = topY - 34;
+  const oy = H - (top + 18 + bh);
 
   page.drawRectangle({
     x: M,
@@ -206,7 +200,7 @@ function drawBarPreCut(
     regular,
     `${tr('Cross cut')}: ${cutsSummary}  →  ${piecesSummary}`,
     M,
-    oy - 14,
+    top + 46,
     9,
     INK_2,
   );

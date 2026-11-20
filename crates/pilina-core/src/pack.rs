@@ -85,7 +85,16 @@ impl Hasher for FxHasher {
     }
 
     fn write(&mut self, bytes: &[u8]) {
-        for &b in bytes {
+        let (chunks, mut rem) = bytes.as_chunks::<8>();
+        for &chunk in chunks {
+            self.write_u64(u64::from_le_bytes(chunk));
+        }
+        if rem.len() >= 4 {
+            let (head, tail) = rem.split_at(4);
+            self.write_u32(u32::from_le_bytes(head.try_into().unwrap()));
+            rem = tail;
+        }
+        for &b in rem {
             self.write_u64(u64::from(b));
         }
     }
@@ -109,11 +118,15 @@ impl Hasher for FxHasher {
 
 pub(crate) type FxBuild = BuildHasherDefault<FxHasher>;
 
+type StripKey = (u64, bool, bool);
+type StripBucket = HashMap<StripKey, SimResult, FxBuild>;
+
 /// Strip simulations depend only on the strip width, the counts left, the row order and
 /// whether sub-row leaders are allowed, so all strategies on one frame can share them.
+/// Keyed by remaining counts first so inner-loop lookups borrow `counts.as_slice()` without cloning.
 #[derive(Default)]
 pub(crate) struct StripMemo {
-    map: HashMap<(u64, bool, bool, Vec<u32>), SimResult, FxBuild>,
+    map: HashMap<Vec<u32>, StripBucket, FxBuild>,
 }
 
 /// Packs a `fw` × `fh` frame. `memo` must only be shared between calls with the same
@@ -129,6 +142,7 @@ pub(crate) fn pack_frame(
     let mut counts: Vec<u32> = groups.iter().map(|g| g.count).collect();
     let mut strips: Vec<Strip> = Vec::new();
     let mut used_w = 0.0;
+    let subcuts = strategy == Strategy::AllowSubcuts;
 
     loop {
         let avail_w = if strips.is_empty() { fw } else { fw - used_w - kerf };
@@ -152,30 +166,36 @@ pub(crate) fn pack_frame(
             break;
         }
 
-        let mut best: Option<(f64, Strip, Vec<u32>)> = None;
+        if !memo.map.contains_key(counts.as_slice()) {
+            memo.map.insert(counts.clone(), HashMap::default());
+        }
+        let Some(bucket) = memo.map.get_mut(counts.as_slice()) else {
+            unreachable!()
+        };
+
+        let mut best: Option<(f64, StripKey)> = None;
         for &col_w in &widths {
             for tall_first in [true, false] {
-                let subcuts = strategy == Strategy::AllowSubcuts;
-                let key = (col_w.to_bits(), tall_first, subcuts, counts.clone());
-                let sim = memo
-                    .map
+                let key = (col_w.to_bits(), tall_first, subcuts);
+                let sim = bucket
                     .entry(key)
                     .or_insert_with(|| simulate_strip(col_w, fh, groups, &counts, kerf, subcuts, tall_first));
                 if sim.strip.rows.is_empty() {
                     continue;
                 }
                 let score = strip_score(sim, fh, strategy);
-                if best.as_ref().is_none_or(|b| score > b.0) {
-                    best = Some((score, sim.strip.clone(), sim.counts.clone()));
+                if best.is_none_or(|b| score > b.0) {
+                    best = Some((score, key));
                 }
             }
         }
 
-        let Some((_, strip, c)) = best else { break };
+        let Some((_, best_key)) = best else { break };
+        let sim = &bucket[&best_key];
         let gap = if strips.is_empty() { 0.0 } else { kerf };
-        used_w += gap + strip.col_w;
-        strips.push(strip);
-        counts = c;
+        used_w += gap + sim.strip.col_w;
+        strips.push(sim.strip.clone());
+        counts = sim.counts.clone();
     }
 
     Packed {

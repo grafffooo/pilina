@@ -110,7 +110,9 @@ export function ProjectHeader({ project, onMenu }: { project: Project; onMenu?: 
 /** Only speaks up when the engine fails; a plan that's up to date needs no badge. */
 export function RunStatus() {
   const { t } = useTranslation();
-  const status = useStore((s) => s.result.status);
+  const status = useStore((s) =>
+    s.result.status === 'error' || s.linearResult.status === 'error' ? 'error' : s.result.status,
+  );
   if (status === 'error') {
     return (
       <span className={styles.statusError} role="status">

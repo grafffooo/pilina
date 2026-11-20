@@ -2,7 +2,7 @@ import { useState, type ClipboardEvent, type KeyboardEvent } from 'react';
 import { swatch } from '../model/describe';
 import { missingPartFields } from '../model/job';
 import { isMultiCell, parsePartRows } from '../model/paste';
-import { countPieces, emptyPart, isBlankPart, type PartRow, type Project } from '../model/project';
+import { emptyPart, isBlankPart, type PartRow, type Project } from '../model/project';
 import {
   duplicatePart,
   insertParts,
@@ -57,7 +57,10 @@ export function PartsTable({ project }: { project: Project }) {
     },
     isBlankPart,
   );
-  const pieces = countPieces(project);
+  const pieces = parts.reduce(
+    (n, p) => n + (p.enabled && p.length && p.width && p.qty ? p.qty : 0),
+    0,
+  );
   const rowsWithData = parts.filter((p) => !isBlankPart(p)).length;
   // Only ask for a material per part once the project cuts more than one board type.
   const stockMaterials = new Set(project.stock.map((s) => s.materialId).filter(Boolean));

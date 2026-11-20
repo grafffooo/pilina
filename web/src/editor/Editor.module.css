@@ -407,6 +407,73 @@
     grid-area: 3 / 2 / 4 / 4;
   }
 
+  .linearPartsTable thead,
+  .linearStockTable thead {
+    display: none;
+  }
+
+  .linearPartsTable tbody,
+  .linearStockTable tbody {
+    display: block;
+  }
+
+  .linearPartsTable tr {
+    display: grid;
+    grid-template-columns: 28px 1fr 64px 36px;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 10px 8px 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .linearPartsTable td,
+  .linearStockTable td {
+    padding: 0;
+    border: 0 !important;
+    width: auto !important;
+  }
+
+  .linearPartsTable .cLength {
+    grid-area: 1 / 2;
+  }
+  .linearPartsTable .cQty {
+    grid-area: 1 / 3;
+  }
+  .linearPartsTable .cMore {
+    grid-area: 1 / 4;
+  }
+  .linearPartsTable .cLabel {
+    grid-area: 2 / 2 / 3 / 5;
+  }
+  .linearPartsTable .cMaterial {
+    grid-area: 3 / 2 / 4 / 5;
+  }
+
+  .linearStockTable tr {
+    display: grid;
+    grid-template-columns: 28px 1fr 64px 36px 36px;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 10px 8px 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .linearStockTable .cLength {
+    grid-area: 1 / 2;
+  }
+  .linearStockTable .cQty {
+    grid-area: 1 / 3;
+  }
+  .linearStockTable .cStar {
+    grid-area: 1 / 4;
+  }
+  .linearStockTable .cMore {
+    grid-area: 1 / 5;
+  }
+  .linearStockTable .cMaterial {
+    grid-area: 2 / 2 / 3 / 6;
+  }
+
   .colCheck .swatch {
     display: none;
   }
@@ -616,4 +683,39 @@
   align-items: center;
   gap: 12px;
   cursor: pointer;
+}
+
+.modeBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.addLinearTrigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: flex-start;
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--text-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.addLinearTrigger:hover {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+}
+
+@media (max-width: 767px) {
+  .addLinearTrigger {
+    align-self: stretch;
+    min-height: var(--tap);
+  }
 }

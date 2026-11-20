@@ -1,7 +1,8 @@
 // Per-project pricing choices: how board is charged, default edge band and extra cost lines.
 import { formatLength, formatLengthUnit } from '../lib/units';
-import { emptyExtra, type ExtraLine, type Project } from '../model/project';
+import { emptyExtra, hasLinearContent, type ExtraLine, type Project } from '../model/project';
 import { addEdgeBand, updatePricing, updateProject, useStore } from '../store/store';
+import { useView } from '../store/view';
 import { CloseIcon, PlusIcon } from '../ui/icons';
 import { NumberInput } from '../ui/NumberInput';
 import ui from '../ui/ui.module.css';
@@ -15,6 +16,8 @@ export function PricingCard({ project }: { project: Project }) {
   const pricing = project.pricing;
   const bands = useStore((s) => s.edgeBands);
   const settings = useStore((s) => s.settings);
+  const activeKind = useView((s) => s.activeKind);
+  const linearMin = hasLinearContent(project) && activeKind === 'linear';
 
   const setExtras = (extras: ExtraLine[], key: string | null = null) =>
     updatePricing({ extras }, key);
@@ -87,7 +90,9 @@ export function PricingCard({ project }: { project: Project }) {
                 onChange={(e) => updatePricing({ offcutCredit: e.target.checked })}
               />
               {t('Credit reusable leftovers (at least {{size}})', {
-                size: `${formatLength(settings.offcutMinLength)} × ${formatLengthUnit(settings.offcutMinWidth)}`,
+                size: linearMin
+                  ? formatLengthUnit(settings.linearOffcutMinLength ?? 300)
+                  : `${formatLength(settings.offcutMinLength)} × ${formatLengthUnit(settings.offcutMinWidth)}`,
               })}
             </span>
           </label>

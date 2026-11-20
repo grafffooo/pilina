@@ -63,3 +63,40 @@ pub fn price(job: JsValue, plan: JsValue, input: JsValue) -> Result<JsValue, JsE
     let serializer = serde_wasm_bindgen::Serializer::json_compatible();
     Ok(serde::Serialize::serialize(&cost, &serializer)?)
 }
+
+/// Renumbers a plan's cuts for a new `CutOrder` without re-optimizing the layout.
+#[wasm_bindgen]
+pub fn reorder_plan(plan: JsValue, order: JsValue) -> Result<JsValue, JsError> {
+    let mut plan: pilina_core::Plan = serde_wasm_bindgen::from_value(plan)?;
+    let order: pilina_core::CutOrder = serde_wasm_bindgen::from_value(order)?;
+    pilina_core::reorder_plan(&mut plan, order);
+    let serializer = serde_wasm_bindgen::Serializer::json_compatible();
+    Ok(serde::Serialize::serialize(&plan, &serializer)?)
+}
+
+/// Optimizes a 1D linear cutting job (`LinearJob` -> `LinearPlan`).
+#[wasm_bindgen]
+pub fn optimize_linear(
+    job: JsValue,
+    on_progress: Option<js_sys::Function>,
+) -> Result<JsValue, JsError> {
+    let job: pilina_core::LinearJob = serde_wasm_bindgen::from_value(job)?;
+    let mut control = JsControl {
+        start: js_sys::Date::now(),
+        on_progress,
+    };
+    let plan = pilina_core::optimize_linear_with(&job, &mut control);
+    let serializer = serde_wasm_bindgen::Serializer::json_compatible();
+    Ok(serde::Serialize::serialize(&plan, &serializer)?)
+}
+
+/// Prices a 1D linear cutting plan (`LinearJob`, `LinearPlan`, `LinearPriceInput` -> `LinearCostBreakdown`).
+#[wasm_bindgen]
+pub fn price_linear(job: JsValue, plan: JsValue, input: JsValue) -> Result<JsValue, JsError> {
+    let job: pilina_core::LinearJob = serde_wasm_bindgen::from_value(job)?;
+    let plan: pilina_core::LinearPlan = serde_wasm_bindgen::from_value(plan)?;
+    let input: pilina_core::LinearPriceInput = serde_wasm_bindgen::from_value(input)?;
+    let cost = pilina_core::price_linear(&job, &plan, &input);
+    let serializer = serde_wasm_bindgen::Serializer::json_compatible();
+    Ok(serde::Serialize::serialize(&cost, &serializer)?)
+}

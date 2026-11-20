@@ -7,12 +7,13 @@ import { WarningIcon } from '../ui/icons';
 import styles from './Results.module.css';
 import { useTranslation } from 'react-i18next';
 
-/** Project cost: board per material, offcut credit, edge banding and extra lines. */
+/** Project cost: board & linear stock per material, offcut credit, edge banding and extra lines. */
 export function CostCard({ project }: { project: Project }) {
   const { t } = useTranslation();
   const cost = useStore((s) => s.cost);
+  const linearCost = useStore((s) => s.linearCost);
   const currency = useStore((s) => s.settings.currency);
-  if (!cost) return null;
+  if (!cost && !linearCost) return null;
 
   const money = (n: number) => formatMoney(n, currency);
   const mode = project.pricing;
@@ -22,9 +23,12 @@ export function CostCard({ project }: { project: Project }) {
       : mode.offcutCredit
         ? t('Board charged by whole sheets, leftovers credited')
         : t('Board charged by whole sheets');
+  const total = (cost?.total ?? 0) + (linearCost?.total ?? 0);
+  const complete = (cost?.complete ?? true) && (linearCost?.complete ?? true);
   const missing = [
-    ...cost.materials.filter((m) => !m.priced).map((m) => m.material),
-    ...cost.edgeBands.filter((b) => !b.priced).map((b) => b.band),
+    ...(cost?.materials ?? []).filter((m) => !m.priced).map((m) => m.material),
+    ...(linearCost?.materials ?? []).filter((m) => !m.priced).map((m) => m.material),
+    ...(cost?.edgeBands ?? []).filter((b) => !b.priced).map((b) => b.band),
   ];
   const openLibrary = () => useStore.getState().setView('library');
 
@@ -38,14 +42,14 @@ export function CostCard({ project }: { project: Project }) {
           <span className={styles.costMode}>{modeText}</span>
         </div>
         <span className={styles.costTotal}>
-          {money(cost.total)}
-          {!cost.complete && <span className={styles.costPartial}> {t('+ unpriced')}</span>}
+          {money(total)}
+          {!complete && <span className={styles.costPartial}> {t('+ unpriced')}</span>}
         </span>
       </div>
 
       <dl className={styles.costLines}>
-        {cost.materials.map((m) => (
-          <div key={m.material} className={styles.costLine}>
+        {cost?.materials.map((m) => (
+          <div key={`sheet-${m.material}`} className={styles.costLine}>
             <dt>
               {m.material}
               <span className={styles.costNote}>
@@ -66,7 +70,29 @@ export function CostCard({ project }: { project: Project }) {
             )}
           </div>
         ))}
-        {cost.edgeBands.map((b) => (
+        {linearCost?.materials.map((m) => (
+          <div key={`linear-${m.material}`} className={styles.costLine}>
+            <dt>
+              {m.material}
+              <span className={styles.costNote}>
+                {mode.mode === 'area'
+                  ? t('{{length}} used', { length: formatLong(m.usedLength) })
+                  : t('n_bars', { count: m.bars })}
+              </span>
+            </dt>
+            <dd>{m.priced ? money(m.gross) : <NoPrice onClick={openLibrary} />}</dd>
+            {m.credit > 0 && (
+              <>
+                <dt className={styles.costCredit}>
+                  {t('Leftovers credited')}
+                  <span className={styles.costNote}>{formatLong(m.creditLength)}</span>
+                </dt>
+                <dd className={styles.costCredit}>−{money(m.credit)}</dd>
+              </>
+            )}
+          </div>
+        ))}
+        {cost?.edgeBands.map((b) => (
           <div key={b.band} className={styles.costLine}>
             <dt>
               {b.band}

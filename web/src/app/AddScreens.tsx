@@ -17,12 +17,21 @@ import {
   longPriceIn,
   unitLabel,
 } from '../lib/units';
-import { formatMoney } from '../model/library';
-import { isBlankPart, emptyPart, type PartRow } from '../model/project';
+import { formatMoney, materialKind } from '../model/library';
+import {
+  emptyLinearPart,
+  emptyPart,
+  isBlankLinearPart,
+  isBlankPart,
+  type LinearPartRow,
+  type PartRow,
+} from '../model/project';
 import {
   addEdgeBand,
   addMaterial,
+  insertLinearParts,
   insertParts,
+  replaceLinearPart,
   replacePart,
   updateEdgeBand,
   updateMaterial,
@@ -492,6 +501,101 @@ export function AddOffcutScreen() {
           onChange={setLocation}
         />
       </CardField>
+    </TaskScreen>
+  );
+}
+
+function BarPreview({ part }: { part: LinearPartRow }) {
+  const w = part.length && part.length > 0 ? 104 : 60;
+  const x = (120 - w) / 2;
+  return (
+    <svg width="120" height="44" viewBox="0 0 120 44" aria-hidden="true">
+      <rect x={x} y="12" width={w} height="20" rx="2" fill="#f1e7cb" stroke="#6a5b4a" />
+    </svg>
+  );
+}
+
+export function AddLinearPartScreen() {
+  const { t } = useTranslation();
+  const project = useCurrentProject();
+  const materials = useStore((s) => s.materials);
+  const [part, setPart] = useState<LinearPartRow>(() => emptyLinearPart());
+  const set = (patch: Partial<LinearPartRow>) => setPart((p) => ({ ...p, ...patch }));
+  const ok = !!part.length && (part.qty ?? 0) > 0;
+  const size = (v: number | null) => (v === null ? '—' : formatLength(v));
+  const linearMats = materials.filter((m) => materialKind(m) === 'linear');
+  const stockMats = new Set(project?.linearStock.map((s) => s.materialId).filter(Boolean));
+  const showMaterial = linearMats.length > 0 || stockMats.size > 1 || !!part.materialId;
+
+  const save = (again: boolean) => {
+    const blank = project?.linearParts.find(isBlankLinearPart);
+    if (blank) replaceLinearPart(blank.id, [part]);
+    else insertLinearParts([part]);
+    if (again) {
+      setPart({
+        ...emptyLinearPart(),
+        materialId: part.materialId,
+      });
+    } else history.back();
+  };
+
+  return (
+    <TaskScreen
+      title={t('Add linear part')}
+      actions={
+        <ActionButtons
+          ok={ok}
+          again={() => save(true)}
+          done={() => save(false)}
+          label={t('Add part')}
+        />
+      }
+    >
+      <div className={styles.preview}>
+        <BarPreview part={part} />
+        <div className={styles.previewText}>
+          <span className={styles.previewTitle}>{size(part.length)}</span>
+          <span>× {part.qty ?? '—'}</span>
+        </div>
+      </div>
+      <CardField label={t('Label')}>
+        <input
+          aria-label={t('Label')}
+          placeholder={t('Label')}
+          enterKeyHint="next"
+          value={part.label}
+          onChange={(e) => set({ label: e.target.value })}
+        />
+      </CardField>
+      <CardFields>
+        <CardField label={t('Length')}>
+          <LengthInput
+            aria-label={t('Length')}
+            placeholder={t('Length')}
+            value={part.length}
+            onCommit={(length) => set({ length })}
+          />
+        </CardField>
+        <CardField label={t('Qty')}>
+          <NumberInput
+            aria-label={t('Qty')}
+            placeholder={t('Qty')}
+            value={part.qty}
+            onCommit={(qty) => set({ qty })}
+          />
+        </CardField>
+      </CardFields>
+      {showMaterial && (
+        <CardField label={t('Material')}>
+          <MaterialSelect
+            kind="linear"
+            value={part.materialId}
+            anyLabel={t('Any bar')}
+            ariaLabel={t('Material')}
+            onChange={(materialId) => set({ materialId })}
+          />
+        </CardField>
+      )}
     </TaskScreen>
   );
 }

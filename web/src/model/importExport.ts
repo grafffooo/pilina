@@ -2,7 +2,12 @@
 // this app's own project files for sharing (.pilina.json; older exports are .cutlist.json).
 import type { Unit } from '../lib/units';
 import type { Edges, Grain } from '../engine/types';
-import { linkLegacyStockLabels, type EdgeBand, type Material } from './library';
+import {
+  linkLegacyStockLabels,
+  materialKind,
+  type EdgeBand,
+  type Material,
+} from './library';
 import {
   emptyPart,
   emptyStock,
@@ -309,6 +314,8 @@ export function exportProjectFile(
   const usedMaterials = new Set([
     ...project.stock.map((s) => s.materialId),
     ...project.parts.map((p) => p.materialId),
+    ...(project.linearStock ?? []).map((s) => s.materialId),
+    ...(project.linearParts ?? []).map((p) => p.materialId),
   ]);
   const usedBands = new Set([project.defaultEdgeBandId, ...project.parts.map((p) => p.edgeBandId)]);
   return {
@@ -339,9 +346,14 @@ export function importProjectFile(
   const newEdgeBands: EdgeBand[] = [];
   const matMap = new Map<string, string>();
   for (const m of file.materials) {
+    const kind = materialKind(m);
     const found =
       materials.find((x) => x.id === m.id) ??
-      materials.find((x) => x.name.trim().toLowerCase() === m.name.trim().toLowerCase());
+      materials.find(
+        (x) =>
+          materialKind(x) === kind &&
+          x.name.trim().toLowerCase() === m.name.trim().toLowerCase(),
+      );
     if (found) matMap.set(m.id, found.id);
     else {
       newMaterials.push(m);
@@ -371,6 +383,8 @@ export function importProjectFile(
       materialId: mapM(x.materialId),
       edgeBandId: mapB(x.edgeBandId),
     })),
+    linearStock: p.linearStock.map((s) => ({ ...s, materialId: mapM(s.materialId) })),
+    linearParts: p.linearParts.map((x) => ({ ...x, materialId: mapM(x.materialId) })),
     defaultEdgeBandId: mapB(p.defaultEdgeBandId),
     cutAt: null,
   };

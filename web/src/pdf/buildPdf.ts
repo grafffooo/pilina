@@ -6,7 +6,8 @@ import type { SheetLayout } from '../engine/types';
 import { formatNumber } from '../lib/format';
 import { formatLength, formatLengthUnit } from '../lib/units';
 import { cutPosition, measureFromPiece } from '../model/cutMeasure';
-import { cutKindLabel, classifyOffcut, isRipLike, sizeOf, swatch } from '../model/describe';
+import { cutKindLabel, isRipLike, sizeOf, swatch } from '../model/describe';
+import { keepAdvice } from '../model/offcut';
 import type { Project } from '../model/project';
 import { t as tr } from '../i18n';
 import {
@@ -215,7 +216,7 @@ function drawSheet(
 
   // Reusable leftovers: their size, so they can be marked and kept.
   for (const r of sheet.waste) {
-    if (classifyOffcut(r) !== 'usable') continue;
+    if (keepAdvice(r, ctx.input.offcutRule) !== 'suggested') continue;
     const z = sizeOf(r);
     label(
       page,

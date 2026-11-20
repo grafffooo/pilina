@@ -2,7 +2,8 @@
 // Colours are fixed (not themed) because the sheet always sits on light "paper".
 import { useId } from 'react';
 import type { Rect, SheetLayout } from '../engine/types';
-import { classifyOffcut, edgeSides, isRipLike, sizeOf } from '../model/describe';
+import { edgeSides, isRipLike, sizeOf } from '../model/describe';
+import { DEFAULT_OFFCUT_RULE, keepAdvice, type OffcutRule } from '../model/offcut';
 import { formatLength } from '../lib/units';
 import { useView } from '../store/view';
 import type { PartInfo } from './partInfo';
@@ -42,6 +43,7 @@ export function SheetDrawing({
   label,
   cutStep,
   focus,
+  offcutRule = DEFAULT_OFFCUT_RULE,
 }: {
   sheet: SheetLayout;
   parts: Map<string, PartInfo>;
@@ -50,6 +52,8 @@ export function SheetDrawing({
   cutStep?: number;
   /** Cut mode: the strip being cut; the rest of the sheet is faded. */
   focus?: Rect;
+  /** Minimum reusable offcut size from workshop settings. */
+  offcutRule?: OffcutRule;
 }) {
   const { t } = useTranslation();
   const view = useView();
@@ -98,7 +102,7 @@ export function SheetDrawing({
 
       {/* Reusable leftovers get their size written on them. */}
       {sheet.waste
-        .filter((r) => classifyOffcut(r) === 'usable')
+        .filter((r) => keepAdvice(r, offcutRule) === 'suggested')
         .map((r, i) => {
           const s = sizeOf(r);
           const lines = [

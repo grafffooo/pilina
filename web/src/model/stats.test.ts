@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import type { CutRecord } from './cutRecord';
-import { newMaterial } from './library';
-import { newOffcut } from './offcut';
+import { cutRecordKind, type CutRecord } from './cutRecord';
+import { newLinearMaterial, newMaterial } from './library';
+import { newLinearOffcut, newOffcut } from './offcut';
 import { computeStats, niceTicks } from './stats';
 
 const NOW = new Date(2026, 10, 20, 12).getTime(); // 20 Nov 2026
@@ -83,6 +83,79 @@ describe('computeStats', () => {
     };
     const manual = newOffcut(2, { length: 900, width: 400 }, {}, NOW - day);
     expect(computeStats([], [kept, manual], [], '30d', NOW).offcutsKept).toBe(1);
+  });
+
+  it('tracks linear bars separately from sheet area while combining cost, unpriced, and savings', () => {
+    const kvh = { ...newLinearMaterial('KVH 45x95'), id: 'lin1', price: 16, stockLength: 4000 }; // €4/m
+    const legacySheet = rec(NOW - day);
+    const barRec: CutRecord = {
+      id: 'lin-r1',
+      at: NOW - day,
+      projectId: 'p-pergola',
+      projectName: 'Pergola',
+      kind: 'linear',
+      materialId: kvh.id,
+      materialName: kvh.name,
+      sheetLength: 4000,
+      sheetWidth: 0,
+      usedArea: 0,
+      keptArea: 0,
+      usedLength: 3200,
+      keptLength: 600,
+      fromOffcut: false,
+      offcutCode: null,
+      cost: 16,
+      currency: 'EUR',
+    };
+    const linearOffcutRec: CutRecord = {
+      ...barRec,
+      id: 'lin-r2',
+      at: NOW - 2 * day,
+      sheetLength: 1500,
+      usedLength: 1200,
+      keptLength: 0,
+      fromOffcut: true,
+      offcutCode: 'OC-0005',
+      cost: null,
+    };
+    const linearUnpriced: CutRecord = {
+      ...barRec,
+      id: 'lin-r3',
+      at: NOW - 3 * day,
+      cost: null,
+    };
+    const keptLinear = { ...newLinearOffcut(5, 600, {}, NOW - day), sourceProjectId: 'p-pergola' };
+
+    expect(cutRecordKind(legacySheet)).toBe('sheet');
+    expect(cutRecordKind(barRec)).toBe('linear');
+
+    const s = computeStats(
+      [legacySheet, barRec, linearOffcutRec, linearUnpriced],
+      [keptLinear],
+      [board, kvh],
+      '30d',
+      NOW,
+    );
+    expect(s.sheets).toBe(1);
+    expect(s.sheetArea).toBe(2_000_000);
+    expect(s.usedPct).toBeCloseTo(50, 9);
+    expect(s.bars).toBe(3);
+    expect(s.stockLength).toBe(9500);
+    expect(s.usedLength).toBe(7600);
+    expect(s.keptLength).toBe(1200);
+    expect(s.linearUsedPct).toBeCloseTo((7600 / 9500) * 100, 9);
+    expect(s.cost).toBe(56);
+    expect(s.unpriced).toBe(1);
+    expect(s.offcutsReused).toBe(1);
+    expect(s.offcutsKept).toBe(1);
+    // 1500 mm offcut reused at €4/m = €6 saved
+    expect(s.saved).toBeCloseTo(6, 9);
+    expect(s.projects.find((p) => p.projectId === 'p-pergola')).toMatchObject({
+      sheets: 0,
+      bars: 3,
+      usedPct: (7600 / 9500) * 100,
+      linearUsedPct: (7600 / 9500) * 100,
+    });
   });
 });
 

@@ -1,6 +1,6 @@
 // Statistics across projects, built from the cut records written in cut mode.
-import type { CutRecord } from './cutRecord';
-import { pricePerSqm, type Material } from './library';
+import { cutRecordKind, type CutRecord, type CutRecordKind } from './cutRecord';
+import { pricePerMetre, pricePerSqm, type Material } from './library';
 import type { Offcut } from './offcut';
 
 export type Range = '30d' | '90d' | '12m' | 'all';
@@ -18,21 +18,29 @@ export interface MonthStat {
   /** First day of the month, local time. */
   start: number;
   sheets: number;
-  /** Known cost only; `unpriced` counts sheets without a price. */
+  bars: number;
+  /** Known cost only; `unpriced` counts items without a price. */
   cost: number;
   unpriced: number;
   sheetArea: number;
   usedArea: number;
   keptArea: number;
+  stockLength: number;
+  usedLength: number;
+  keptLength: number;
   /** Share of the sheet area neither used for parts nor kept as offcuts (0–100), null without sheets. */
   wastePct: number | null;
 }
 
 export interface MaterialStat {
   name: string;
+  kind?: CutRecordKind;
   sheets: number;
+  bars: number;
   /** mm² of board cut. */
   sheetArea: number;
+  /** mm of linear bar cut. */
+  stockLength: number;
   cost: number;
 }
 
@@ -40,7 +48,9 @@ export interface ProjectStat {
   projectId: string;
   name: string;
   sheets: number;
+  bars: number;
   usedPct: number;
+  linearUsedPct: number | null;
   cost: number;
   unpriced: number;
   lastAt: number;
@@ -48,18 +58,23 @@ export interface ProjectStat {
 
 export interface Stats {
   sheets: number;
+  bars: number;
   cost: number;
   unpriced: number;
   sheetArea: number;
   usedArea: number;
   keptArea: number;
+  stockLength: number;
+  usedLength: number;
+  keptLength: number;
   usedPct: number | null;
   wastePct: number | null;
+  linearUsedPct: number | null;
   /** Offcuts added to the library in the range. */
   offcutsKept: number;
   /** Library offcuts cut in the range. */
   offcutsReused: number;
-  /** What the reused offcuts would have cost as new board, at today's prices. */
+  /** What the reused offcuts would have cost as new stock, at today's prices. */
   saved: number;
   months: MonthStat[];
   materials: MaterialStat[];
@@ -103,55 +118,104 @@ export function computeStats(
       key: monthKey(t),
       start: t,
       sheets: 0,
+      bars: 0,
       cost: 0,
       unpriced: 0,
       sheetArea: 0,
       usedArea: 0,
       keptArea: 0,
+      stockLength: 0,
+      usedLength: 0,
+      keptLength: 0,
       wastePct: null,
     });
   }
 
   const byMaterial = new Map<string, MaterialStat>();
-  const byProject = new Map<string, ProjectStat & { sheetArea: number; usedArea: number }>();
+  const byProject = new Map<
+    string,
+    ProjectStat & {
+      sheetArea: number;
+      usedArea: number;
+      stockLength: number;
+      usedLength: number;
+    }
+  >();
+  let sheets = 0;
+  let bars = 0;
+  let stockLength = 0;
+  let usedLength = 0;
+  let keptLength = 0;
   let saved = 0;
 
   for (const r of inRange) {
+    const kind = cutRecordKind(r);
     const m = months.get(monthKey(r.at));
     if (m) {
-      m.sheets++;
-      m.sheetArea += area(r);
-      m.usedArea += r.usedArea;
-      m.keptArea += r.keptArea;
+      if (kind === 'sheet') {
+        m.sheets++;
+        m.sheetArea += area(r);
+        m.usedArea += r.usedArea;
+        m.keptArea += r.keptArea;
+      } else {
+        m.bars++;
+        m.stockLength += r.sheetLength;
+        m.usedLength += r.usedLength ?? 0;
+        m.keptLength += r.keptLength ?? 0;
+      }
       if (r.cost !== null) m.cost += r.cost;
       else if (!r.fromOffcut) m.unpriced++;
     }
 
-    const mat = byMaterial.get(r.materialName) ?? {
+    const matKey = `${kind}:${r.materialName}`;
+    const mat = byMaterial.get(matKey) ?? {
       name: r.materialName,
+      kind,
       sheets: 0,
+      bars: 0,
       sheetArea: 0,
+      stockLength: 0,
       cost: 0,
     };
-    mat.sheets++;
-    mat.sheetArea += area(r);
+    if (kind === 'sheet') {
+      mat.sheets++;
+      mat.sheetArea += area(r);
+    } else {
+      mat.bars++;
+      mat.stockLength += r.sheetLength;
+    }
     mat.cost += r.cost ?? 0;
-    byMaterial.set(r.materialName, mat);
+    byMaterial.set(matKey, mat);
 
     const p = byProject.get(r.projectId) ?? {
       projectId: r.projectId,
       name: r.projectName,
       sheets: 0,
+      bars: 0,
       usedPct: 0,
+      linearUsedPct: null,
       cost: 0,
       unpriced: 0,
       lastAt: 0,
       sheetArea: 0,
       usedArea: 0,
+      stockLength: 0,
+      usedLength: 0,
     };
-    p.sheets++;
-    p.sheetArea += area(r);
-    p.usedArea += r.usedArea;
+    if (kind === 'sheet') {
+      p.sheets++;
+      p.sheetArea += area(r);
+      p.usedArea += r.usedArea;
+      sheets++;
+    } else {
+      p.bars++;
+      p.stockLength += r.sheetLength;
+      p.usedLength += r.usedLength ?? 0;
+      bars++;
+      stockLength += r.sheetLength;
+      usedLength += r.usedLength ?? 0;
+      keptLength += r.keptLength ?? 0;
+    }
     p.cost += r.cost ?? 0;
     if (r.cost === null && !r.fromOffcut) p.unpriced++;
     p.lastAt = Math.max(p.lastAt, r.at);
@@ -159,8 +223,13 @@ export function computeStats(
     byProject.set(r.projectId, p);
 
     if (r.fromOffcut) {
-      const perSqm = pricePerSqm(material(r.materialId));
-      if (perSqm !== null) saved += (area(r) / 1e6) * perSqm;
+      if (kind === 'linear') {
+        const perM = pricePerMetre(material(r.materialId));
+        if (perM !== null) saved += (r.sheetLength / 1000) * perM;
+      } else {
+        const perSqm = pricePerSqm(material(r.materialId));
+        if (perSqm !== null) saved += (area(r) / 1e6) * perSqm;
+      }
     }
   }
 
@@ -168,30 +237,39 @@ export function computeStats(
     m.wastePct = m.sheets ? pct(m.sheetArea - m.usedArea - m.keptArea, m.sheetArea) : null;
   }
 
-  const sheetArea = inRange.reduce((a, r) => a + area(r), 0);
-  const usedArea = inRange.reduce((a, r) => a + r.usedArea, 0);
-  const keptArea = inRange.reduce((a, r) => a + r.keptArea, 0);
+  const sheetRecords = inRange.filter((r) => cutRecordKind(r) === 'sheet');
+  const sheetArea = sheetRecords.reduce((a, r) => a + area(r), 0);
+  const usedArea = sheetRecords.reduce((a, r) => a + r.usedArea, 0);
+  const keptArea = sheetRecords.reduce((a, r) => a + r.keptArea, 0);
 
   return {
-    sheets: inRange.length,
+    sheets,
+    bars,
     cost: inRange.reduce((a, r) => a + (r.cost ?? 0), 0),
     unpriced: inRange.filter((r) => r.cost === null && !r.fromOffcut).length,
     sheetArea,
     usedArea,
     keptArea,
+    stockLength,
+    usedLength,
+    keptLength,
     usedPct: pct(usedArea, sheetArea),
-    wastePct: inRange.length ? pct(sheetArea - usedArea - keptArea, sheetArea) : null,
+    wastePct: sheets ? pct(sheetArea - usedArea - keptArea, sheetArea) : null,
+    linearUsedPct: pct(usedLength, stockLength),
     offcutsKept: offcuts.filter(
       (o) => o.sourceProjectId && o.createdAt >= from && o.createdAt <= now,
     ).length,
     offcutsReused: inRange.filter((r) => r.fromOffcut).length,
     saved,
     months: [...months.values()],
-    materials: [...byMaterial.values()].sort((a, b) => b.sheetArea - a.sheetArea),
+    materials: [...byMaterial.values()].sort(
+      (a, b) => b.sheetArea - a.sheetArea || b.stockLength - a.stockLength,
+    ),
     projects: [...byProject.values()]
-      .map(({ sheetArea: a, usedArea: u, ...rest }) => ({
+      .map(({ sheetArea: a, usedArea: u, stockLength: sl, usedLength: ul, ...rest }) => ({
         ...rest,
-        usedPct: a > 0 ? (u / a) * 100 : 0,
+        usedPct: a > 0 ? (u / a) * 100 : sl > 0 ? (ul / sl) * 100 : 0,
+        linearUsedPct: pct(ul, sl),
       }))
       .sort((a, b) => b.lastAt - a.lastAt),
   };

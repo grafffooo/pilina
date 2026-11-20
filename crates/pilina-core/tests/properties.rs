@@ -351,3 +351,196 @@ fn past_failures_stay_fixed() {
         check(&job, &plan).unwrap();
     }
 }
+
+// ---- 1D linear property tests ----
+
+fn linear_part(i: usize) -> impl Strategy<Value = LinearPartSpec> {
+    (
+        40u32..2600,
+        0u32..8,
+        material(),
+        prop::bool::weighted(0.25),
+    )
+        .prop_map(move |(length, qty, material, half)| LinearPartSpec {
+            id: format!("lp{i}"),
+            length: f64::from(length) + if half { 0.5 } else { 0.0 },
+            qty,
+            label: String::new(),
+            material,
+        })
+}
+
+fn linear_stock(i: usize) -> impl Strategy<Value = LinearStockSpec> {
+    (
+        300u32..4500,
+        prop::option::weighted(0.5, 1u32..4),
+        any::<bool>(),
+        prop::bool::weighted(0.25),
+        material(),
+    )
+        .prop_map(move |(length, qty, priority, offcut, material)| LinearStockSpec {
+            id: format!("ls{i}"),
+            length: f64::from(length),
+            qty,
+            priority,
+            offcut,
+            material,
+            label: String::new(),
+        })
+}
+
+fn linear_job() -> impl Strategy<Value = LinearJob> {
+    (
+        prop::collection::vec(0usize..1, 1..14),
+        prop::collection::vec(0usize..1, 1..5),
+        prop_oneof![Just(0.0), Just(3.2), Just(4.0), 0.0f64..6.0],
+        prop_oneof![2 => Just(0.0), 1 => 1.0f64..25.0],
+    )
+        .prop_flat_map(|(parts, stocks, kerf, end_trim)| {
+            let parts: Vec<_> = (0..parts.len()).map(linear_part).collect();
+            let stocks: Vec<_> = (0..stocks.len()).map(linear_stock).collect();
+            (parts, stocks, Just(kerf), Just(end_trim))
+        })
+        .prop_map(|(parts, stock, kerf, end_trim)| LinearJob {
+            parts,
+            stock,
+            kerf,
+            end_trim,
+            options: LinearOptions {
+                time_budget_ms: 40,
+                seed: 7,
+            },
+        })
+}
+
+fn check_linear(job: &LinearJob, plan: &LinearPlan) -> Result<(), String> {
+    let part = |id: &str| job.parts.iter().find(|p| p.id == id).unwrap();
+    let mut placed = std::collections::HashMap::<&str, u32>::new();
+
+    for (bi, bar) in plan.bars.iter().enumerate() {
+        let stock = job
+            .stock
+            .iter()
+            .find(|s| s.id == bar.stock_id)
+            .ok_or("unknown linear stock")?;
+        let t = if stock.offcut { 0.0 } else { job.end_trim };
+        let l = bar.length;
+        if bar.qty == 0 {
+            return Err(format!("bar {bi} has qty 0"));
+        }
+
+        for p in &bar.placements {
+            let spec = part(&p.part_id);
+            *placed.entry(spec.id.as_str()).or_default() += bar.qty;
+            if p.x < t - EPS || p.x + p.length > l - t + EPS {
+                return Err(format!(
+                    "bar {bi}: {} outside trimmed bar [{t}, {}]: {p:?}",
+                    p.part_id,
+                    l - t
+                ));
+            }
+            if (p.length - spec.length).abs() >= EPS {
+                return Err(format!("bar {bi}: {} wrong length {p:?}", p.part_id));
+            }
+            if let (Some(a), Some(b)) = (&spec.material, &stock.material)
+                && a != b
+            {
+                return Err(format!("{} ({a}) placed on {b}", p.part_id));
+            }
+        }
+
+        let ps = &bar.placements;
+        for i in 0..ps.len() {
+            for j in i + 1..ps.len() {
+                let (a, b) = (&ps[i], &ps[j]);
+                if !(a.x + a.length + job.kerf <= b.x + EPS || b.x + b.length + job.kerf <= a.x + EPS)
+                {
+                    return Err(format!("bar {bi}: {} and {} too close", a.part_id, b.part_id));
+                }
+            }
+        }
+
+        for (ci, c) in bar.cuts.iter().enumerate() {
+            if c.number as usize != ci + 1 {
+                return Err(format!("bar {bi}: cut {ci} numbered {}", c.number));
+            }
+            if c.pos < -EPS || c.pos > l + EPS || c.from_last_edge <= 0.0 {
+                return Err(format!("bar {bi}: invalid cut {c:?}"));
+            }
+            for p in ps {
+                if c.pos > p.x + EPS && c.pos < p.x + p.length - EPS {
+                    return Err(format!("bar {bi}: cut {} hits {}", c.number, p.part_id));
+                }
+            }
+        }
+
+        if bar.waste < 0.0 {
+            return Err(format!("bar {bi}: negative waste {}", bar.waste));
+        }
+        if bar.waste > 0.0 {
+            let last_end = ps.iter().map(|p| p.x + p.length).fold(t, f64::max);
+            if bar.offcut_start < last_end + job.kerf - EPS {
+                return Err(format!("bar {bi}: offcut_start {} overlaps last cut", bar.offcut_start));
+            }
+            if bar.offcut_start + bar.waste > l - t + EPS {
+                return Err(format!("bar {bi}: leftover exceeds bar end"));
+            }
+        }
+    }
+
+    for s in &job.stock {
+        let used: u32 = plan
+            .bars
+            .iter()
+            .filter(|b| b.stock_id == s.id)
+            .map(|b| b.qty)
+            .sum();
+        if let Some(q) = s.qty
+            && used > q
+        {
+            return Err(format!("linear stock {} used {used} times, only {q}", s.id));
+        }
+    }
+
+    for p in job.parts.iter().filter(|p| p.qty > 0) {
+        let got = placed.get(p.id.as_str()).copied().unwrap_or(0);
+        let missing: u32 = plan
+            .unplaced
+            .iter()
+            .filter(|u| u.part_id == p.id)
+            .map(|u| u.count)
+            .sum();
+        if got + missing != p.qty {
+            return Err(format!("{}: {got} placed + {missing} unplaced != {}", p.id, p.qty));
+        }
+    }
+
+    let t = &plan.totals;
+    let bars: u32 = plan.bars.iter().map(|b| b.qty).sum();
+    if t.bars != bars
+        || t.used_length > t.stock_length + EPS
+        || (t.waste_length - (t.stock_length - t.used_length).max(0.0)).abs() >= EPS
+    {
+        return Err(format!("linear totals don't add up: {t:?}"));
+    }
+    Ok(())
+}
+
+proptest! {
+    #![proptest_config(ProptestConfig { cases: 256, ..ProptestConfig::default() })]
+
+    #[test]
+    fn every_linear_plan_is_cuttable_and_complete(job in linear_job()) {
+        let plan = optimize_linear(&job);
+        if let Err(e) = check_linear(&job, &plan) {
+            prop_assert!(false, "{e}\njob: {}", serde_json::to_string(&job).unwrap());
+        }
+    }
+
+    #[test]
+    fn same_seed_gives_the_same_linear_plan(job in linear_job()) {
+        let a = optimize_linear_with(&job, &mut NoClock);
+        let b = optimize_linear_with(&job, &mut NoClock);
+        prop_assert_eq!(a, b);
+    }
+}

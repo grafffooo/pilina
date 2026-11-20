@@ -1,10 +1,12 @@
 // Re-optimizes the open project shortly after every change that affects the cut.
 import { useEffect, useMemo } from 'react';
-import { CANCELLED, optimize } from '../engine/client';
-import { jobKey, projectToJob, usedPercent } from '../model/job';
+import { CANCELLED, optimize, reorderPlan } from '../engine/client';
+import type { Job } from '../engine/types';
+import { jobKey, projectToJob } from '../model/job';
 import { matchingOffcuts, offcutStock } from '../model/offcut';
 import { useCurrentProject, useStore } from '../store/store';
 import { useView } from '../store/view';
+import { syncProjectSummary } from './projectSummary';
 
 const DEBOUNCE_MS = 200;
 
@@ -20,21 +22,20 @@ export function useOptimizer() {
   const useOffcuts = project?.useOffcuts;
   const cutOrder = useStore((s) => s.settings.cutOrder);
 
-  // Only the fields that change the cut; renaming a project doesn't re-run the engine.
-  const job = useMemo(
+  // Only the fields that change the layout; renaming a project or switching cut order doesn't re-run the search.
+  const baseJob = useMemo(
     () =>
       project
         ? projectToJob(
             project,
             materials,
             offcutStock(matchingOffcuts(project, library), materials),
-            { cutOrder },
           )
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [id, parts, stock, kerf, trim, materials, library, useOffcuts, cutOrder],
+    [id, parts, stock, kerf, trim, materials, library, useOffcuts],
   );
-  const key = jobKey(job);
+  const key = jobKey(baseJob);
 
   // A different project starts on its first sheet.
   useEffect(() => {
@@ -42,25 +43,43 @@ export function useOptimizer() {
   }, [id]);
 
   useEffect(() => {
-    const { setResult, setSummary } = useStore.getState();
-    if (!job || !id) {
+    const { setResult } = useStore.getState();
+    if (!baseJob || !id) {
       setResult({ status: 'empty', plan: null, job: null, error: null });
+      if (id) syncProjectSummary(id);
       return;
     }
     let stale = false;
     setResult({ status: 'running' });
     const timer = setTimeout(() => {
+      const initialOrder = useStore.getState().settings.cutOrder;
+      const job: Job = {
+        ...baseJob,
+        options: { timeBudgetMs: 600, seed: 1234567, ...baseJob.options, cutOrder: initialOrder },
+      };
       optimize(job)
-        .then((plan) => {
+        .then(async (plan) => {
           if (stale || plan === CANCELLED) return;
-          setResult({ status: 'ready', plan, job, error: null });
+          const latestOrder = useStore.getState().settings.cutOrder;
+          const finalPlan =
+            latestOrder === initialOrder ? plan : await reorderPlan(plan, latestOrder);
+          if (stale) return;
+          const finalJob: Job =
+            latestOrder === initialOrder
+              ? job
+              : {
+                  ...job,
+                  options: {
+                    timeBudgetMs: 600,
+                    seed: 1234567,
+                    ...job.options,
+                    cutOrder: latestOrder,
+                  },
+                };
+          setResult({ status: 'ready', plan: finalPlan, job: finalJob, error: null });
           const view = useView.getState();
-          if (view.sheet >= plan.sheets.length) view.setSheet(0);
-          setSummary(id, {
-            pieces: job.parts.reduce((n, p) => n + p.qty, 0),
-            sheets: plan.totals.sheets,
-            usedPct: usedPercent(plan),
-          });
+          if (view.sheet >= finalPlan.sheets.length) view.setSheet(0);
+          syncProjectSummary(id);
         })
         .catch((e: unknown) => {
           if (!stale) setResult({ status: 'error', error: String(e) });
@@ -70,7 +89,39 @@ export function useOptimizer() {
       stale = true;
       clearTimeout(timer);
     };
-    // `key` captures everything in `job`.
+    // `key` captures everything in `baseJob`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, id]);
+
+  // Renumber existing layouts immediately when Cut order changes without re-optimizing.
+  useEffect(() => {
+    const { result, setResult } = useStore.getState();
+    if (
+      result.status !== 'ready' ||
+      !result.plan ||
+      !result.job ||
+      result.job.options?.cutOrder === cutOrder
+    ) {
+      return;
+    }
+    let stale = false;
+    const planJob = result.job;
+    const nextJob: Job = {
+      ...planJob,
+      options: { timeBudgetMs: 600, seed: 1234567, ...planJob.options, cutOrder },
+    };
+    reorderPlan(result.plan, cutOrder)
+      .then((plan) => {
+        if (stale) return;
+        const cur = useStore.getState().result;
+        if (cur.status !== 'ready' || cur.job !== planJob) return;
+        setResult({ status: 'ready', plan, job: nextJob, error: null });
+      })
+      .catch((e: unknown) => {
+        if (!stale) setResult({ status: 'error', error: String(e) });
+      });
+    return () => {
+      stale = true;
+    };
+  }, [cutOrder]);
 }

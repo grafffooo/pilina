@@ -1,5 +1,6 @@
-//! `pilina [--stats] [job.json]` prints the optimized plan as JSON. Reads stdin when no
-//! file is given. `--stats` prints a one-line summary to stderr instead of the plan.
+//! `pilina [--linear] [--stats] [job.json]` prints the optimized plan as JSON. Reads stdin
+//! when no file is given. `--stats` prints a one-line summary instead of the plan;
+//! `--linear` optimizes a 1D `LinearJob`.
 
 use std::io::Read;
 use std::process::ExitCode;
@@ -25,6 +26,7 @@ impl Control for Clock {
 
 fn main() -> ExitCode {
     let mut stats = false;
+    let mut linear = false;
     let mut path = None;
     for arg in std::env::args().skip(1) {
         match arg.as_str() {
@@ -33,6 +35,7 @@ fn main() -> ExitCode {
                 return ExitCode::SUCCESS;
             }
             "--stats" => stats = true,
+            "--linear" => linear = true,
             _ => path = Some(arg),
         }
     }
@@ -55,6 +58,47 @@ fn main() -> ExitCode {
         }
     };
 
+    let mut clock = Clock {
+        start: Instant::now(),
+        last: None,
+    };
+
+    if linear {
+        let job: pilina_core::LinearJob = match serde_json::from_str(&input) {
+            Ok(job) => job,
+            Err(e) => {
+                eprintln!("invalid linear job JSON: {e}");
+                return ExitCode::FAILURE;
+            }
+        };
+        let plan = pilina_core::optimize_linear_with(&job, &mut clock);
+        if stats {
+            let t = &plan.totals;
+            let unplaced: u32 = plan.unplaced.iter().map(|u| u.count).sum();
+            let passes = clock.last.map_or(0, |p| p.passes);
+            println!(
+                "bars {} (offcuts {})  used {:.1}%  cuts {}  unplaced {}  passes {}  {:.0} ms",
+                t.bars,
+                t.offcuts_used,
+                if t.stock_length > 0.0 {
+                    t.used_length / t.stock_length * 100.0
+                } else {
+                    0.0
+                },
+                t.cuts,
+                unplaced,
+                passes,
+                clock.elapsed_ms()
+            );
+        } else {
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&plan).expect("plan serializes")
+            );
+        }
+        return ExitCode::SUCCESS;
+    }
+
     let job: pilina_core::Job = match serde_json::from_str(&input) {
         Ok(job) => job,
         Err(e) => {
@@ -63,10 +107,6 @@ fn main() -> ExitCode {
         }
     };
 
-    let mut clock = Clock {
-        start: Instant::now(),
-        last: None,
-    };
     let plan = pilina_core::optimize_with(&job, &mut clock);
 
     if stats {

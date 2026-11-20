@@ -5,9 +5,10 @@ import { LineCapStyle, type PDFPage, type RGB } from 'pdf-lib';
 import type { Rect, SheetLayout } from '../engine/types';
 import { formatNumber } from '../lib/format';
 import { formatArea, formatLength, formatLengthUnit, formatLong } from '../lib/units';
-import { classifyOffcut, sizeOf, swatch } from '../model/describe';
+import { sizeOf, swatch } from '../model/describe';
 import { unplacedReason } from '../model/job';
 import { formatMoney } from '../model/library';
+import { keepAdvice, type OffcutRule } from '../model/offcut';
 import type { PartRow } from '../model/project';
 import { locale, t as tr } from '../i18n';
 import { ACCENT, INK, INK_2, INK_3, M, W, H, WARN, clip, hex, rule, text, type Ctx } from './draw';
@@ -32,13 +33,14 @@ interface Use {
 
 const area = (r: Rect) => r.w * r.h;
 
-function sheetUse(s: SheetLayout): Use {
+function sheetUse(s: SheetLayout, offcutRule?: OffcutRule): Use {
   return {
     sheet: s.length * s.width * s.qty,
     parts: s.placements.reduce((a, p) => a + area(p.rect), 0) * s.qty,
     leftovers:
-      s.waste.filter((r) => classifyOffcut(r) === 'usable').reduce((a, r) => a + area(r), 0) *
-      s.qty,
+      s.waste
+        .filter((r) => keepAdvice(r, offcutRule) === 'suggested')
+        .reduce((a, r) => a + area(r), 0) * s.qty,
   };
 }
 
@@ -212,7 +214,7 @@ export function summaryPage(ctx: Ctx) {
     const th = first.length * scale;
     hatch(page, M, top, tw, th, 2.5);
     for (const r of first.waste) {
-      if (classifyOffcut(r) !== 'usable') continue;
+      if (keepAdvice(r, input.offcutRule) !== 'suggested') continue;
       box(page, M + r.x * scale, top + r.y * scale, r.w * scale, r.h * scale, {
         fill: LEFTOVER,
         border: ACCENT,
@@ -267,7 +269,9 @@ export function summaryPage(ctx: Ctx) {
 
   const cx = first ? M + 147 : M;
   const cw = right - cx;
-  const use = plan.sheets.map(sheetUse).reduce(addUse, { sheet: 0, parts: 0, leftovers: 0 });
+  const use = plan.sheets
+    .map((s) => sheetUse(s, input.offcutRule))
+    .reduce(addUse, { sheet: 0, parts: 0, leftovers: 0 });
   const waste = Math.max(0, use.sheet - use.parts - use.leftovers);
   const partsPct = Math.round(pct(use.parts, use.sheet));
   const big = `${formatNumber(partsPct)}%`;
@@ -287,7 +291,7 @@ export function summaryPage(ctx: Ctx) {
   const leftoverSizes = new Map<string, number>();
   for (const s of plan.sheets) {
     for (const r of s.waste) {
-      if (classifyOffcut(r) !== 'usable') continue;
+      if (keepAdvice(r, input.offcutRule) !== 'suggested') continue;
       const z = sizeOf(r);
       const key = `${formatLength(z.long)} × ${formatLength(z.short)}`;
       leftoverSizes.set(key, (leftoverSizes.get(key) ?? 0) + s.qty);
@@ -403,7 +407,9 @@ export function summaryPage(ctx: Ctx) {
   let boardCost = 0;
   for (const [board, sheets] of byBoard) {
     const m = materialOf(sheets[0]!.stockId);
-    const u = sheets.map(sheetUse).reduce(addUse, { sheet: 0, parts: 0, leftovers: 0 });
+    const u = sheets
+      .map((s) => sheetUse(s, input.offcutRule))
+      .reduce(addUse, { sheet: 0, parts: 0, leftovers: 0 });
     const n = sheets.reduce((a, s) => a + s.qty, 0);
     const sizesText = [
       ...new Set(sheets.map((s) => `${formatLength(s.length)} × ${formatLength(s.width)}`)),

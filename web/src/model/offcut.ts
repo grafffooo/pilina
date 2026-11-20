@@ -1,8 +1,9 @@
 // Offcut library: leftovers kept for later, each with an OC-0001 style ID and a QR label.
-import type { Grain, Rect, StockSpec } from '../engine/types';
+import type { Grain, LinearStockSpec, Rect, StockSpec } from '../engine/types';
 import { materialGrain, type Material, type Settings } from './library';
 import { newId, type Project } from './project';
 
+export type OffcutKind = 'sheet' | 'linear';
 export type OffcutStatus = 'available' | 'reserved' | 'used';
 /** `queued` = waiting for the next label sheet. */
 export type LabelState = 'queued' | 'printed' | 'none';
@@ -11,10 +12,16 @@ export interface Offcut {
   id: string;
   /** Human ID printed on the label and held in its QR code, e.g. "OC-0013". */
   code: string;
+  /** Sheet rectangle vs linear bar leftover. Missing on older records means 'sheet'. */
+  kind?: OffcutKind;
   materialId: string | null;
-  /** mm, always length ≥ width. */
+  /** mm, always length ≥ width for sheet offcuts; bar length for linear offcuts. */
   length: number;
+  /** mm (0 for linear offcuts). */
   width: number;
+  /** Optional profile dimensions in mm for linear offcuts without a linked material. */
+  profileThickness?: number | null;
+  profileWidth?: number | null;
   /**
    * Which way the grain runs on this piece: along its length or its width ('none' for boards
    * without grain). Missing on offcuts kept before grain existed, which means 'length'.
@@ -34,6 +41,11 @@ export interface Offcut {
   usedAt: number | null;
 }
 
+/** Whether an offcut is a sheet piece or linear bar, defaulting legacy records to 'sheet'. */
+export function offcutKind(o: Pick<Offcut, 'kind'> | undefined | null): OffcutKind {
+  return o?.kind ?? 'sheet';
+}
+
 /** "OC-0007" (four digits, more when needed). */
 export function offcutCode(n: number): string {
   return `OC-${String(n).padStart(4, '0')}`;
@@ -50,9 +62,37 @@ export function newOffcut(
   return {
     id: newId(),
     code: offcutCode(number),
+    kind: 'sheet',
     materialId: null,
     length: long,
     width: short,
+    location: '',
+    status: 'available',
+    label: 'queued',
+    sourceProjectId: null,
+    sourceProjectName: null,
+    createdAt: now,
+    usedInProjectName: null,
+    usedAt: null,
+    ...fields,
+  };
+}
+
+export function newLinearOffcut(
+  number: number,
+  length: number,
+  fields: Partial<Offcut> = {},
+  now = Date.now(),
+): Offcut {
+  return {
+    id: newId(),
+    code: offcutCode(number),
+    kind: 'linear',
+    materialId: null,
+    length,
+    width: 0,
+    profileThickness: null,
+    profileWidth: null,
     location: '',
     status: 'available',
     label: 'queued',
@@ -73,19 +113,44 @@ export function offcutIdFromStock(stockId: string): string | null {
 }
 
 /**
- * Available offcuts in a material the project cuts from. Offcuts without a material never
- * match, and neither do the project's own leftovers (they came from cutting it).
+ * Available offcuts in a material the project cuts from (including material-less offcuts when
+ * the project has enabled sized stock without a material), excluding the project's own leftovers.
  */
 export function matchingOffcuts(project: Project, offcuts: Offcut[]): Offcut[] {
   const materials = new Set(
     project.stock.filter((s) => s.enabled && s.materialId).map((s) => s.materialId!),
   );
+  const hasUnassigned = project.stock.some(
+    (s) => s.enabled && s.length !== null && s.length > 0 && s.width !== null && s.width > 0 && s.materialId === null,
+  );
   return offcuts.filter(
     (o) =>
+      offcutKind(o) === 'sheet' &&
       o.status === 'available' &&
-      o.materialId !== null &&
-      materials.has(o.materialId) &&
-      o.sourceProjectId !== project.id,
+      o.sourceProjectId !== project.id &&
+      (o.materialId === null ? hasUnassigned : materials.has(o.materialId)),
+  );
+}
+
+/**
+ * Available linear offcuts in a material the project cuts from (including material-less linear
+ * offcuts when the project has enabled sized linear stock without a material), excluding the
+ * project's own leftovers.
+ */
+export function matchingLinearOffcuts(project: Project, offcuts: Offcut[]): Offcut[] {
+  const linearStock = project.linearStock ?? [];
+  const materials = new Set(
+    linearStock.filter((s) => s.enabled && s.materialId).map((s) => s.materialId!),
+  );
+  const hasUnassigned = linearStock.some(
+    (s) => s.enabled && s.length !== null && s.length > 0 && s.materialId === null,
+  );
+  return offcuts.filter(
+    (o) =>
+      offcutKind(o) === 'linear' &&
+      o.status === 'available' &&
+      o.sourceProjectId !== project.id &&
+      (o.materialId === null ? hasUnassigned : materials.has(o.materialId)),
   );
 }
 
@@ -120,18 +185,40 @@ export function offcutStock(offcuts: Offcut[], materials: Material[]): StockSpec
   }));
 }
 
+export function linearOffcutStock(offcuts: Offcut[], materials: Material[]): LinearStockSpec[] {
+  const names = new Map(materials.map((m) => [m.id, m.name]));
+  return offcuts.map((o) => ({
+    id: `${OFFCUT_STOCK_PREFIX}${o.id}`,
+    length: o.length,
+    qty: 1,
+    offcut: true,
+    material: o.materialId,
+    label: `${o.code} · ${(o.materialId && names.get(o.materialId)) || 'offcut'}`,
+  }));
+}
+
 export type KeepAdvice = 'suggested' | 'strip' | 'small';
+export type OffcutRule = Pick<Settings, 'offcutMinLength' | 'offcutMinWidth'>;
+export const DEFAULT_OFFCUT_RULE: OffcutRule = { offcutMinLength: 300, offcutMinWidth: 100 };
 
 /** Whether a leftover is worth keeping, by the library's minimum size. */
-export function keepAdvice(
-  r: Rect,
-  settings: Pick<Settings, 'offcutMinLength' | 'offcutMinWidth'>,
-): KeepAdvice {
+export function keepAdvice(r: Rect, settings: OffcutRule = DEFAULT_OFFCUT_RULE): KeepAdvice {
   const long = Math.max(r.w, r.h);
   const short = Math.min(r.w, r.h);
   if (long >= settings.offcutMinLength && short >= settings.offcutMinWidth) return 'suggested';
   if (long >= settings.offcutMinLength && short >= 30) return 'strip';
   return 'small';
+}
+
+export type LinearKeepAdvice = 'suggested' | 'small';
+export const DEFAULT_LINEAR_OFFCUT_MIN = 300;
+
+/** Whether a bar leftover is worth keeping, by the minimum length setting. */
+export function linearKeepAdvice(
+  length: number,
+  minLength = DEFAULT_LINEAR_OFFCUT_MIN,
+): LinearKeepAdvice {
+  return length >= minLength ? 'suggested' : 'small';
 }
 
 // ---- A4 sticker sheets ----

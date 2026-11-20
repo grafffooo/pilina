@@ -88,6 +88,10 @@ export function ShareDialog({ project, onClose }: { project: Project; onClose: (
       materials,
       currency: settings.currency,
       edgeAllowance: settings.edgeAllowance,
+      offcutRule: {
+        offcutMinLength: settings.offcutMinLength,
+        offcutMinWidth: settings.offcutMinWidth,
+      },
       cutMeasure: settings.cutMeasure,
     });
   };

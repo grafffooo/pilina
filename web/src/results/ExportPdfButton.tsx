@@ -30,6 +30,10 @@ export function ExportPdfButton({ compact }: { compact?: boolean }) {
         materials,
         currency: settings.currency,
         edgeAllowance: settings.edgeAllowance,
+        offcutRule: {
+          offcutMinLength: settings.offcutMinLength,
+          offcutMinWidth: settings.offcutMinWidth,
+        },
         cutMeasure: settings.cutMeasure,
       });
     } catch (e) {

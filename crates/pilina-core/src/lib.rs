@@ -5,14 +5,19 @@
 //! different part orderings and keeps the best plan, within `Options::time_budget_ms`.
 
 mod layout;
+pub mod linear;
 pub mod model;
 mod pack;
 mod prep;
 pub mod pricing;
 mod search;
 
+pub use linear::*;
 pub use model::*;
-pub use pricing::{CostBreakdown, PriceInput, price};
+pub use pricing::{
+    CostBreakdown, LinearCostBreakdown, LinearMaterialCost, LinearPriceInput, LinearPricingMode,
+    LinearStockPrice, PriceInput, price, price_linear,
+};
 
 use search::{Ctx, EVAL_MODES, EvalMode, Rng};
 
@@ -79,6 +84,13 @@ pub fn optimize(job: &Job) -> Plan {
     #[cfg(target_arch = "wasm32")]
     {
         optimize_with(job, &mut NoClock)
+    }
+}
+
+/// Renumbers every sheet's cuts for a different sawing order without changing the layout.
+pub fn reorder_plan(plan: &mut Plan, order: CutOrder) {
+    for sheet in &mut plan.sheets {
+        layout::order_cuts(&mut sheet.cuts, order);
     }
 }
 
@@ -637,5 +649,21 @@ mod tests {
         let o: Options =
             serde_json::from_str(r#"{"timeBudgetMs":10,"seed":1,"cutOrder":"stripByStrip"}"#).unwrap();
         assert_eq!(o.cut_order, CutOrder::StripByStrip);
+    }
+
+    #[test]
+    fn reorder_plan_switches_cut_order_without_changing_layout() {
+        let mut job = skrinky();
+        job.trim = 10.0;
+        let rips_first = optimize(&job);
+        job.options.cut_order = CutOrder::StripByStrip;
+        let by_strip = optimize(&job);
+
+        let mut reordered = rips_first.clone();
+        reorder_plan(&mut reordered, CutOrder::StripByStrip);
+        assert_eq!(reordered, by_strip);
+
+        reorder_plan(&mut reordered, CutOrder::RipsFirst);
+        assert_eq!(reordered, rips_first);
     }
 }

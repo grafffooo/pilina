@@ -14,26 +14,6 @@
     "fs:allow-remove",
     "fs:allow-write-text-file",
     "fs:allow-read-text-file",
-    "fs:allow-read-dir",
-    {
-      "identifier": "fs:scope",
-      "allow": [
-        {
-          "path": "$HOME/**"
-        },
-        {
-          "path": "$DESKTOP/**"
-        },
-        {
-          "path": "$DOCUMENT/**"
-        },
-        {
-          "path": "$DOWNLOAD/**"
-        },
-        {
-          "path": "/Volumes/**"
-        }
-      ]
-    }
+    "fs:allow-read-dir"
   ]
 }

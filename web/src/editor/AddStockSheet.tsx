@@ -2,6 +2,7 @@
 // a custom size.
 import { useTranslation } from 'react-i18next';
 import { boardSummary } from '../library/LibraryCards';
+import { materialKind } from '../model/library';
 import { emptyStock, type StockRow } from '../model/project';
 import { addStock, useStore } from '../store/store';
 import { BottomSheet } from '../ui/BottomSheet';
@@ -17,7 +18,8 @@ export function AddStockSheet({
   onAdded: (sheet: StockRow) => void;
 }) {
   const { t } = useTranslation();
-  const materials = useStore((s) => s.materials);
+  const allMaterials = useStore((s) => s.materials);
+  const materials = allMaterials.filter((m) => materialKind(m) === 'sheet');
   const currency = useStore((s) => s.settings.currency);
   const add = (patch: Partial<StockRow>) => {
     const sheet = { ...emptyStock(), ...patch };

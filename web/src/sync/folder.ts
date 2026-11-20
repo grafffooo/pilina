@@ -130,11 +130,9 @@ function browserFolder(dir: DirHandle): Folder {
 /** Asks for a folder. Null when the dialog was cancelled. */
 export async function pickFolder(): Promise<Folder | null> {
   if (folderSupport() === 'mac') {
-    const { open } = await import('@tauri-apps/plugin-dialog');
-    const path = await open({ directory: true, multiple: false, recursive: false });
-    if (typeof path !== 'string') return null;
-    localStorage.setItem(PATH_KEY, path);
-    return macFolder(path);
+    const { invoke } = await import('@tauri-apps/api/core');
+    const path = await invoke<string | null>('pick_sync_folder');
+    return path ? macFolder(path) : null;
   }
   const picker = (window as PickerWindow).showDirectoryPicker;
   if (!picker) return null;
@@ -157,7 +155,8 @@ export interface Remembered {
 /** The folder linked earlier, if any. */
 export async function rememberedFolder(): Promise<Remembered | null> {
   if (folderSupport() === 'mac') {
-    const path = localStorage.getItem(PATH_KEY);
+    const { invoke } = await import('@tauri-apps/api/core');
+    const path = await invoke<string | null>('remembered_sync_folder');
     return path ? { folder: macFolder(path), allow: null } : null;
   }
   if (folderSupport() !== 'browser') return null;
@@ -176,6 +175,10 @@ export async function rememberedFolder(): Promise<Remembered | null> {
 
 export async function forgetFolder() {
   localStorage.removeItem(PATH_KEY);
+  if (folderSupport() === 'mac') {
+    const { invoke } = await import('@tauri-apps/api/core');
+    await invoke('forget_sync_folder').catch(() => {});
+  }
   if (folderSupport() === 'browser')
     await idb('readwrite', (s) => s.delete('folder')).catch(() => {});
 }

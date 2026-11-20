@@ -67,3 +67,10 @@
   font-weight: 600;
   text-align: start;
 }
+
+.emptyNote {
+  margin: 0;
+  padding: 10px 4px;
+  color: var(--text-3);
+  font-size: 14px;
+}

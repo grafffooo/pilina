@@ -1,7 +1,16 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { LinearPartsTable } from '../editor/LinearPartsTable';
+import { LinearStockTable } from '../editor/LinearStockTable';
 import { PartsTable } from '../editor/PartsTable';
 import { StockTable } from '../editor/StockTable';
-import type { Project } from '../model/project';
+import editorStyles from '../editor/Editor.module.css';
+import { materialKind } from '../model/library';
+import {
+  emptyLinearStock,
+  hasLinearContent,
+  isBlankPart,
+  type Project,
+} from '../model/project';
 import {
   CutOrder,
   CutOrderSetting,
@@ -12,6 +21,14 @@ import {
   StatCards,
   UnplacedBanner,
 } from '../results/Results';
+import {
+  BarPager,
+  BarPanel,
+  EmptyLinearResults,
+  LinearCutOrder,
+  LinearStatCards,
+  LinearUnplacedBanner,
+} from '../results/LinearResults';
 import { CostCard } from '../results/CostCard';
 import { ExportPdfButton } from '../results/ExportPdfButton';
 import { PricingCard } from '../editor/PricingCard';
@@ -21,14 +38,22 @@ import { StartCuttingButton } from '../cutting/StartCuttingButton';
 import { LabelPrint } from '../offcuts/LabelPrint';
 import { OffcutLibrary } from '../offcuts/OffcutLibrary';
 import { StatsScreen } from '../stats/StatsScreen';
-import { useCurrentProject, useStore } from '../store/store';
+import { addLinearStock, useCurrentProject, useStore } from '../store/store';
+import { useView } from '../store/view';
 import { useMediaQuery } from '../ui/hooks';
-import { CloseIcon } from '../ui/icons';
+import { CloseIcon, PlusIcon } from '../ui/icons';
+import { SegmentedControl } from '../ui/SegmentedControl';
 import ui from '../ui/ui.module.css';
 import { ProjectHeader, RunStatus } from './ProjectHeader';
 import { useProjectStatus } from './StatusBadge';
 import { Sidebar } from './Sidebar';
-import { AddBoardScreen, AddEdgeBandScreen, AddOffcutScreen, AddPartScreen } from './AddScreens';
+import {
+  AddBoardScreen,
+  AddEdgeBandScreen,
+  AddLinearPartScreen,
+  AddOffcutScreen,
+  AddPartScreen,
+} from './AddScreens';
 import { BottomBar } from './BottomBar';
 import { ImportHost } from './importHost';
 import { CutArchiveScreen, ProjectsScreen } from './ProjectsScreen';
@@ -40,6 +65,7 @@ import { importProjectFile } from '../model/importExport';
 import { readProjectLink } from '../model/shareLink';
 import { startFolderSync } from '../sync/folderSync';
 import { t as i18nT } from '../i18n';
+import { useLinearOptimizer } from './useLinearOptimizer';
 import { useOptimizer } from './useOptimizer';
 import { usePricing } from './usePricing';
 import styles from './App.module.css';
@@ -64,12 +90,22 @@ export function App() {
   // Sizes are formatted in the workshop's unit: draw everything again when it changes.
   useStore((s) => s.settings.units);
   useOptimizer();
+  useLinearOptimizer();
   usePricing();
   useUndoShortcuts();
   useProjectFromLink(ready);
   useEffect(() => {
     if (ready) void startFolderSync();
   }, [ready]);
+  useEffect(() => {
+    if (!project) return;
+    const hasSheets = project.parts.some((p) => !isBlankPart(p));
+    useView
+      .getState()
+      .setActiveKind(!hasSheets && hasLinearContent(project) ? 'linear' : 'sheets');
+    // Reset active view tab when opening a different project.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id]);
 
   if (!ready || !project) {
     return <div className={styles.loading}>{t('Loading…')}</div>;
@@ -129,6 +165,7 @@ function PhoneApp({ project }: { project: Project }) {
       {view === 'archive' && <CutArchiveScreen />}
       {view === 'settings' && <SettingsScreen />}
       {view === 'add-part' && <AddPartScreen />}
+      {view === 'add-linear-part' && <AddLinearPartScreen />}
       {view === 'add-board' && <AddBoardScreen />}
       {view === 'add-band' && <AddEdgeBandScreen />}
       {view === 'add-offcut' && <AddOffcutScreen />}
@@ -147,11 +184,60 @@ function PhoneApp({ project }: { project: Project }) {
 
 /** Parts, stock and pricing; read-only once the project is cut. */
 function ProjectEditor({ project }: { project: Project }) {
+  const { t } = useTranslation();
+  const phone = useMediaQuery('(max-width: 767px)');
   const locked = useProjectStatus(project).kind === 'cut';
+  const hasLinear = hasLinearContent(project);
+  const activeKind = useView((s) => s.activeKind);
+  const setActiveKind = useView((s) => s.setActiveKind);
+  const effectiveKind = hasLinear ? activeKind : 'sheets';
+
+  const enableLinear = () => {
+    const firstLinear = useStore
+      .getState()
+      .materials.find((m) => materialKind(m) === 'linear');
+    addLinearStock({
+      ...emptyLinearStock(),
+      length: firstLinear?.stockLength ?? 3000,
+      materialId: firstLinear?.id ?? null,
+      priority: true,
+    });
+    setActiveKind('linear');
+  };
+
   return (
     <fieldset className={styles.editorFields} disabled={locked}>
-      <PartsTable project={project} />
-      <StockTable project={project} />
+      {hasLinear && (
+        <div className={editorStyles.modeBar}>
+          <SegmentedControl
+            full={phone}
+            label={t('Stock type')}
+            value={effectiveKind}
+            options={[
+              { value: 'sheets', label: t('Sheets') },
+              { value: 'linear', label: t('Linear stock') },
+            ]}
+            onChange={setActiveKind}
+          />
+        </div>
+      )}
+      {effectiveKind === 'linear' ? (
+        <>
+          <LinearPartsTable project={project} />
+          <LinearStockTable project={project} />
+        </>
+      ) : (
+        <>
+          <PartsTable project={project} />
+          <StockTable project={project} />
+          {!hasLinear && (
+            <button type="button" className={editorStyles.addLinearTrigger} onClick={enableLinear}>
+              <PlusIcon size={16} />
+              {t('Add linear stock')}
+            </button>
+          )}
+        </>
+      )}
       <PricingCard project={project} />
     </fieldset>
   );
@@ -161,6 +247,15 @@ function PhoneLayout({ project }: { project: Project }) {
   const { t } = useTranslation();
   const tab = useStore((s) => s.phoneTab);
   const { plan, job, status } = useStore((s) => s.result);
+  const {
+    plan: linearPlan,
+    job: linearJob,
+    status: linearStatus,
+  } = useStore((s) => s.linearResult);
+  const hasLinear = hasLinearContent(project);
+  const activeKind = useView((s) => s.activeKind);
+  const setActiveKind = useView((s) => s.setActiveKind);
+  const effectiveKind = hasLinear ? activeKind : 'sheets';
 
   return (
     <div className={styles.phone}>
@@ -172,14 +267,39 @@ function PhoneLayout({ project }: { project: Project }) {
           </>
         )}
         {tab !== 'parts' && (
-          <div className={styles.phoneTop}>
-            <span className={styles.phoneTitle}>{project.name || t('Untitled project')}</span>
-            <RunStatus />
-            <ExportPdfButton compact />
-          </div>
+          <>
+            <div className={styles.phoneTop}>
+              <span className={styles.phoneTitle}>{project.name || t('Untitled project')}</span>
+              <RunStatus />
+              <ExportPdfButton compact />
+            </div>
+            {hasLinear && (
+              <SegmentedControl
+                full
+                label={t('Stock type')}
+                value={effectiveKind}
+                options={[
+                  { value: 'sheets', label: t('Sheets') },
+                  { value: 'linear', label: t('Linear stock') },
+                ]}
+                onChange={setActiveKind}
+              />
+            )}
+          </>
         )}
         {tab === 'sheets' &&
-          (plan && job ? (
+          (effectiveKind === 'linear' ? (
+            linearPlan && linearJob ? (
+              <>
+                <LinearStatCards plan={linearPlan} job={linearJob} compact />
+                <LinearUnplacedBanner plan={linearPlan} job={linearJob} project={project} />
+                {linearPlan.bars.length > 0 && <BarPanel plan={linearPlan} project={project} />}
+                <CostCard project={project} />
+              </>
+            ) : (
+              <EmptyLinearResults running={linearStatus === 'running'} />
+            )
+          ) : plan && job ? (
             <>
               <StatCards plan={plan} job={job} compact />
               <UnplacedBanner plan={plan} job={job} project={project} />
@@ -190,7 +310,16 @@ function PhoneLayout({ project }: { project: Project }) {
             <EmptyResults running={status === 'running'} />
           ))}
         {tab === 'cut' &&
-          (plan && plan.sheets.length > 0 ? (
+          (effectiveKind === 'linear' ? (
+            linearPlan && linearPlan.bars.length > 0 ? (
+              <>
+                <BarPager plan={linearPlan} />
+                <LinearCutOrder plan={linearPlan} title={false} fullHeight />
+              </>
+            ) : (
+              <EmptyLinearResults running={linearStatus === 'running'} />
+            )
+          ) : plan && plan.sheets.length > 0 ? (
             <>
               <CutOrderSetting />
               <SheetPager plan={plan} />

@@ -1,19 +1,35 @@
 // Materials, edge bands and app settings: shared by all projects, stored on this device.
 import type { Unit } from '../lib/units';
-import type { CutOrder } from '../engine/types';
+import type {
+  CutOrder,
+  Grain,
+  LinearPriceInput,
+  LinearStockPrice,
+  LinearStockSpec,
+  PriceInput,
+  StockPrice,
+  StockSpec,
+} from '../engine/types';
 import type { MeasureFrom } from './cutMeasure';
 import type { LabelFormat } from './offcut';
-import type { Grain, PriceInput, StockPrice, StockSpec } from '../engine/types';
 import { locale as current, t } from '../i18n';
 import { newId, type Project } from './project';
 
-export type PriceUnit = 'sheet' | 'sqm';
+export type MaterialKind = 'sheet' | 'linear';
+
+export type PriceUnit = 'sheet' | 'sqm' | 'piece' | 'metre';
 
 export interface Material {
   id: string;
   name: string;
-  /** mm */
+  /** Sheet material (2D panel) vs linear stock (1D bar/profile). Missing on older records means 'sheet'. */
+  kind?: MaterialKind;
+  /** mm — board thickness, or profile thickness for linear stock. */
   thickness: number | null;
+  /** Profile width (mm) for linear stock, e.g. 95 in 45x95 KVH. */
+  profileWidth?: number | null;
+  /** Reference stock bar length (mm) a per-piece linear price refers to. */
+  stockLength?: number | null;
   /** Swatch colour for lists and the drawing legend. */
   color: string;
   price: number | null;
@@ -27,6 +43,11 @@ export interface Material {
    * saved before grain existed, which means 'length'.
    */
   grain?: Grain;
+}
+
+/** Whether a material is a sheet board or linear stock, defaulting older records to 'sheet'. */
+export function materialKind(m: Pick<Material, 'kind'> | undefined | null): MaterialKind {
+  return m?.kind ?? 'sheet';
 }
 
 /** A material's grain, with the default for materials saved before grain existed. */
@@ -53,6 +74,8 @@ export interface Settings {
   /** Leftovers at least this big count as reusable offcuts (mm). */
   offcutMinLength: number;
   offcutMinWidth: number;
+  /** Linear bar leftovers at least this long count as reusable linear offcuts (mm). */
+  linearOffcutMinLength: number;
   /** Number for the next offcut ID (OC-0001, OC-0002, …). */
   nextOffcutNumber: number;
   /** Storage places offered when keeping an offcut. */
@@ -73,6 +96,7 @@ export const DEFAULT_SETTINGS: Settings = {
   edgeAllowance: 20,
   offcutMinLength: 300,
   offcutMinWidth: 100,
+  linearOffcutMinLength: 300,
   nextOffcutNumber: 1,
   locations: ['Rack A', 'Rack B', 'Bin 1'],
   labelFormatId: 'a4-3x8',
@@ -97,10 +121,31 @@ export function newMaterial(name: string, index = 0): Material {
   return {
     id: newId(),
     name,
+    kind: 'sheet',
     thickness: guessThickness(name),
+    profileWidth: null,
+    stockLength: null,
     color: MATERIAL_COLORS[index % MATERIAL_COLORS.length]!,
     price: null,
     priceUnit: 'sheet',
+    sheetLength: null,
+    sheetWidth: null,
+    grain: 'length',
+  };
+}
+
+export function newLinearMaterial(name: string, index = 0): Material {
+  const { thickness, profileWidth } = guessProfile(name);
+  return {
+    id: newId(),
+    name,
+    kind: 'linear',
+    thickness,
+    profileWidth,
+    stockLength: null,
+    color: MATERIAL_COLORS[index % MATERIAL_COLORS.length]!,
+    price: null,
+    priceUnit: 'piece',
     sheetLength: null,
     sheetWidth: null,
     grain: 'length',
@@ -115,6 +160,21 @@ export function newEdgeBand(name = 'ABS 2 mm'): EdgeBand {
 export function guessThickness(name: string): number | null {
   const m = /(\d+(?:[.,]\d+)?)\s*mm/i.exec(name);
   return m ? Number(m[1]!.replace(',', '.')) : null;
+}
+
+/** "KVH 45x95" → { thickness: 45, profileWidth: 95 }; "Dowel 18mm" → { thickness: 18, profileWidth: null }. */
+export function guessProfile(name: string): {
+  thickness: number | null;
+  profileWidth: number | null;
+} {
+  const m = /(\d+(?:[.,]\d+)?)\s*[x×*]\s*(\d+(?:[.,]\d+)?)/i.exec(name);
+  if (m) {
+    return {
+      thickness: Number(m[1]!.replace(',', '.')),
+      profileWidth: Number(m[2]!.replace(',', '.')),
+    };
+  }
+  return { thickness: guessThickness(name), profileWidth: null };
 }
 
 /**
@@ -226,6 +286,68 @@ export function formatMoney(amount: number, currency: string, locale: string = c
 export function pricePerSqm(m: Material | undefined): number | null {
   if (!m || m.price === null) return null;
   if (m.priceUnit === 'sqm') return m.price;
-  if (!m.sheetLength || !m.sheetWidth) return null;
+  if (m.priceUnit !== 'sheet' || !m.sheetLength || !m.sheetWidth) return null;
   return m.price / ((m.sheetLength * m.sheetWidth) / 1e6);
+}
+
+/** A linear material's price per metre (from either unit), or `null` when unpriced. */
+export function pricePerMetre(m: Material | undefined): number | null {
+  if (!m || m.price === null) return null;
+  if (m.priceUnit === 'metre') return m.price;
+  if (m.priceUnit !== 'piece' || !m.stockLength || m.stockLength <= 0) return null;
+  return m.price / (m.stockLength / 1000);
+}
+
+/**
+ * Prices for one linear stock bar. A per-piece price applies as is when the bar matches the
+ * material's reference length (or none is set); other lengths are priced per metre.
+ */
+export function linearStockPrice(
+  stockId: string,
+  length: number,
+  material: Material | undefined,
+): LinearStockPrice {
+  const name = material?.name || t('Unnamed material');
+  if (!material || material.price === null) return { stockId, material: name };
+  if (material.priceUnit === 'metre') return { stockId, material: name, perMetre: material.price };
+  if (material.priceUnit === 'piece') {
+    const refL = material.stockLength ?? null;
+    if (refL === null || refL === length) return { stockId, material: name, perPiece: material.price };
+    if (refL > 0) return { stockId, material: name, perMetre: material.price / (refL / 1000) };
+  }
+  return { stockId, material: name };
+}
+
+/** Everything the core needs to price linear (1D) stock in the open project. */
+export function buildLinearPriceInput(
+  project: Project,
+  materials: Material[],
+  settings: Settings,
+  offcutStock: LinearStockSpec[] = [],
+  includeExtras = false,
+): LinearPriceInput {
+  const mat = new Map(materials.map((m) => [m.id, m]));
+  return {
+    mode: project.pricing.mode === 'area' ? 'length' : 'pieces',
+    wastePct: project.pricing.wastePct,
+    offcutCredit: project.pricing.offcutCredit,
+    minOffcutLength: settings.linearOffcutMinLength ?? 300,
+    stock: [
+      ...(project.linearStock ?? [])
+        .filter((s) => s.length)
+        .map((s) =>
+          linearStockPrice(s.id, s.length!, s.materialId ? mat.get(s.materialId) : undefined),
+        ),
+      // Library offcuts are free (paid for earlier) but grouped under their material.
+      ...offcutStock.map((s) => ({
+        stockId: s.id,
+        material: (s.material && mat.get(s.material)?.name) || t('Unnamed material'),
+      })),
+    ],
+    extras: includeExtras
+      ? project.pricing.extras
+          .filter((x) => x.amount !== null && Number.isFinite(x.amount))
+          .map((x) => ({ label: x.label, amount: x.amount! * (x.qty ?? 1) }))
+      : [],
+  };
 }

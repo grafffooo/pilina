@@ -9,8 +9,8 @@ import {
   parseOldStorage,
   projectToOldMarkdown,
 } from './importExport';
-import { newEdgeBand, newMaterial } from './library';
-import { emptyPart, newProject } from './project';
+import { newEdgeBand, newLinearMaterial, newMaterial } from './library';
+import { emptyLinearPart, emptyLinearStock, emptyPart, newProject } from './project';
 
 // Exactly what the old app's projectToMarkdown() writes.
 const OLD_MD = `---
@@ -187,5 +187,33 @@ describe('project files', () => {
 
   it('makes file names', () => {
     expect(fileSlug('Stôl – jedáleň')).toBe('stol-jedalen');
+  });
+
+  it('round-trips linear parts, stock, and linear materials without colliding with same-named sheets', () => {
+    const oakSheet = { ...newMaterial('Dub'), price: 90 };
+    const oakBar = { ...newLinearMaterial('Dub'), stockLength: 3000, price: 24 };
+    const p = newProject('Pergola', 0, oakSheet.id);
+    p.linearParts = [
+      { ...emptyLinearPart(), length: 1400, qty: 2, label: 'Post', materialId: oakBar.id },
+    ];
+    p.linearStock = [
+      { ...emptyLinearStock(), length: 3000, qty: 2, materialId: oakBar.id },
+    ];
+
+    const file = JSON.parse(JSON.stringify(exportProjectFile(p, [oakSheet, oakBar], [])));
+    expect(file.materials).toHaveLength(2);
+
+    // Target device already has a sheet named "Dub", plus its own linear "Dub" under another id.
+    const localLinearDub = { ...oakBar, id: 'local-linear-dub' };
+    const imported = importProjectFile(file, [oakSheet, localLinearDub], [], new Set([p.id]));
+    expect(imported.newMaterials).toHaveLength(0);
+    expect(imported.project.stock[0]!.materialId).toBe(oakSheet.id);
+    expect(imported.project.linearParts[0]!.materialId).toBe('local-linear-dub');
+    expect(imported.project.linearStock[0]!.materialId).toBe('local-linear-dub');
+
+    // Target device only has the sheet named "Dub": linear "Dub" must be added rather than colliding.
+    const onlySheet = importProjectFile(file, [oakSheet], [], new Set());
+    expect(onlySheet.newMaterials.map((m) => [m.name, m.kind])).toEqual([['Dub', 'linear']]);
+    expect(onlySheet.project.linearParts[0]!.materialId).toBe(oakBar.id);
   });
 });

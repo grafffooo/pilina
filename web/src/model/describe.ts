@@ -63,16 +63,6 @@ export function sizeOf(r: Rect): { long: number; short: number } {
   return { long: Math.max(r.w, r.h), short: Math.min(r.w, r.h) };
 }
 
-export type OffcutClass = 'usable' | 'strip' | 'scrap';
-
-/** Rough reuse value of a leftover rectangle. */
-export function classifyOffcut(r: Rect): OffcutClass {
-  const { long, short } = sizeOf(r);
-  if (short >= 100 && long >= 300) return 'usable';
-  if (long >= 300 && short >= 30) return 'strip';
-  return 'scrap';
-}
-
 /** Which rectangle sides carry the part's length edges (top/bottom) and width edges (left/right). */
 export function edgeSides(p: Placement): {
   top: 'left' | 'top';

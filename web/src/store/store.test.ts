@@ -1,8 +1,18 @@
 import 'fake-indexeddb/auto';
 import { describe, expect, it } from 'vitest';
 import { db } from '../db/db';
-import { emptyPart } from '../model/project';
-import { insertParts, updatePart, useStore } from './store';
+import { emptyLinearPart, emptyLinearStock, emptyPart } from '../model/project';
+import {
+  addLinearMaterial,
+  addLinearStock,
+  addMaterial,
+  insertLinearParts,
+  insertParts,
+  removeLinearStock,
+  updateLinearPart,
+  updatePart,
+  useStore,
+} from './store';
 
 const current = () => {
   const s = useStore.getState();
@@ -43,5 +53,46 @@ describe('store', () => {
     await useStore.getState().deleteProject(current().id);
     expect(useStore.getState().projects).toHaveLength(1);
     expect(useStore.getState().currentId).toBe(useStore.getState().projects[0]!.id);
+  });
+
+  it('manages linear materials, parts, stock, offcuts, and resets linear state on project switch', () => {
+    const s = useStore.getState();
+    const kvh = addLinearMaterial('KVH 45x95', { stockLength: 4000 });
+    expect(kvh).toMatchObject({
+      kind: 'linear',
+      thickness: 45,
+      profileWidth: 95,
+      stockLength: 4000,
+    });
+
+    const firstRowId = current().linearParts[0]!.id;
+    updateLinearPart(firstRowId, { length: 1200, qty: 2, materialId: kvh.id });
+    insertLinearParts([{ ...emptyLinearPart(), length: 800, label: 'Rail' }], firstRowId);
+    const bar = { ...emptyLinearStock(), length: 4000, materialId: kvh.id };
+    addLinearStock(bar);
+    expect(current().linearParts).toHaveLength(2);
+    expect(current().linearStock).toHaveLength(1);
+    removeLinearStock(bar.id);
+    expect(current().linearStock).toHaveLength(0);
+
+    const [created] = s.addOffcuts([{ kind: 'linear', length: 1200, materialId: kvh.id }]);
+    expect(created).toMatchObject({ kind: 'linear', length: 1200, width: 0, materialId: kvh.id });
+
+    s.setLinearResult({ status: 'ready', error: null });
+    s.setLinearCost({ materials: [], extras: 0, total: 16, complete: true });
+    expect(useStore.getState().linearResult.status).toBe('ready');
+    expect(useStore.getState().linearCost?.total).toBe(16);
+
+    // Ensure createProject() picks a sheet material, never a linear material, when starting fresh.
+    const sheetMat = addMaterial('Oak 18mm');
+    useStore.getState().editLibrary((lib) => ({
+      ...lib,
+      materials: [kvh, sheetMat],
+    }));
+    useStore.getState().edit((p) => ({ ...p, stock: [] }));
+    s.createProject();
+    expect(current().stock[0]!.materialId).toBe(sheetMat.id);
+    expect(useStore.getState().linearResult.status).toBe('empty');
+    expect(useStore.getState().linearCost).toBeNull();
   });
 });

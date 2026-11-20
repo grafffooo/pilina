@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { CutRecord } from '../model/cutRecord';
 import { DEFAULT_SETTINGS, type Settings } from '../model/library';
-import { newOffcut, type Offcut } from '../model/offcut';
+import { newLinearOffcut, newOffcut, type Offcut } from '../model/offcut';
 import type { FolderFile } from './merge';
 import {
   mergeWorkshop,
@@ -188,5 +188,41 @@ describe('syncing offcuts, cut records and settings', () => {
     expect(r.unreadable).toEqual([OFFCUTS_FILE]);
     expect(names(r)).not.toContain(OFFCUTS_FILE);
     expect(r.offcutRemoves).toEqual([]);
+  });
+
+  it('syncs linear offcuts, linear cut records, and linearOffcutMinLength settings', () => {
+    const linOc = { ...newLinearOffcut(3, 1450, { location: 'Rack C' }, 30), id: 'lin-oc' };
+    const linRec: CutRecord = {
+      ...record('lin-rec', 40),
+      kind: 'linear',
+      materialName: 'KVH 45x95',
+      sheetLength: 4000,
+      sheetWidth: 0,
+      usedArea: 0,
+      keptArea: 0,
+      usedLength: 3100,
+      keptLength: 600,
+      cost: 16,
+    };
+    const customSettings: Settings = { ...DEFAULT_SETTINGS, linearOffcutMinLength: 450 };
+
+    const folder = mergeWorkshop(
+      device({ offcuts: [linOc], records: [linRec], settings: customSettings, settingsAt: 50 }),
+    );
+    const peer = mergeWorkshop(device({ files: folder.writes, settingsAt: 10 }));
+
+    expect(peer.offcutUpserts[0]).toMatchObject({
+      id: 'lin-oc',
+      kind: 'linear',
+      length: 1450,
+      width: 0,
+    });
+    expect(peer.newRecords[0]).toMatchObject({
+      id: 'lin-rec',
+      kind: 'linear',
+      usedLength: 3100,
+      keptLength: 600,
+    });
+    expect(peer.settings?.linearOffcutMinLength).toBe(450);
   });
 });

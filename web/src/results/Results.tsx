@@ -5,9 +5,10 @@ import { createPortal } from 'react-dom';
 import type { Job, Plan, SheetLayout } from '../engine/types';
 import { formatNumber } from '../lib/format';
 import { formatLength, formatLengthUnit, formatLong } from '../lib/units';
-import { classifyOffcut, cutKindLabel, isRipLike, sizeOf } from '../model/describe';
+import { cutKindLabel, isRipLike, sizeOf } from '../model/describe';
+import { keepAdvice, type KeepAdvice } from '../model/offcut';
 import { unplacedReason, usedPercent } from '../model/job';
-import type { Project } from '../model/project';
+import { hasLinearContent, type Project } from '../model/project';
 import { updateSettings, useStore } from '../store/store';
 import { useMediaQuery } from '../ui/hooks';
 import { SegmentedControl } from '../ui/SegmentedControl';
@@ -26,6 +27,14 @@ import ui from '../ui/ui.module.css';
 import { CostCard } from './CostCard';
 import { t as i18nT } from '../i18n';
 import { ExportPdfButton } from './ExportPdfButton';
+import {
+  BarPanel,
+  EmptyLinearResults,
+  LinearCutOrder,
+  LinearOffcuts,
+  LinearStatCards,
+  LinearUnplacedBanner,
+} from './LinearResults';
 import { StartCuttingButton } from '../cutting/StartCuttingButton';
 import { usePartInfo, type PartInfo } from './partInfo';
 import { SheetDrawing } from './SheetDrawing';
@@ -36,6 +45,16 @@ import { useTranslation } from 'react-i18next';
 export function Results({ project }: { project: Project }) {
   const { t } = useTranslation();
   const { plan, job, status } = useStore((s) => s.result);
+  const {
+    plan: linearPlan,
+    job: linearJob,
+    status: linearStatus,
+  } = useStore((s) => s.linearResult);
+  const activeKind = useView((s) => s.activeKind);
+  const setActiveKind = useView((s) => s.setActiveKind);
+  const hasLinear = hasLinearContent(project);
+  const effectiveKind = hasLinear ? activeKind : 'sheets';
+
   return (
     <section className={styles.results} aria-labelledby="results-h">
       <div className={styles.resultsHeader}>
@@ -44,7 +63,37 @@ export function Results({ project }: { project: Project }) {
         <ExportPdfButton />
         <StartCuttingButton />
       </div>
-      {!plan || !job ? (
+      {hasLinear && (
+        <SegmentedControl
+          label={t('Stock type')}
+          value={effectiveKind}
+          options={[
+            { value: 'sheets', label: t('Sheets') },
+            { value: 'linear', label: t('Linear stock') },
+          ]}
+          onChange={setActiveKind}
+        />
+      )}
+      {effectiveKind === 'linear' ? (
+        !linearPlan || !linearJob ? (
+          <EmptyLinearResults running={linearStatus === 'running'} />
+        ) : (
+          <>
+            <LinearStatCards plan={linearPlan} job={linearJob} />
+            <LinearUnplacedBanner plan={linearPlan} job={linearJob} project={project} />
+            <CostCard project={project} />
+            {linearPlan.bars.length > 0 && (
+              <>
+                <BarPanel plan={linearPlan} project={project} withLegend />
+                <div className={styles.lists}>
+                  <LinearCutOrder plan={linearPlan} />
+                  <LinearOffcuts plan={linearPlan} />
+                </div>
+              </>
+            )}
+          </>
+        )
+      ) : !plan || !job ? (
         <EmptyResults running={status === 'running'} />
       ) : (
         <>
@@ -252,6 +301,7 @@ export function SheetPanel({
   const view = useView();
   const parts = usePartInfo(project);
   const job = useStore((s) => s.result.job);
+  const settings = useStore((s) => s.settings);
   const index = Math.min(view.sheet, plan.sheets.length - 1);
   const sheet = plan.sheets[index]!;
   const stock = job?.stock.find((s) => s.id === sheet.stockId);
@@ -329,7 +379,7 @@ export function SheetPanel({
       <div className={styles.paper}>
         <div className={styles.canvas} data-zoomed={view.zoom > 1 || undefined}>
           <div style={{ width: `${view.zoom * 100}%` }} className={styles.canvasInner}>
-            <SheetDrawing sheet={sheet} parts={parts} label={label} />
+            <SheetDrawing sheet={sheet} parts={parts} label={label} offcutRule={settings} />
           </div>
         </div>
         {withLegend && <Legend sheet={sheet} parts={parts} />}
@@ -591,12 +641,13 @@ export function CutOrder({
   );
 }
 
-const offcutText = (k: 'usable' | 'strip' | 'scrap') =>
-  k === 'usable' ? i18nT('reusable') : k === 'strip' ? i18nT('strip') : i18nT('scrap');
+const offcutText = (k: KeepAdvice) =>
+  k === 'suggested' ? i18nT('reusable') : k === 'strip' ? i18nT('strip') : i18nT('scrap');
 const MAX_OFFCUTS = 8;
 
 export function Offcuts({ plan }: { plan: Plan }) {
   const { t } = useTranslation();
+  const settings = useStore((s) => s.settings);
   const index = useView((s) => Math.min(s.sheet, plan.sheets.length - 1));
   const sheet = plan.sheets[index]!;
   const shown = sheet.waste.slice(0, MAX_OFFCUTS);
@@ -614,13 +665,13 @@ export function Offcuts({ plan }: { plan: Plan }) {
         <ul className={styles.offcutList}>
           {shown.map((r, i) => {
             const s = sizeOf(r);
-            const kind = classifyOffcut(r);
+            const kind = keepAdvice(r, settings);
             return (
               <li key={i}>
-                <span className={kind === 'usable' ? styles.offcutBig : undefined}>
+                <span className={kind === 'suggested' ? styles.offcutBig : undefined}>
                   {formatLength(s.long)} × {formatLength(s.short)}
                 </span>
-                <span className={kind === 'usable' ? styles.offcutKeep : styles.offcutKind}>
+                <span className={kind === 'suggested' ? styles.offcutKeep : styles.offcutKind}>
                   {offcutText(kind)}
                 </span>
               </li>

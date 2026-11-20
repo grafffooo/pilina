@@ -84,7 +84,8 @@ function ProjectButton({ row, grouped }: { row: ProjectRowData; grouped?: boolea
         {s && s.pieces > 0
           ? [
               t('n_parts', { count: s.pieces }),
-              t('n_sheets', { count: s.sheets }),
+              s.sheets > 0 || !(s.bars && s.bars > 0) ? t('n_sheets', { count: s.sheets }) : null,
+              s.bars && s.bars > 0 ? t('n_bars', { count: s.bars }) : null,
               t('{{pct}}% used', { pct: formatNumber(Math.round(s.usedPct)) }),
               s.cost != null && s.cost > 0 ? formatMoney(s.cost, currency) : null,
             ]

@@ -1,15 +1,29 @@
 // The folder sync end to end against the real store and an in-memory IndexedDB, with an
 // in-memory folder standing in for the one the user picks.
 import 'fake-indexeddb/auto';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { db } from '../db/db';
 import { DEFAULT_SETTINGS } from '../model/library';
 import { newOffcut } from '../model/offcut';
-import { useStore } from '../store/store';
+import { addEdgeBand, addMaterial, removeEdgeBand, removeMaterial, useStore } from '../store/store';
 import type { FolderFile } from './merge';
+import { LIBRARY_FILE } from './merge';
 import { mergeWorkshop, OFFCUTS_FILE, RECORDS_FILE, SETTINGS_FILE } from './workshop';
 
+const storageMap = new Map<string, string>();
+vi.stubGlobal('localStorage', {
+  getItem: (k: string) => storageMap.get(k) ?? null,
+  setItem: (k: string, v: string) => void storageMap.set(k, v),
+  removeItem: (k: string) => void storageMap.delete(k),
+  clear: () => storageMap.clear(),
+});
+vi.stubGlobal('window', {
+  addEventListener: () => {},
+  matchMedia: () => ({ matches: false }),
+});
+
 const files = new Map<string, string>();
+let onWrite: ((name: string) => void) | null = null;
 
 vi.mock('./folder', () => ({
   folderSupport: () => 'browser',
@@ -18,12 +32,19 @@ vi.mock('./folder', () => ({
   pickFolder: async () => ({
     name: 'Pilina',
     list: async (): Promise<FolderFile[]> => [...files].map(([name, text]) => ({ name, text })),
-    write: async (name: string, text: string) => void files.set(name, text),
+    write: async (name: string, text: string) => {
+      files.set(name, text);
+      onWrite?.(name);
+    },
     remove: async (name: string) => void files.delete(name),
   }),
 }));
 
-const { linkFolder, useFolderSync } = await import('./folderSync');
+const { linkFolder, startFolderSync, syncNow, useFolderSync } = await import('./folderSync');
+
+beforeEach(() => {
+  onWrite = null;
+});
 
 describe('folder sync with workshop data', () => {
   it('brings in another computer’s offcuts, records and settings, and adds this one’s', async () => {
@@ -76,5 +97,65 @@ describe('folder sync with workshop data', () => {
     const inFolder = JSON.parse(files.get(OFFCUTS_FILE)!) as { offcuts: { id: string }[] };
     expect(inFolder.offcuts.map((o) => o.id).sort()).toEqual([mine!.id, 'theirs'].sort());
     expect(files.has(SETTINGS_FILE) && files.has(RECORDS_FILE)).toBe(true);
+  });
+
+  it('tracks material and edge band deletions and preserves concurrent or skipped offcut deletions', async () => {
+    await useStore.getState().init();
+    await startFolderSync();
+    await linkFolder();
+
+    // Add and sync a material and edge band, then delete them.
+    const mat = addMaterial('Oak 18mm');
+    const band = addEdgeBand();
+    await syncNow();
+    expect(JSON.parse(files.get(LIBRARY_FILE)!).materials.some((m: { id: string }) => m.id === mat.id)).toBe(true);
+
+    removeMaterial(mat.id);
+    removeEdgeBand(band.id);
+    await syncNow();
+    const libAfter = JSON.parse(files.get(LIBRARY_FILE)!) as {
+      materials: { id: string }[];
+      edgeBands: { id: string }[];
+      deleted: Record<string, number>;
+    };
+    expect(libAfter.materials.some((m) => m.id === mat.id)).toBe(false);
+    expect(libAfter.edgeBands.some((b) => b.id === band.id)).toBe(false);
+    expect(libAfter.deleted[mat.id]).toBeTypeOf('number');
+    expect(libAfter.deleted[band.id]).toBeTypeOf('number');
+
+    // Deleting an offcut while a sync is writing must not drop the in-flight deletion.
+    const [a, b] = useStore.getState().addOffcuts([
+      { length: 700, width: 300 },
+      { length: 800, width: 300 },
+    ]);
+    await syncNow();
+
+    useStore.getState().removeOffcut(a!.id);
+    onWrite = (name) => {
+      if (name === OFFCUTS_FILE) {
+        onWrite = null;
+        useStore.getState().removeOffcut(b!.id);
+      }
+    };
+    await syncNow();
+    // A second sync picks up `b` because its deletion was preserved rather than wiped.
+    await syncNow();
+    const offcutsAfter = JSON.parse(files.get(OFFCUTS_FILE)!) as { offcuts: { id: string }[] };
+    expect(offcutsAfter.offcuts.some((o) => o.id === a!.id || o.id === b!.id)).toBe(false);
+
+    // An unreadable offcuts file preserves local deletions until the file is readable again.
+    const [c] = useStore.getState().addOffcuts([{ length: 900, width: 300 }]);
+    await syncNow();
+    const goodOffcuts = files.get(OFFCUTS_FILE)!;
+    files.set(OFFCUTS_FILE, '{corrupt');
+    useStore.getState().removeOffcut(c!.id);
+    await syncNow();
+    expect(useFolderSync.getState().unreadable).toContain(OFFCUTS_FILE);
+    expect(JSON.parse(storageMap.get('cutlist.folder.offcutDeletions')!)[c!.id]).toBeTypeOf('number');
+
+    files.set(OFFCUTS_FILE, goodOffcuts);
+    await syncNow();
+    const recovered = JSON.parse(files.get(OFFCUTS_FILE)!) as { offcuts: { id: string }[] };
+    expect(recovered.offcuts.some((o) => o.id === c!.id)).toBe(false);
   });
 });

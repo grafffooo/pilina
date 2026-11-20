@@ -33,6 +33,29 @@ export function ProjectSettingChips({ project }: { project: Project }) {
   );
 }
 
+export function LinearSettingChips({ project }: { project: Project }) {
+  const { t } = useTranslation();
+  const locked = useProjectStatus(project).kind === 'cut';
+  return (
+    <span className={styles.chips}>
+      <SettingChip
+        disabled={locked}
+        label={t('Kerf')}
+        hint={t('Saw blade thickness')}
+        value={project.linearKerf}
+        onCommit={(linearKerf) => updateProject({ linearKerf }, 'linearKerf')}
+      />
+      <SettingChip
+        disabled={locked}
+        label={t('End trim')}
+        hint={t('Trimmed off both ends of each raw bar before cutting')}
+        value={project.linearEndTrim}
+        onCommit={(linearEndTrim) => updateProject({ linearEndTrim }, 'linearEndTrim')}
+      />
+    </span>
+  );
+}
+
 function SettingChip({
   label,
   hint,

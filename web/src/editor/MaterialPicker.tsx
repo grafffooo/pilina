@@ -2,7 +2,8 @@
 // of a system dropdown, so each board shows its price and size.
 import { useTranslation } from 'react-i18next';
 import { boardSummary } from '../library/LibraryCards';
-import { addMaterial, useStore } from '../store/store';
+import { materialKind, type MaterialKind } from '../model/library';
+import { addLinearMaterial, addMaterial, useStore } from '../store/store';
 import { BottomSheet } from '../ui/BottomSheet';
 import { promptDialog } from '../ui/dialogs';
 import { CheckIcon, PlusIcon } from '../ui/icons';
@@ -13,20 +14,27 @@ export function MaterialPickerSheet({
   value,
   anyLabel,
   sheet,
+  kind = 'sheet',
+  stockLength,
   onPick,
   onClose,
 }: {
   title: string;
   value: string | null;
-  /** Adds an empty choice at the top ("Any board"). */
+  /** Adds an empty choice at the top ("Any board" / "Any bar"). */
   anyLabel?: string;
   /** Sheet size for a new material's per-sheet price. */
   sheet?: { length: number; width: number };
+  /** Material kind offered by this picker. */
+  kind?: MaterialKind;
+  /** Bar length for a new linear material's per-piece price. */
+  stockLength?: number;
   onPick: (id: string | null) => void;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const materials = useStore((s) => s.materials);
+  const allMaterials = useStore((s) => s.materials);
+  const materials = allMaterials.filter((m) => materialKind(m) === kind);
   const currency = useStore((s) => s.settings.currency);
   const pick = (id: string | null) => {
     onPick(id);
@@ -76,10 +84,19 @@ export function MaterialPickerSheet({
         onClick={async () => {
           const name = await promptDialog({
             title: t('New material'),
-            label: t('Name of the new material, e.g. “DTD White 18mm”'),
+            label:
+              kind === 'linear'
+                ? t('Name of the new linear stock, e.g. “KVH 45x95”')
+                : t('Name of the new material, e.g. “DTD White 18mm”'),
             confirmLabel: t('Add'),
           });
-          if (name) pick(addMaterial(name, sheet).id);
+          if (name) {
+            pick(
+              kind === 'linear'
+                ? addLinearMaterial(name, stockLength ? { stockLength } : undefined).id
+                : addMaterial(name, sheet).id,
+            );
+          }
         }}
       >
         <PlusIcon size={20} />

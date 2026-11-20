@@ -53,7 +53,8 @@ export function CutMode() {
   const step = all[Math.min(session.sheet, all.length - 1)]!;
   const sheet = step.layout;
   const cuts = sheet.cuts;
-  const measureFrom = useStore((s) => s.settings.cutMeasure);
+  const settings = useStore((s) => s.settings);
+  const measureFrom = settings.cutMeasure;
   const measures = useMemo(
     () => measureFromPiece(sheet, session.job.kerf),
     [sheet, session.job.kerf],
@@ -313,6 +314,7 @@ export function CutMode() {
             parts={parts}
             cutStep={cut.number}
             focus={strip?.rect}
+            offcutRule={settings}
             label={t('{{sheet}} with cut {{n}} highlighted at {{axis}} = {{pos}}', {
               sheet: sheetTitle,
               n: cut.number,

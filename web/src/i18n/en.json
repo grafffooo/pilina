@@ -103,5 +103,11 @@
   "Click to toggle part · Shift+click to toggle component · Drag to orbit": "Click to toggle part · Shift+click to toggle component · Drag to orbit",
   "Front": "Front",
   "Iso": "Iso",
-  "Top": "Top"
+  "Top": "Top",
+  "n_bars_one": "1 bar",
+  "n_bars_other": "{{count}} bars",
+  "{{count}} bar lengths_one": "1 bar length",
+  "{{count}} bar lengths_other": "{{count}} bar lengths",
+  "bar_drawing_label_one": "Bar {{n}}: 1 part on a {{length}} mm bar, {{pct}}% used",
+  "bar_drawing_label_other": "Bar {{n}}: {{count}} parts on a {{length}} mm bar, {{pct}}% used"
 }

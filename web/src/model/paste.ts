@@ -1,7 +1,7 @@
 // Parses rows pasted from a spreadsheet (tab separated) or CSV into part rows.
 // Sizes are read in the workshop's unit (and stored in millimetres).
 import { parseLength } from '../lib/units';
-import { emptyPart, type PartRow } from './project';
+import { emptyLinearPart, emptyPart, type LinearPartRow, type PartRow } from './project';
 
 /** Parses "1 234,5", "1234.5" or "18,5" style numbers; `null` when empty or invalid. */
 export function parseNumber(text: string): number | null {
@@ -47,6 +47,43 @@ export function parsePartRows(text: string): PartRow[] {
       width,
       qty: qty === null ? 1 : Math.max(1, Math.round(qty)),
       label: cells.slice(3).join(' ').trim(),
+    });
+  });
+  return rows;
+}
+
+/**
+ * Columns in order: length, quantity, label (or length, label when col 2 is text). A first
+ * row whose length isn't a number is treated as a header and skipped.
+ */
+export function parseLinearPartRows(text: string): LinearPartRow[] {
+  const lines = text
+    .replace(/\r/g, '')
+    .split('\n')
+    .filter((l) => l.trim() !== '');
+  const rows: LinearPartRow[] = [];
+  lines.forEach((line, i) => {
+    const cells = splitRow(line).map((c) => c.trim());
+    const length = parseLength(cells[0] ?? '');
+    if (i === 0 && length === null) return; // header
+    if (length === null) return;
+    const second = cells[1] ?? '';
+    const q = parseNumber(second);
+    let qty = 1;
+    let label: string;
+    if (q !== null && q > 0) {
+      qty = Math.max(1, Math.round(q));
+      label = cells.slice(2).join(' ').trim();
+    } else if (second !== '' && cells.length === 2) {
+      label = second;
+    } else {
+      label = cells.slice(2).join(' ').trim();
+    }
+    rows.push({
+      ...emptyLinearPart(),
+      length,
+      qty,
+      label,
     });
   });
   return rows;

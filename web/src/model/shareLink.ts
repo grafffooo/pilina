@@ -42,6 +42,16 @@ function remapIds(file: ProjectFile, map: (id: string) => string): ProjectFile {
         edgeBandId: opt(x.edgeBandId),
       })),
       stock: p.stock.map((x) => ({ ...x, id: map(x.id), materialId: opt(x.materialId) })),
+      linearParts: (p.linearParts ?? []).map((x) => ({
+        ...x,
+        id: map(x.id),
+        materialId: opt(x.materialId),
+      })),
+      linearStock: (p.linearStock ?? []).map((x) => ({
+        ...x,
+        id: map(x.id),
+        materialId: opt(x.materialId),
+      })),
       defaultEdgeBandId: opt(p.defaultEdgeBandId),
       pricing: {
         ...p.pricing,

@@ -4,6 +4,7 @@ import { rgb, type PDFDocument, type PDFFont, type PDFPage, type RGB } from 'pdf
 import type { CostBreakdown, Job, Plan } from '../engine/types';
 import type { MeasureFrom } from '../model/cutMeasure';
 import type { Material } from '../model/library';
+import type { OffcutRule } from '../model/offcut';
 import type { Project } from '../model/project';
 
 export interface PdfInput {
@@ -15,6 +16,8 @@ export interface PdfInput {
   currency: string;
   /** Extra band length per banded edge, mm (the workshop setting). */
   edgeAllowance?: number;
+  /** Minimum reusable offcut size from workshop settings. */
+  offcutRule?: OffcutRule;
   /** Cut positions from the last cut (default) or from the sheet edge. */
   cutMeasure?: MeasureFrom;
   /** For the header; injectable so tests are stable. */

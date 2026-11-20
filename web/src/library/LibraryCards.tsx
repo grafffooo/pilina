@@ -6,12 +6,20 @@ import {
   areaPriceOut,
   areaUnit,
   formatLength,
+  formatLengthUnit,
   isImperial,
   longPriceIn,
   longPriceOut,
+  longUnit,
   unitLabel,
 } from '../lib/units';
-import { formatMoney, materialGrain, type EdgeBand, type Material } from '../model/library';
+import {
+  formatMoney,
+  materialGrain,
+  materialKind,
+  type EdgeBand,
+  type Material,
+} from '../model/library';
 import {
   removeEdgeBand,
   removeMaterial,
@@ -28,8 +36,24 @@ import styles from './Library.module.css';
 const grainName = (g: Grain, t: (k: string) => string) =>
   g === 'length' ? t('Along the length') : g === 'width' ? t('Along the width') : t('No grain');
 
-/** A board's price line and its "size · grain" line, for its card and the material picker. */
+/** A board or linear material's price line and size/profile line, for cards and pickers. */
 export function boardSummary(m: Material, currency: string, t: (k: string) => string): string[] {
+  if (materialKind(m) === 'linear') {
+    const shown =
+      m.price === null ? null : m.priceUnit === 'metre' ? exact(longPriceOut(m.price)) : m.price;
+    const profile =
+      m.thickness && m.profileWidth
+        ? `${formatLength(m.thickness)} × ${formatLength(m.profileWidth)}`
+        : m.thickness
+          ? formatLengthUnit(m.thickness)
+          : null;
+    return [
+      shown === null
+        ? '—'
+        : `${formatMoney(shown, currency)} / ${m.priceUnit === 'metre' ? longUnit() : t('piece')}`,
+      [profile, m.stockLength ? formatLengthUnit(m.stockLength) : null].filter(Boolean).join(' · '),
+    ];
+  }
   const shown =
     m.price === null ? null : m.priceUnit === 'sqm' ? exact(areaPriceOut(m.price)) : m.price;
   return [

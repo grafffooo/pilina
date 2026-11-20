@@ -1,0 +1,380 @@
+{
+  "en": {
+    "n_bars_one": "1 bar",
+    "n_bars_other": "{{count}} bars",
+    "{{count}} bar lengths_one": "1 bar length",
+    "{{count}} bar lengths_other": "{{count}} bar lengths",
+    "bar_drawing_label_one": "Bar {{n}}: 1 part on a {{length}} mm bar, {{pct}}% used",
+    "bar_drawing_label_other": "Bar {{n}}: {{count}} parts on a {{length}} mm bar, {{pct}}% used"
+  },
+  "locales": {
+    "sk": {
+      "n_bars": { "one": "1 tyč", "few": "{{count}} tyče", "many": "{{count}} tyče", "other": "{{count}} tyčí" },
+      "{{count}} bar lengths": { "one": "1 dĺžka tyče", "few": "{{count}} dĺžky tyčí", "many": "{{count}} dĺžky tyče", "other": "{{count}} dĺžok tyčí" },
+      "bar_drawing_label": {
+        "one": "Tyč {{n}}: 1 diel na tyči {{length}} mm, využitie {{pct}} %",
+        "few": "Tyč {{n}}: {{count}} diely na tyči {{length}} mm, využitie {{pct}} %",
+        "many": "Tyč {{n}}: {{count}} diela na tyči {{length}} mm, využitie {{pct}} %",
+        "other": "Tyč {{n}}: {{count}} dielov na tyči {{length}} mm, využitie {{pct}} %"
+      }
+    },
+    "cs": {
+      "n_bars": { "one": "1 tyč", "few": "{{count}} tyče", "many": "{{count}} tyče", "other": "{{count}} tyčí" },
+      "{{count}} bar lengths": { "one": "1 délka tyče", "few": "{{count}} délky tyčí", "many": "{{count}} délky tyče", "other": "{{count}} délek tyčí" },
+      "bar_drawing_label": {
+        "one": "Tyč {{n}}: 1 díl na tyči {{length}} mm, využito {{pct}} %",
+        "few": "Tyč {{n}}: {{count}} díly na tyči {{length}} mm, využito {{pct}} %",
+        "many": "Tyč {{n}}: {{count}} dílu na tyči {{length}} mm, využito {{pct}} %",
+        "other": "Tyč {{n}}: {{count}} dílů na tyči {{length}} mm, využito {{pct}} %"
+      }
+    },
+    "de": {
+      "n_bars": { "one": "{{count}} Stab", "other": "{{count}} Stäbe" },
+      "{{count}} bar lengths": { "one": "{{count}} Stangenlänge", "other": "{{count}} Stangenlängen" },
+      "bar_drawing_label": {
+        "one": "Stab {{n}}: {{count}} Teil auf einem Stab {{length}} mm, {{pct}} % genutzt",
+        "other": "Stab {{n}}: {{count}} Teile auf einem Stab {{length}} mm, {{pct}} % genutzt"
+      }
+    },
+    "fr": {
+      "n_bars": { "one": "{{count}} barre", "many": "{{count}} de barres", "other": "{{count}} barres" },
+      "{{count}} bar lengths": { "one": "{{count}} longueur de barre", "many": "{{count}} de longueurs de barre", "other": "{{count}} longueurs de barre" },
+      "bar_drawing_label": {
+        "one": "Barre {{n}} : {{count}} pièce sur une barre de {{length}} mm, {{pct}} % utilisé",
+        "many": "Barre {{n}} : {{count}} pièces sur une barre de {{length}} mm, {{pct}} % utilisé",
+        "other": "Barre {{n}} : {{count}} pièces sur une barre de {{length}} mm, {{pct}} % utilisé"
+      }
+    },
+    "it": {
+      "n_bars": { "one": "1 barra", "many": "{{count}} barre", "other": "{{count}} barre" },
+      "{{count}} bar lengths": { "one": "1 lunghezza di barra", "many": "{{count}} lunghezze di barra", "other": "{{count}} lunghezze di barra" },
+      "bar_drawing_label": {
+        "one": "Barra {{n}}: 1 pezzo su una barra {{length}} mm, {{pct}}% usato",
+        "many": "Barra {{n}}: {{count}} pezzi su una barra {{length}} mm, {{pct}}% usato",
+        "other": "Barra {{n}}: {{count}} pezzi su una barra {{length}} mm, {{pct}}% usato"
+      }
+    },
+    "es": {
+      "n_bars": { "one": "1 barra", "many": "{{count}} barras", "other": "{{count}} barras" },
+      "{{count}} bar lengths": { "one": "1 longitud de barra", "many": "{{count}} longitudes de barra", "other": "{{count}} longitudes de barra" },
+      "bar_drawing_label": {
+        "one": "Barra {{n}}: 1 pieza en una barra de {{length}} mm, {{pct}} % usado",
+        "many": "Barra {{n}}: {{count}} piezas en una barra de {{length}} mm, {{pct}} % usado",
+        "other": "Barra {{n}}: {{count}} piezas en una barra de {{length}} mm, {{pct}} % usado"
+      }
+    },
+    "pt": {
+      "n_bars": { "one": "{{count}} barra", "many": "{{count}} barras", "other": "{{count}} barras" },
+      "{{count}} bar lengths": { "one": "{{count}} comprimento de barra", "many": "{{count}} comprimentos de barra", "other": "{{count}} comprimentos de barra" },
+      "bar_drawing_label": {
+        "one": "Barra {{n}}: {{count}} peça em uma barra de {{length}} mm, {{pct}}% usada",
+        "many": "Barra {{n}}: {{count}} peças em uma barra de {{length}} mm, {{pct}}% usada",
+        "other": "Barra {{n}}: {{count}} peças em uma barra de {{length}} mm, {{pct}}% usada"
+      }
+    },
+    "nl": {
+      "n_bars": { "one": "1 staf", "other": "{{count}} staven" },
+      "{{count}} bar lengths": { "one": "1 staaflengte", "other": "{{count}} staaflengten" },
+      "bar_drawing_label": {
+        "one": "Staf {{n}}: 1 onderdeel op een staf van {{length}} mm, {{pct}}% gebruikt",
+        "other": "Staf {{n}}: {{count}} onderdelen op een staf van {{length}} mm, {{pct}}% gebruikt"
+      }
+    },
+    "pl": {
+      "n_bars": { "one": "1 listwa", "few": "{{count}} listwy", "many": "{{count}} listew", "other": "{{count}} listew" },
+      "{{count}} bar lengths": { "one": "1 długość listwy", "few": "{{count}} długości listew", "many": "{{count}} długości listew", "other": "{{count}} długości listew" },
+      "bar_drawing_label": {
+        "one": "Listwa {{n}}: 1 element na listwie {{length}} mm, wykorzystanie {{pct}}%",
+        "few": "Listwa {{n}}: {{count}} elementy na listwie {{length}} mm, wykorzystanie {{pct}}%",
+        "many": "Listwa {{n}}: {{count}} elementów na listwie {{length}} mm, wykorzystanie {{pct}}%",
+        "other": "Listwa {{n}}: {{count}} elementu na listwie {{length}} mm, wykorzystanie {{pct}}%"
+      }
+    },
+    "hu": {
+      "n_bars": { "one": "1 szál", "other": "{{count}} szál" },
+      "{{count}} bar lengths": { "one": "1 szálhossz", "other": "{{count}} szálhossz" },
+      "bar_drawing_label": {
+        "one": "{{n}}. szál: 1 darab egy {{length}} mm-es szálon, {{pct}}% kihasználás",
+        "other": "{{n}}. szál: {{count}} darab egy {{length}} mm-es szálon, {{pct}}% kihasználás"
+      }
+    },
+    "ro": {
+      "n_bars": { "one": "1 bară", "few": "{{count}} bare", "other": "{{count}} de bare" },
+      "{{count}} bar lengths": { "one": "1 lungime de bară", "few": "{{count}} lungimi de bară", "other": "{{count}} de lungimi de bară" },
+      "bar_drawing_label": {
+        "one": "Bara {{n}}: 1 piesă pe o bară {{length}} mm, {{pct}}% folosit",
+        "few": "Bara {{n}}: {{count}} piese pe o bară {{length}} mm, {{pct}}% folosit",
+        "other": "Bara {{n}}: {{count}} de piese pe o bară {{length}} mm, {{pct}}% folosit"
+      }
+    },
+    "bg": {
+      "n_bars": { "one": "1 греда", "other": "{{count}} греди" },
+      "{{count}} bar lengths": { "one": "1 дължина на греда", "other": "{{count}} дължини на греди" },
+      "bar_drawing_label": {
+        "one": "Греда {{n}}: 1 детайл на греда {{length}} мм, използвани {{pct}}%",
+        "other": "Греда {{n}}: {{count}} детайла на греда {{length}} мм, използвани {{pct}}%"
+      }
+    },
+    "el": {
+      "n_bars": { "one": "1 βέργα", "other": "{{count}} βέργες" },
+      "{{count}} bar lengths": { "one": "1 μήκος βέργας", "other": "{{count}} μήκη βέργας" },
+      "bar_drawing_label": {
+        "one": "Βέργα {{n}}: 1 κομμάτι σε βέργα {{length}} mm, {{pct}}% σε χρήση",
+        "other": "Βέργα {{n}}: {{count}} κομμάτια σε βέργα {{length}} mm, {{pct}}% σε χρήση"
+      }
+    },
+    "sv": {
+      "n_bars": { "one": "1 regel", "other": "{{count}} reglar" },
+      "{{count}} bar lengths": { "one": "1 regellängd", "other": "{{count}} regellängder" },
+      "bar_drawing_label": {
+        "one": "Regel {{n}}: 1 del på en regel {{length}} mm, {{pct}} % använt",
+        "other": "Regel {{n}}: {{count}} delar på en regel {{length}} mm, {{pct}} % använt"
+      }
+    },
+    "da": {
+      "n_bars": { "one": "1 lægte", "other": "{{count}} lægter" },
+      "{{count}} bar lengths": { "one": "1 lægtelængde", "other": "{{count}} lægtelængder" },
+      "bar_drawing_label": {
+        "one": "Lægte {{n}}: 1 del på en lægte {{length}} mm, {{pct}} % brugt",
+        "other": "Lægte {{n}}: {{count}} dele på en lægte {{length}} mm, {{pct}} % brugt"
+      }
+    },
+    "fi": {
+      "n_bars": { "one": "1 tanko", "other": "{{count}} tankoa" },
+      "{{count}} bar lengths": { "one": "1 tankopituus", "other": "{{count}} tankopituutta" },
+      "bar_drawing_label": {
+        "one": "Tanko {{n}}: 1 osa tangolla {{length}} mm, {{pct}} % käytetty",
+        "other": "Tanko {{n}}: {{count}} osaa tangolla {{length}} mm, {{pct}} % käytetty"
+      }
+    },
+    "no": {
+      "n_bars": { "one": "1 lekt", "other": "{{count}} lekter" },
+      "{{count}} bar lengths": { "one": "1 lektelengde", "other": "{{count}} lektelengder" },
+      "bar_drawing_label": {
+        "one": "Lekt {{n}}: 1 del på en lekt {{length}} mm, {{pct}} % brukt",
+        "other": "Lekt {{n}}: {{count}} deler på en lekt {{length}} mm, {{pct}} % brukt"
+      }
+    },
+    "is": {
+      "n_bars": { "one": "{{count}} stöng", "other": "{{count}} stangir" },
+      "{{count}} bar lengths": { "one": "{{count}} stangarlengd", "other": "{{count}} stangarlengdir" },
+      "bar_drawing_label": {
+        "one": "Stöng {{n}}: {{count}} hlutur á {{length}} mm stöng, {{pct}}% notað",
+        "other": "Stöng {{n}}: {{count}} hlutar á {{length}} mm stöng, {{pct}}% notað"
+      }
+    },
+    "et": {
+      "n_bars": { "one": "1 latt", "other": "{{count}} latti" },
+      "{{count}} bar lengths": { "one": "1 lati pikkus", "other": "{{count}} lati pikkust" },
+      "bar_drawing_label": {
+        "one": "Latt {{n}}: 1 detail latil {{length}} mm, {{pct}}% kasutatud",
+        "other": "Latt {{n}}: {{count}} detaili latil {{length}} mm, {{pct}}% kasutatud"
+      }
+    },
+    "lv": {
+      "n_bars": { "zero": "{{count}} latu", "one": "{{count}} lata", "other": "{{count}} latas" },
+      "{{count}} bar lengths": { "zero": "{{count}} latu garumu", "one": "{{count}} latas garums", "other": "{{count}} latu garumi" },
+      "bar_drawing_label": {
+        "zero": "Lata {{n}}: {{count}} detaļu uz {{length}} mm latas, izmantoti {{pct}}%",
+        "one": "Lata {{n}}: {{count}} detaļa uz {{length}} mm latas, izmantoti {{pct}}%",
+        "other": "Lata {{n}}: {{count}} detaļas uz {{length}} mm latas, izmantoti {{pct}}%"
+      }
+    },
+    "lt": {
+      "n_bars": { "one": "{{count}} tašas", "few": "{{count}} tašai", "many": "{{count}} tašo", "other": "{{count}} tašų" },
+      "{{count}} bar lengths": { "one": "{{count}} tašo ilgis", "few": "{{count}} tašų ilgiai", "many": "{{count}} tašo ilgio", "other": "{{count}} tašų ilgių" },
+      "bar_drawing_label": {
+        "one": "Tašas {{n}}: {{count}} detalė {{length}} mm taše, panaudota {{pct}}%",
+        "few": "Tašas {{n}}: {{count}} detalės {{length}} mm taše, panaudota {{pct}}%",
+        "many": "Tašas {{n}}: {{count}} detalės {{length}} mm taše, panaudota {{pct}}%",
+        "other": "Tašas {{n}}: {{count}} detalių {{length}} mm taše, panaudota {{pct}}%"
+      }
+    },
+    "hr": {
+      "n_bars": { "one": "{{count}} letva", "few": "{{count}} letve", "other": "{{count}} letvi" },
+      "{{count}} bar lengths": { "one": "{{count}} duljina letve", "few": "{{count}} duljine letvi", "other": "{{count}} duljina letvi" },
+      "bar_drawing_label": {
+        "one": "Letva {{n}}: {{count}} dio na letvi {{length}} mm, iskorišteno {{pct}} %",
+        "few": "Letva {{n}}: {{count}} dijela na letvi {{length}} mm, iskorišteno {{pct}} %",
+        "other": "Letva {{n}}: {{count}} dijelova na letvi {{length}} mm, iskorišteno {{pct}} %"
+      }
+    },
+    "sl": {
+      "n_bars": { "one": "{{count}} letev", "two": "{{count}} letvi", "few": "{{count}} letve", "other": "{{count}} letev" },
+      "{{count}} bar lengths": { "one": "{{count}} dolžina letve", "two": "{{count}} dolžini letve", "few": "{{count}} dolžine letev", "other": "{{count}} dolžin letev" },
+      "bar_drawing_label": {
+        "one": "Letev {{n}}: {{count}} del na letvi {{length}} mm, izkoristek {{pct}} %",
+        "two": "Letev {{n}}: {{count}} dela na letvi {{length}} mm, izkoristek {{pct}} %",
+        "few": "Letev {{n}}: {{count}} deli na letvi {{length}} mm, izkoristek {{pct}} %",
+        "other": "Letev {{n}}: {{count}} delov na letvi {{length}} mm, izkoristek {{pct}} %"
+      }
+    },
+    "sr": {
+      "n_bars": { "one": "{{count}} letva", "few": "{{count}} letve", "other": "{{count}} letvi" },
+      "{{count}} bar lengths": { "one": "{{count}} dužina letve", "few": "{{count}} dužine letvi", "other": "{{count}} dužina letvi" },
+      "bar_drawing_label": {
+        "one": "Letva {{n}}: {{count}} deo na letvi {{length}} mm, iskorišćeno {{pct}} %",
+        "few": "Letva {{n}}: {{count}} dela na letvi {{length}} mm, iskorišćeno {{pct}} %",
+        "other": "Letva {{n}}: {{count}} delova na letvi {{length}} mm, iskorišćeno {{pct}} %"
+      }
+    },
+    "bs": {
+      "n_bars": { "one": "{{count}} letva", "few": "{{count}} letve", "other": "{{count}} letvi" },
+      "{{count}} bar lengths": { "one": "{{count}} dužina letve", "few": "{{count}} dužine letvi", "other": "{{count}} dužina letvi" },
+      "bar_drawing_label": {
+        "one": "Letva {{n}}: {{count}} dio na letvi {{length}} mm, iskorišteno {{pct}} %",
+        "few": "Letva {{n}}: {{count}} dijela na letvi {{length}} mm, iskorišteno {{pct}} %",
+        "other": "Letva {{n}}: {{count}} dijelova na letvi {{length}} mm, iskorišteno {{pct}} %"
+      }
+    },
+    "sq": {
+      "n_bars": { "one": "1 shufër", "other": "{{count}} shufra" },
+      "{{count}} bar lengths": { "one": "1 gjatësi shufre", "other": "{{count}} gjatësi shufrash" },
+      "bar_drawing_label": {
+        "one": "Shufra {{n}}: 1 pjesë në një shufër {{length}} mm, {{pct}}% e përdorur",
+        "other": "Shufra {{n}}: {{count}} pjesë në një shufër {{length}} mm, {{pct}}% e përdorur"
+      }
+    },
+    "uk": {
+      "n_bars": { "one": "{{count}} брусок", "few": "{{count}} бруски", "many": "{{count}} брусків", "other": "{{count}} бруска" },
+      "{{count}} bar lengths": { "one": "{{count}} довжина бруска", "few": "{{count}} довжини брусків", "many": "{{count}} довжин брусків", "other": "{{count}} довжини бруска" },
+      "bar_drawing_label": {
+        "one": "Брусок {{n}}: {{count}} деталь на бруску {{length}} мм, використано {{pct}}%",
+        "few": "Брусок {{n}}: {{count}} деталі на бруску {{length}} мм, використано {{pct}}%",
+        "many": "Брусок {{n}}: {{count}} деталей на бруску {{length}} мм, використано {{pct}}%",
+        "other": "Брусок {{n}}: {{count}} деталі на бруску {{length}} мм, використано {{pct}}%"
+      }
+    },
+    "tr": {
+      "n_bars": { "one": "1 çubuk", "other": "{{count}} çubuk" },
+      "{{count}} bar lengths": { "one": "1 çubuk boyu", "other": "{{count}} çubuk boyu" },
+      "bar_drawing_label": {
+        "one": "Çubuk {{n}}: {{length}} mm çubukta 1 parça, %{{pct}} kullanıldı",
+        "other": "Çubuk {{n}}: {{length}} mm çubukta {{count}} parça, %{{pct}} kullanıldı"
+      }
+    },
+    "ga": {
+      "n_bars": { "one": "Barraí: 1", "two": "Barraí: {{count}}", "few": "Barraí: {{count}}", "many": "Barraí: {{count}}", "other": "Barraí: {{count}}" },
+      "{{count}} bar lengths": { "one": "1 fhad barra", "two": "{{count}} fhad barra", "few": "{{count}} fhad barra", "many": "{{count}} bhfad barra", "other": "{{count}} fad barra" },
+      "bar_drawing_label": {
+        "one": "Barra {{n}}: píosa amháin ar bharra {{length}} mm, {{pct}}% úsáidte",
+        "two": "Barra {{n}}: {{count}} phíosa ar bharra {{length}} mm, {{pct}}% úsáidte",
+        "few": "Barra {{n}}: {{count}} phíosa ar bharra {{length}} mm, {{pct}}% úsáidte",
+        "many": "Barra {{n}}: {{count}} bpíosa ar bharra {{length}} mm, {{pct}}% úsáidte",
+        "other": "Barra {{n}}: píosaí ({{count}}) ar bharra {{length}} mm, {{pct}}% úsáidte"
+      }
+    },
+    "mt": {
+      "n_bars": { "one": "Bar wieħed", "two": "Żewġ barijiet ({{count}})", "few": "Barijiet: {{count}}", "many": "Barijiet: {{count}}", "other": "Barijiet: {{count}}" },
+      "{{count}} bar lengths": { "one": "Tul wieħed ta’ bar", "two": "Żewġ tulijiet ta’ bar ({{count}})", "few": "{{count}} tulijiet ta’ bar", "many": "{{count}} tul ta’ bar", "other": "{{count}} tul ta’ bar" },
+      "bar_drawing_label": {
+        "one": "Bar {{n}}: biċċa waħda fuq bar {{length}} mm, {{pct}}% użat",
+        "two": "Bar {{n}}: {{count}} biċċiet fuq bar {{length}} mm, {{pct}}% użat",
+        "few": "Bar {{n}}: {{count}} biċċiet fuq bar {{length}} mm, {{pct}}% użat",
+        "many": "Bar {{n}}: {{count}} biċċa fuq bar {{length}} mm, {{pct}}% użat",
+        "other": "Bar {{n}}: biċċiet ({{count}}) fuq bar {{length}} mm, {{pct}}% użat"
+      }
+    },
+    "eu": {
+      "n_bars": { "one": "barra 1", "other": "{{count}} barra" },
+      "{{count}} bar lengths": { "one": "barra-luzera 1", "other": "{{count}} barra-luzera" },
+      "bar_drawing_label": {
+        "one": "{{n}}. barra: pieza 1 {{length}} mm-ko barran, % {{pct}} erabilita",
+        "other": "{{n}}. barra: {{count}} pieza {{length}} mm-ko barran, % {{pct}} erabilita"
+      }
+    },
+    "zh-Hans": {
+      "n_bars": { "other": "{{count}} 根条料" },
+      "{{count}} bar lengths": { "other": "{{count}} 种条料长度" },
+      "bar_drawing_label": {
+        "other": "条料 {{n}}：{{length}} mm 条料上有 {{count}} 个零件，利用率 {{pct}}%"
+      }
+    },
+    "zh-Hant": {
+      "n_bars": { "other": "{{count}} 根條料" },
+      "{{count}} bar lengths": { "other": "{{count}} 種條料長度" },
+      "bar_drawing_label": {
+        "other": "條料 {{n}}：{{length}} mm 條料上有 {{count}} 個零件，利用率 {{pct}}%"
+      }
+    },
+    "ja": {
+      "n_bars": { "other": "材 {{count}} 本" },
+      "{{count}} bar lengths": { "other": "{{count}} 種類の長さ" },
+      "bar_drawing_label": {
+        "other": "材 {{n}}: {{length}} mm の材に部材 {{count}} 個、使用率 {{pct}}%"
+      }
+    },
+    "ko": {
+      "n_bars": { "other": "각재 {{count}}개" },
+      "{{count}} bar lengths": { "other": "길이 {{count}}종" },
+      "bar_drawing_label": {
+        "other": "부재 {{n}}: {{length}} mm 자재에 부품 {{count}}개, {{pct}}% 사용"
+      }
+    },
+    "vi": {
+      "n_bars": { "other": "{{count}} thanh" },
+      "{{count}} bar lengths": { "other": "{{count}} chiều dài thanh" },
+      "bar_drawing_label": {
+        "other": "Thanh {{n}}: {{count}} chi tiết trên thanh {{length}} mm, đã dùng {{pct}}%"
+      }
+    },
+    "id": {
+      "n_bars": { "other": "{{count}} batang" },
+      "{{count}} bar lengths": { "other": "{{count}} panjang batang" },
+      "bar_drawing_label": {
+        "other": "Batang {{n}}: {{count}} bagian di batang {{length}} mm, {{pct}}% terpakai"
+      }
+    },
+    "fil": {
+      "n_bars": { "one": "{{count}} bar", "other": "{{count}} bar" },
+      "{{count}} bar lengths": { "one": "{{count}} haba ng bar", "other": "{{count}} haba ng bar" },
+      "bar_drawing_label": {
+        "one": "Bar {{n}}: {{count}} piyesa sa {{length}} mm na bar, {{pct}}% nagamit",
+        "other": "Bar {{n}}: {{count}} piyesa sa {{length}} mm na bar, {{pct}}% nagamit"
+      }
+    },
+    "th": {
+      "n_bars": { "other": "{{count}} ท่อน" },
+      "{{count}} bar lengths": { "other": "{{count}} ความยาว" },
+      "bar_drawing_label": {
+        "other": "ท่อนที่ {{n}}: ชิ้นงาน {{count}} ชิ้นบนท่อน {{length}} mm ใช้ {{pct}}%"
+      }
+    },
+    "hi": {
+      "n_bars": { "one": "{{count}} डंडा", "other": "{{count}} डंडे" },
+      "{{count}} bar lengths": { "one": "{{count}} डंडे की लंबाई", "other": "{{count}} डंडे की लंबाइयाँ" },
+      "bar_drawing_label": {
+        "one": "डंडा {{n}}: {{length}} mm डंडे पर {{count}} हिस्सा, {{pct}}% इस्तेमाल",
+        "other": "डंडा {{n}}: {{length}} mm डंडे पर {{count}} हिस्से, {{pct}}% इस्तेमाल"
+      }
+    },
+    "bn": {
+      "n_bars": { "one": "{{count}}টি বার", "other": "{{count}}টি বার" },
+      "{{count}} bar lengths": { "one": "{{count}}টি বারের দৈর্ঘ্য", "other": "{{count}}টি বারের দৈর্ঘ্য" },
+      "bar_drawing_label": {
+        "one": "বার {{n}}: {{length}} mm বারে {{count}}টি অংশ, {{pct}}% ব্যবহৃত",
+        "other": "বার {{n}}: {{length}} mm বারে {{count}}টি অংশ, {{pct}}% ব্যবহৃত"
+      }
+    },
+    "ar": {
+      "n_bars": { "zero": "لا قضبان", "one": "قضيب واحد", "two": "قضيبان", "few": "{{count}} قضبان", "many": "{{count}} قضيبًا", "other": "{{count}} قضيب" },
+      "{{count}} bar lengths": { "zero": "لا أطوال قضبان", "one": "طول قضيب واحد", "two": "طولا قضيبين", "few": "{{count}} أطوال قضبان", "many": "{{count}} طول قضيب", "other": "{{count}} طول قضيب" },
+      "bar_drawing_label": {
+        "zero": "القضيب {{n}}: لا قطع على قضيب {{length}} مم، {{pct}}% مستعمل",
+        "one": "القضيب {{n}}: قطعة واحدة على قضيب {{length}} مم، {{pct}}% مستعمل",
+        "two": "القضيب {{n}}: قطعتان على قضيب {{length}} مم، {{pct}}% مستعمل",
+        "few": "القضيب {{n}}: {{count}} قطع على قضيب {{length}} مم، {{pct}}% مستعمل",
+        "many": "القضيب {{n}}: {{count}} قطعة على قضيب {{length}} مم، {{pct}}% مستعمل",
+        "other": "القضيب {{n}}: {{count}} قطعة على قضيب {{length}} مم، {{pct}}% مستعمل"
+      }
+    },
+    "ur": {
+      "n_bars": { "one": "1 سلاخ", "other": "{{count}} سلاخیں" },
+      "{{count}} bar lengths": { "one": "1 سلاخ کی لمبائی", "other": "{{count}} سلاخوں کی لمبائیاں" },
+      "bar_drawing_label": {
+        "one": "سلاخ {{n}}: {{length}} mm سلاخ پر 1 حصہ، {{pct}}% استعمال",
+        "other": "سلاخ {{n}}: {{length}} mm سلاخ پر {{count}} حصے، {{pct}}% استعمال"
+      }
+    }
+  }
+}

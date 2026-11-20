@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { exportProjectFile } from '../model/importExport';
-import { newMaterial } from '../model/library';
-import { emptyPart, newProject, type Project } from '../model/project';
+import { newEdgeBand, newLinearMaterial, newMaterial } from '../model/library';
+import {
+  emptyLinearPart,
+  emptyLinearStock,
+  emptyPart,
+  newProject,
+  type Project,
+} from '../model/project';
 import {
   LIBRARY_FILE,
   mergeFolder,
@@ -145,5 +151,119 @@ describe('syncing with a folder', () => {
       ['walnut', null],
     ]);
     expect(newer.writes.map((w) => w.name)).toEqual([LIBRARY_FILE]);
+  });
+
+  it('passes material and edge band deletions through tombstones and keeps unreadable library files untouched', () => {
+    const band = { ...newEdgeBand('ABS 2 mm'), id: 'band-1' };
+    const pine = { ...newMaterial('Pine'), id: 'pine' };
+    const p = project('Polica', 10);
+    // Seed folder with oak + pine + band and a project referencing oak.
+    const seed = mergeFolder(
+      input({
+        projects: [p],
+        materials: [oak, pine],
+        edgeBands: [band],
+        libraryAt: 10,
+      }),
+    );
+
+    // Device A deletes oak and band-1 at t=50.
+    const afterDelete = mergeFolder(
+      input({
+        files: seed.writes,
+        projects: [p],
+        materials: [pine],
+        edgeBands: [],
+        libraryAt: 50,
+        libraryDeletions: { oak: 50, 'band-1': 50 },
+      }),
+    );
+    const libWrite = afterDelete.writes.find((w) => w.name === LIBRARY_FILE)!;
+    expect(JSON.parse(libWrite.text).deleted).toEqual({ oak: 50, 'band-1': 50 });
+
+    // Device B (still holding oak and band-1 locally) syncs and removes both without resurrecting them.
+    const folderNow = [
+      ...seed.writes.filter((w) => w.name !== LIBRARY_FILE),
+      libWrite,
+    ];
+    const deviceB = mergeFolder(
+      input({
+        files: folderNow,
+        projects: [p],
+        materials: [oak, pine],
+        edgeBands: [band],
+        libraryAt: 10,
+      }),
+    );
+    expect(deviceB.library).toEqual({ materials: [pine], edgeBands: [] });
+    expect(deviceB.writes.find((w) => w.name === LIBRARY_FILE)).toBeUndefined();
+
+    // A brand-new Device C importing the project from the folder also keeps oak deleted from the library.
+    const deviceC = mergeFolder(
+      input({
+        files: folderNow,
+        projects: [],
+        materials: [],
+        edgeBands: [],
+        libraryAt: 0,
+      }),
+    );
+    expect(deviceC.library!.materials.map((m) => m.id)).toEqual(['pine']);
+
+    // An unreadable library file is reported and never overwritten.
+    const corrupt = mergeFolder(
+      input({
+        files: [{ name: LIBRARY_FILE, text: '{broken' }],
+        materials: [pine],
+        libraryAt: 60,
+      }),
+    );
+    expect(corrupt.unreadable).toEqual([LIBRARY_FILE]);
+    expect(corrupt.writes.find((w) => w.name === LIBRARY_FILE)).toBeUndefined();
+  });
+
+  it('syncs mixed 2D and 1D project rows and linear materials between devices', () => {
+    const kvh = { ...newLinearMaterial('KVH 45x95'), id: 'kvh', stockLength: 4000, price: 18 };
+    const p = project('Altánok', 20, 'altanok');
+    p.linearKerf = 3.2;
+    p.linearEndTrim = 15;
+    p.linearParts = [
+      { ...emptyLinearPart(), length: 1800, qty: 4, label: 'Stĺp', materialId: kvh.id },
+    ];
+    p.linearStock = [{ ...emptyLinearStock(), length: 4000, qty: 3, materialId: kvh.id }];
+
+    const devA = mergeFolder(
+      input({
+        projects: [p],
+        materials: [oak, kvh],
+        libraryAt: 20,
+      }),
+    );
+
+    const devB = mergeFolder(
+      input({
+        files: devA.writes,
+        projects: [],
+        materials: [],
+        edgeBands: [],
+        libraryAt: 0,
+      }),
+    );
+    expect(devB.upsert).toHaveLength(1);
+    expect(devB.upsert[0]).toMatchObject({
+      linearKerf: 3.2,
+      linearEndTrim: 15,
+    });
+    expect(devB.upsert[0]!.linearParts[0]).toMatchObject({
+      length: 1800,
+      label: 'Stĺp',
+      materialId: 'kvh',
+    });
+    expect(devB.upsert[0]!.linearStock[0]).toMatchObject({
+      length: 4000,
+      qty: 3,
+      materialId: 'kvh',
+    });
+    expect(devB.library!.materials.find((m) => m.id === 'kvh')?.kind).toBe('linear');
   });
 });

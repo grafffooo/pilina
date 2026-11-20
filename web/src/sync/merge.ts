@@ -28,6 +28,8 @@ export interface LibraryFile {
   updatedAt: number;
   materials: Material[];
   edgeBands: EdgeBand[];
+  /** Deleted material and edge-band ids, with when. */
+  deleted?: Record<string, number>;
 }
 
 /** Left in place of a deleted project, so other devices delete it too. */
@@ -52,6 +54,8 @@ export interface SyncInput {
   libraryAt: number;
   /** Projects deleted here since the last sync, with when. */
   deletions: Record<string, number>;
+  /** Materials and edge bands deleted here since the last sync, with when. */
+  libraryDeletions?: Record<string, number>;
 }
 
 export interface SyncResult {
@@ -145,6 +149,11 @@ export function mergeFolder(input: SyncInput): SyncResult {
   }
 
   // Library first, so projects coming in find their materials.
+  const libraryUnreadable = result.unreadable.includes(LIBRARY_FILE);
+  const deletedLib: Record<string, number> = { ...(library?.deleted ?? {}) };
+  for (const [id, at] of Object.entries(input.libraryDeletions ?? {})) {
+    deletedLib[id] = Math.max(deletedLib[id] ?? 0, at);
+  }
   let materials = input.materials;
   let edgeBands = input.edgeBands;
   const theirsNewer = !!library && library.updatedAt > input.libraryAt;
@@ -152,12 +161,14 @@ export function mergeFolder(input: SyncInput): SyncResult {
     materials = mergeById(input.materials, library.materials, theirsNewer);
     edgeBands = mergeById(input.edgeBands, library.edgeBands, theirsNewer);
   }
+  materials = materials.filter((m) => deletedLib[m.id] === undefined);
+  edgeBands = edgeBands.filter((b) => deletedLib[b.id] === undefined);
 
   const local = new Map(input.projects.map((p) => [p.id, p]));
   const fromFile = (file: ProjectFile): Project => {
     const r = importProjectFile(file, materials, edgeBands, new Set());
-    materials = [...materials, ...r.newMaterials];
-    edgeBands = [...edgeBands, ...r.newEdgeBands];
+    materials = [...materials, ...r.newMaterials.filter((m) => deletedLib[m.id] === undefined)];
+    edgeBands = [...edgeBands, ...r.newEdgeBands.filter((b) => deletedLib[b.id] === undefined)];
     // A synced copy keeps everything an import would reset.
     return { ...r.project, cutAt: file.project.cutAt ?? null, summary: file.project.summary };
   };
@@ -214,16 +225,19 @@ export function mergeFolder(input: SyncInput): SyncResult {
     updatedAt: Math.max(input.libraryAt, library?.updatedAt ?? 0),
     materials,
     edgeBands,
+    deleted: deletedLib,
   };
   if (!same(materials, input.materials) || !same(edgeBands, input.edgeBands)) {
     result.library = { materials, edgeBands };
   }
   result.libraryAt = merged.updatedAt;
   if (
-    !library ||
-    !same(library.materials, materials) ||
-    !same(library.edgeBands, edgeBands) ||
-    library.updatedAt !== merged.updatedAt
+    !libraryUnreadable &&
+    (!library ||
+      !same(library.materials, materials) ||
+      !same(library.edgeBands, edgeBands) ||
+      !same(library.deleted ?? {}, deletedLib) ||
+      library.updatedAt !== merged.updatedAt)
   ) {
     result.writes.push({ name: LIBRARY_FILE, text: json(merged) });
   }

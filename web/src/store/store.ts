@@ -3,14 +3,23 @@ import { setCurrentUnit } from '../lib/units';
 import { create } from 'zustand';
 import { t } from '../i18n';
 import * as storage from '../db/db';
-import type { CostBreakdown, Job, Plan } from '../engine/types';
+import type {
+  CostBreakdown,
+  Job,
+  LinearCostBreakdown,
+  LinearJob,
+  LinearPlan,
+  Plan,
+} from '../engine/types';
 import type { CutRecord } from '../model/cutRecord';
 import { emptyHistory, record, redo, undo, type History } from '../model/history';
-import { newOffcut, type Offcut } from '../model/offcut';
+import { newLinearOffcut, newOffcut, type Offcut } from '../model/offcut';
 import {
   DEFAULT_SETTINGS,
   linkLegacyStockLabels,
+  materialKind,
   newEdgeBand,
+  newLinearMaterial,
   newMaterial,
   type EdgeBand,
   type Material,
@@ -20,6 +29,8 @@ import {
   migrate,
   newId,
   newProject,
+  type LinearPartRow,
+  type LinearStockRow,
   type PartRow,
   type Project,
   type ProjectSummary,
@@ -33,6 +44,14 @@ export interface ResultState {
   plan: Plan | null;
   /** The job the current plan belongs to. */
   job: Job | null;
+  error: string | null;
+}
+
+export interface LinearResultState {
+  status: ResultStatus;
+  plan: LinearPlan | null;
+  /** The job the current linear plan belongs to. */
+  job: LinearJob | null;
   error: string | null;
 }
 
@@ -52,6 +71,7 @@ export type MainView =
   | 'labels'
   | 'stats'
   | 'add-part'
+  | 'add-linear-part'
   | 'add-board'
   | 'add-band'
   | 'add-offcut';
@@ -68,6 +88,7 @@ const DRILL_DOWN: ReadonlySet<MainView> = new Set([
   'labels',
   'stats',
   'add-part',
+  'add-linear-part',
   'add-board',
   'add-band',
   'add-offcut',
@@ -98,11 +119,14 @@ interface AppState {
   cutting: boolean;
   /** Cost of the current plan; `null` until priced. */
   cost: CostBreakdown | null;
+  /** Cost of the current linear plan; `null` until priced. */
+  linearCost: LinearCostBreakdown | null;
   currentId: string | null;
   history: History<Project>;
   saveState: SaveState;
   savedAt: number | null;
   result: ResultState;
+  linearResult: LinearResultState;
 
   init(): Promise<void>;
   select(id: string): void;
@@ -114,14 +138,16 @@ interface AppState {
   undo(): void;
   redo(): void;
   setResult(result: Partial<ResultState>): void;
+  setLinearResult(result: Partial<LinearResultState>): void;
   setSummary(id: string, summary: Partial<ProjectSummary>): void;
   setCost(cost: CostBreakdown | null): void;
+  setLinearCost(cost: LinearCostBreakdown | null): void;
   setView(view: MainView): void;
   setPhoneTab(tab: PhoneTab): void;
   /** Edits the shared library (not part of a project's undo history). */
   editLibrary(fn: (lib: Library) => Library): void;
-  /** Adds offcuts, numbering them OC-0001, OC-0002, … in order. */
-  addOffcuts(items: (Partial<Offcut> & { length: number; width: number })[]): Offcut[];
+  /** Adds sheet or linear offcuts, numbering them OC-0001, OC-0002, … in order. */
+  addOffcuts(items: (Partial<Offcut> & { length: number; width?: number })[]): Offcut[];
   updateOffcuts(ids: string[], patch: Partial<Offcut>): void;
   removeOffcut(id: string): void;
   setCutting(on: boolean): void;
@@ -181,6 +207,12 @@ function writeLast(id: string) {
 }
 
 const emptyResult: ResultState = { status: 'empty', plan: null, job: null, error: null };
+const emptyLinearResult: LinearResultState = {
+  status: 'empty',
+  plan: null,
+  job: null,
+  error: null,
+};
 
 export const useStore = create<AppState>()((set, get) => {
   function scheduleSave(id: string) {
@@ -280,8 +312,9 @@ export const useStore = create<AppState>()((set, get) => {
     const outdated = raw.some((r) => r.schema !== projects[0]?.schema);
 
     if (projects.length === 0) {
-      const board = materials[0] ?? newMaterial(t('Chipboard 18mm'));
-      if (!materials[0]) {
+      const firstSheet = materials.find((m) => materialKind(m) === 'sheet');
+      const board = firstSheet ?? newMaterial(t('Chipboard 18mm'));
+      if (!firstSheet) {
         board.sheetLength = 2800;
         board.sheetWidth = 2070;
         created.push(board);
@@ -316,7 +349,9 @@ export const useStore = create<AppState>()((set, get) => {
       currentId: id,
       history: emptyHistory(),
       result: emptyResult,
+      linearResult: emptyLinearResult,
       cost: null,
+      linearCost: null,
       view: 'project',
       cutting: false,
     });
@@ -334,11 +369,13 @@ export const useStore = create<AppState>()((set, get) => {
     offcuts: [],
     cutting: false,
     cost: null,
+    linearCost: null,
     currentId: null,
     history: emptyHistory(),
     saveState: 'saved',
     savedAt: null,
     result: emptyResult,
+    linearResult: emptyLinearResult,
 
     init() {
       // Runs once even if called twice (React StrictMode runs effects twice in development).
@@ -355,10 +392,13 @@ export const useStore = create<AppState>()((set, get) => {
     },
 
     createProject() {
-      // Start on the board the open project uses, or the first material.
+      // Start on the board the open project uses, or the first sheet material.
       const { projects, currentId, materials } = get();
       const active = projects.find((x) => x.id === currentId);
-      const board = active?.stock.find((s) => s.materialId)?.materialId ?? materials[0]?.id ?? null;
+      const board =
+        active?.stock.find((s) => s.materialId)?.materialId ??
+        materials.find((m) => materialKind(m) === 'sheet')?.id ??
+        null;
       const p = newProject(undefined, undefined, board);
       set((s) => ({ projects: [p, ...s.projects] }));
       scheduleSave(p.id);
@@ -432,6 +472,10 @@ export const useStore = create<AppState>()((set, get) => {
       set((s) => ({ result: { ...s.result, ...result } }));
     },
 
+    setLinearResult(result) {
+      set((s) => ({ linearResult: { ...s.linearResult, ...result } }));
+    },
+
     setSummary(id, patch) {
       const p = get().projects.find((x) => x.id === id);
       if (!p) return;
@@ -441,6 +485,7 @@ export const useStore = create<AppState>()((set, get) => {
         p.summary &&
         old.pieces === next.pieces &&
         old.sheets === next.sheets &&
+        (old.bars ?? 0) === (next.bars ?? 0) &&
         Math.round(old.usedPct) === Math.round(next.usedPct) &&
         (old.cost ?? null) === (next.cost ?? null)
       ) {
@@ -452,6 +497,10 @@ export const useStore = create<AppState>()((set, get) => {
 
     setCost(cost) {
       set({ cost });
+    },
+
+    setLinearCost(linearCost) {
+      set({ linearCost });
     },
 
     setView(view) {
@@ -467,7 +516,9 @@ export const useStore = create<AppState>()((set, get) => {
       const { settings } = get();
       let n = settings.nextOffcutNumber;
       const created = items.map(({ length, width, ...fields }) =>
-        newOffcut(n++, { length, width }, fields),
+        fields.kind === 'linear'
+          ? newLinearOffcut(n++, length, fields)
+          : newOffcut(n++, { length, width: width ?? 0 }, fields),
       );
       set((s) => ({
         offcuts: [...s.offcuts, ...created],
@@ -555,7 +606,7 @@ export const useStore = create<AppState>()((set, get) => {
             ...s.offcuts.filter((o) => !gone.has(o.id)).map((o) => incoming.get(o.id) ?? o),
             ...offcutUpserts.filter((o) => !known.has(o.id)),
           ],
-          ...(settings ? { settings } : {}),
+          ...(settings ? { settings: { ...DEFAULT_SETTINGS, ...settings } } : {}),
         };
       });
       offcutUpserts.forEach((o) => offcutsChanged.add(o.id));
@@ -658,6 +709,85 @@ export function duplicateStock(id: string) {
   });
 }
 
+export function updateLinearPart(
+  id: string,
+  patch: Partial<LinearPartRow>,
+  key: string | null = null,
+) {
+  edit(
+    (p) => ({
+      ...p,
+      linearParts: p.linearParts.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+    }),
+    key,
+  );
+}
+
+export function insertLinearParts(rows: LinearPartRow[], afterId?: string) {
+  edit((p) => {
+    const i = afterId
+      ? p.linearParts.findIndex((r) => r.id === afterId)
+      : p.linearParts.length - 1;
+    const linearParts = [...p.linearParts];
+    linearParts.splice(i + 1, 0, ...rows);
+    return { ...p, linearParts };
+  });
+}
+
+/** Replaces the linear part row with `rows` (used when pasting into an empty row). */
+export function replaceLinearPart(id: string, rows: LinearPartRow[]) {
+  edit((p) => ({
+    ...p,
+    linearParts: p.linearParts.flatMap((r) => (r.id === id ? rows : [r])),
+  }));
+}
+
+export function removeLinearPart(id: string) {
+  edit((p) => ({ ...p, linearParts: p.linearParts.filter((r) => r.id !== id) }));
+}
+
+export function duplicateLinearPart(id: string) {
+  edit((p) => {
+    const i = p.linearParts.findIndex((r) => r.id === id);
+    if (i < 0) return p;
+    const linearParts = [...p.linearParts];
+    linearParts.splice(i + 1, 0, { ...structuredClone(p.linearParts[i]!), id: newId() });
+    return { ...p, linearParts };
+  });
+}
+
+export function updateLinearStock(
+  id: string,
+  patch: Partial<LinearStockRow>,
+  key: string | null = null,
+) {
+  edit(
+    (p) => ({
+      ...p,
+      linearStock: p.linearStock.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+    }),
+    key,
+  );
+}
+
+export function addLinearStock(row: LinearStockRow) {
+  edit((p) => ({ ...p, linearStock: [...p.linearStock, row] }));
+}
+
+export function removeLinearStock(id: string) {
+  edit((p) => ({ ...p, linearStock: p.linearStock.filter((r) => r.id !== id) }));
+}
+
+export function duplicateLinearStock(id: string) {
+  edit((p) => {
+    const i = p.linearStock.findIndex((r) => r.id === id);
+    if (i < 0) return p;
+    const linearStock = [...p.linearStock];
+    linearStock.splice(i + 1, 0, { ...structuredClone(p.linearStock[i]!), id: newId() });
+    return { ...p, linearStock };
+  });
+}
+
 // ---- Library helpers ----
 
 const editLibrary = (fn: (lib: Library) => Library) => useStore.getState().editLibrary(fn);
@@ -668,6 +798,22 @@ export function addMaterial(name: string, sheet?: { length: number; width: numbe
     m.sheetLength = sheet.length;
     m.sheetWidth = sheet.width;
   }
+  editLibrary((l) => ({ ...l, materials: [...l.materials, m] }));
+  return m;
+}
+
+export function addLinearMaterial(
+  name: string,
+  options?: {
+    stockLength?: number | null;
+    thickness?: number | null;
+    profileWidth?: number | null;
+  },
+): Material {
+  const m = newLinearMaterial(name, useStore.getState().materials.length);
+  if (options?.stockLength !== undefined) m.stockLength = options.stockLength;
+  if (options?.thickness !== undefined) m.thickness = options.thickness;
+  if (options?.profileWidth !== undefined) m.profileWidth = options.profileWidth;
   editLibrary((l) => ({ ...l, materials: [...l.materials, m] }));
   return m;
 }

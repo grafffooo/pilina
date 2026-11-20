@@ -224,6 +224,18 @@
   min-width: 100%;
 }
 
+.barCanvas {
+  flex: 1 1 320px;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.barDrawing {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .drawing {
   display: block;
   width: 100%;
@@ -702,4 +714,12 @@
   .listCard {
     flex: none;
   }
+}
+
+.statValue,
+.cutPos,
+.cutLen,
+.costTotal,
+.costLine dd {
+  font-variant-numeric: tabular-nums;
 }

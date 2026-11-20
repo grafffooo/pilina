@@ -6,6 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::linear::{LinearJob, LinearPlan};
 use crate::model::{Job, Plan, Rect};
 
 /// How board material is charged.
@@ -271,6 +272,163 @@ pub fn price(job: &Job, plan: &Plan, input: &PriceInput) -> CostBreakdown {
     }
 }
 
+// ---- 1D linear pricing ----
+
+/// How linear timber/bar material is charged.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum LinearPricingMode {
+    /// Every stock piece started is paid in full; kept tails can be credited back.
+    #[default]
+    Pieces,
+    /// Only the length of the cut parts is paid, plus a waste percentage.
+    Length,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LinearStockPrice {
+    pub stock_id: String,
+    pub material: String,
+    #[serde(default)]
+    pub per_piece: Option<f64>,
+    #[serde(default)]
+    pub per_metre: Option<f64>,
+}
+
+fn default_linear_min_offcut() -> f64 {
+    300.0
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LinearPriceInput {
+    #[serde(default)]
+    pub mode: LinearPricingMode,
+    #[serde(default = "default_waste")]
+    pub waste_pct: f64,
+    #[serde(default)]
+    pub offcut_credit: bool,
+    #[serde(default = "default_linear_min_offcut")]
+    pub min_offcut_length: f64,
+    #[serde(default)]
+    pub stock: Vec<LinearStockPrice>,
+    #[serde(default)]
+    pub extras: Vec<ExtraCost>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LinearMaterialCost {
+    pub material: String,
+    /// Bars started (library offcuts included).
+    pub bars: u32,
+    /// mm.
+    pub stock_length: f64,
+    /// mm covered by parts.
+    pub used_length: f64,
+    /// mm of reusable tail leftovers (only counted in pieces mode with offcut credit).
+    pub credit_length: f64,
+    pub gross: f64,
+    pub credit: f64,
+    pub cost: f64,
+    pub priced: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LinearCostBreakdown {
+    pub materials: Vec<LinearMaterialCost>,
+    pub extras: f64,
+    pub total: f64,
+    pub complete: bool,
+}
+
+/// Prices a 1D linear cutting plan.
+pub fn price_linear(
+    job: &LinearJob,
+    plan: &LinearPlan,
+    input: &LinearPriceInput,
+) -> LinearCostBreakdown {
+    let mut materials: Vec<LinearMaterialCost> = Vec::new();
+
+    for bar in &plan.bars {
+        let qty = f64::from(bar.qty);
+        let metres = bar.length / 1000.0;
+        let sp = input.stock.iter().find(|s| s.stock_id == bar.stock_id);
+        let is_offcut = job
+            .stock
+            .iter()
+            .any(|s| s.id == bar.stock_id && s.offcut);
+        let name = sp.map_or_else(|| bar.stock_id.clone(), |s| s.material.clone());
+
+        let per_piece = sp.and_then(|s| s.per_piece.or(s.per_metre.map(|p| p * metres)));
+        let per_metre = sp.and_then(|s| {
+            s.per_metre
+                .or(s.per_piece.and_then(|p| (metres > 0.0).then_some(p / metres)))
+        });
+        let used: f64 = bar.placements.iter().map(|p| p.length).sum();
+
+        let idx = match materials.iter().position(|m| m.material == name) {
+            Some(i) => i,
+            None => {
+                materials.push(LinearMaterialCost {
+                    material: name,
+                    bars: 0,
+                    stock_length: 0.0,
+                    used_length: 0.0,
+                    credit_length: 0.0,
+                    gross: 0.0,
+                    credit: 0.0,
+                    cost: 0.0,
+                    priced: true,
+                });
+                materials.len() - 1
+            }
+        };
+        let m = &mut materials[idx];
+        m.bars += bar.qty;
+        m.stock_length += bar.length * qty;
+        m.used_length += used * qty;
+
+        if is_offcut {
+            continue;
+        }
+        let (Some(per_piece), Some(per_metre)) = (per_piece, per_metre) else {
+            m.priced = false;
+            continue;
+        };
+        match input.mode {
+            LinearPricingMode::Pieces => {
+                m.gross += per_piece * qty;
+                if input.offcut_credit && bar.waste >= input.min_offcut_length {
+                    m.credit_length += bar.waste * qty;
+                    m.credit += (bar.waste / 1000.0) * per_metre * qty;
+                }
+            }
+            LinearPricingMode::Length => {
+                m.gross +=
+                    (used / 1000.0) * per_metre * (1.0 + input.waste_pct.max(0.0) / 100.0) * qty;
+            }
+        }
+    }
+
+    for m in &mut materials {
+        m.cost = m.gross - m.credit;
+    }
+
+    let extras: f64 = input.extras.iter().map(|x| x.amount).sum();
+    let total = materials.iter().map(|m| m.cost).sum::<f64>() + extras;
+    let complete = materials.iter().all(|m| m.priced);
+
+    LinearCostBreakdown {
+        materials,
+        extras,
+        total,
+        complete,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -403,5 +561,88 @@ mod tests {
         let c = price(&job, &plan, &input(PricingMode::Sheets));
         assert_eq!(c.materials[0].sheets, 1);
         assert_eq!(c.materials[0].cost, 0.0);
+    }
+
+    #[test]
+    fn linear_pieces_and_length_pricing() {
+        use crate::linear::{LinearJob, LinearOptions, LinearPartSpec, LinearStockSpec, optimize_linear};
+
+        let job = LinearJob {
+            parts: vec![LinearPartSpec {
+                id: "leg".into(),
+                length: 1000.0,
+                qty: 2,
+                label: "Leg".into(),
+                material: None,
+            }],
+            stock: vec![LinearStockSpec {
+                id: "oak".into(),
+                length: 4000.0,
+                qty: None,
+                priority: false,
+                offcut: false,
+                material: None,
+                label: "Oak 40x60".into(),
+            }],
+            kerf: 0.0,
+            end_trim: 0.0,
+            options: LinearOptions::default(),
+        };
+        let plan = optimize_linear(&job);
+
+        let base_input = |mode| LinearPriceInput {
+            mode,
+            waste_pct: 10.0,
+            offcut_credit: false,
+            min_offcut_length: 300.0,
+            stock: vec![LinearStockPrice {
+                stock_id: "oak".into(),
+                material: "Oak 40x60".into(),
+                per_piece: Some(40.0),
+                per_metre: None,
+            }],
+            extras: vec![ExtraCost {
+                label: "Bolts".into(),
+                amount: 5.0,
+            }],
+        };
+
+        let whole = price_linear(&job, &plan, &base_input(LinearPricingMode::Pieces));
+        assert!(whole.complete);
+        assert_eq!(whole.materials[0].cost, 40.0);
+        assert_eq!(whole.total, 45.0);
+
+        let mut credited = base_input(LinearPricingMode::Pieces);
+        credited.offcut_credit = true;
+        let c = price_linear(&job, &plan, &credited);
+        // 2000 mm used of 4000 mm bar -> 2000 mm reusable tail -> 50% credited back.
+        assert!((c.materials[0].credit - 20.0).abs() < 1e-9);
+        assert!((c.materials[0].cost - 20.0).abs() < 1e-9);
+
+        let by_len = price_linear(&job, &plan, &base_input(LinearPricingMode::Length));
+        // 2 m used at 10 EUR/m + 10% waste = 22.0 + 5.0 extras.
+        assert!((by_len.materials[0].cost - 22.0).abs() < 1e-9);
+        assert!((by_len.total - 27.0).abs() < 1e-9);
+
+        let mut offcut_job = job;
+        offcut_job.stock[0].offcut = true;
+        let off = price_linear(&offcut_job, &plan, &base_input(LinearPricingMode::Pieces));
+        assert_eq!(off.materials[0].cost, 0.0);
+
+        let mut missing = base_input(LinearPricingMode::Pieces);
+        missing.stock[0].per_piece = None;
+        let unpriced = price_linear(&plan_job(), &plan, &missing);
+        assert!(!unpriced.complete);
+        assert!(!unpriced.materials[0].priced);
+
+        fn plan_job() -> LinearJob {
+            LinearJob {
+                parts: vec![],
+                stock: vec![],
+                kerf: 0.0,
+                end_trim: 0.0,
+                options: LinearOptions::default(),
+            }
+        }
     }
 }

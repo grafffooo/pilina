@@ -1,18 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { newMaterial } from './library';
+import { newLinearMaterial, newMaterial } from './library';
 import {
   keepAdvice,
   labelFormat,
   labelOverflow,
   layoutLabels,
+  linearKeepAdvice,
+  linearOffcutStock,
+  matchingLinearOffcuts,
   matchingOffcuts,
+  newLinearOffcut,
   newOffcut,
   offcutCode,
   offcutIdFromStock,
+  offcutKind,
   offcutStock,
   stickerPosition,
 } from './offcut';
-import { newProject } from './project';
+import { emptyLinearStock, newProject } from './project';
 
 const rule = { offcutMinLength: 300, offcutMinWidth: 100 };
 
@@ -28,6 +33,13 @@ describe('offcuts', () => {
     expect(keepAdvice({ x: 0, y: 0, w: 914, h: 2800 }, rule)).toBe('suggested');
     expect(keepAdvice({ x: 0, y: 0, w: 80, h: 1264 }, rule)).toBe('strip');
     expect(keepAdvice({ x: 0, y: 0, w: 24, h: 300 }, rule)).toBe('small');
+    expect(keepAdvice({ x: 0, y: 0, w: 914, h: 2800 })).toBe('suggested');
+    expect(
+      keepAdvice({ x: 0, y: 0, w: 250, h: 450 }, { offcutMinLength: 500, offcutMinWidth: 100 }),
+    ).toBe('small');
+    expect(
+      keepAdvice({ x: 0, y: 0, w: 250, h: 450 }, { offcutMinLength: 400, offcutMinWidth: 200 }),
+    ).toBe('suggested');
   });
 
   it('offers only available offcuts in a material the project uses', () => {
@@ -41,10 +53,58 @@ describe('offcuts', () => {
     const own = { ...match, id: 'own', sourceProjectId: p.id };
     expect(matchingOffcuts(p, [match, used, other, loose, own])).toEqual([match]);
 
+    // When a project has enabled sized stock without a material, loose offcuts match too.
+    const plain = newProject(undefined, undefined, null);
+    expect(matchingOffcuts(plain, [match, loose])).toEqual([loose]);
+
     const [stock] = offcutStock([match], [dtd]);
     expect(stock).toMatchObject({ qty: 1, offcut: true, material: dtd.id, label: 'OC-0001 · DTD' });
     expect(offcutIdFromStock(stock!.id)).toBe(match.id);
     expect(offcutIdFromStock('sheet-1')).toBeNull();
+  });
+
+  it('keeps sheet and linear offcuts strictly separate', () => {
+    const dtd = newMaterial('DTD 18mm');
+    const kvh = newLinearMaterial('KVH 45x95');
+    const p = newProject(undefined, undefined, dtd.id);
+    p.linearStock = [{ ...emptyLinearStock(), id: 'b1', length: 4000, materialId: kvh.id }];
+
+    const sheetOc = { ...newOffcut(1, { length: 900, width: 400 }), materialId: dtd.id };
+    const linearOc = { ...newLinearOffcut(2, 1200), materialId: kvh.id };
+    const looseLinear = newLinearOffcut(3, 850);
+    const legacySheet = { ...newOffcut(4, { length: 700, width: 350 }), materialId: dtd.id };
+    delete legacySheet.kind;
+
+    expect(offcutKind(legacySheet)).toBe('sheet');
+    expect(offcutKind(linearOc)).toBe('linear');
+    expect([linearOc.width, linearOc.length]).toEqual([0, 1200]);
+
+    expect(matchingOffcuts(p, [sheetOc, linearOc, looseLinear, legacySheet])).toEqual([
+      sheetOc,
+      legacySheet,
+    ]);
+    expect(matchingLinearOffcuts(p, [sheetOc, linearOc, looseLinear, legacySheet])).toEqual([
+      linearOc,
+    ]);
+
+    const untypedLinearProject = newProject();
+    untypedLinearProject.linearStock = [{ ...emptyLinearStock(), length: 3000, materialId: null }];
+    expect(matchingLinearOffcuts(untypedLinearProject, [linearOc, looseLinear])).toEqual([
+      looseLinear,
+    ]);
+
+    const [barSpec] = linearOffcutStock([linearOc], [kvh]);
+    expect(barSpec).toMatchObject({
+      qty: 1,
+      offcut: true,
+      length: 1200,
+      material: kvh.id,
+      label: 'OC-0002 · KVH 45x95',
+    });
+
+    expect(linearKeepAdvice(300)).toBe('suggested');
+    expect(linearKeepAdvice(299)).toBe('small');
+    expect(linearKeepAdvice(450, 500)).toBe('small');
   });
 });
 

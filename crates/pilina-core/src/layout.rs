@@ -331,16 +331,25 @@ pub(crate) fn build(
     }
 }
 
-/// Puts a sheet's cuts in sawing order and numbers them 1, 2, 3… `build` makes them strip
-/// by strip; "rips first" moves every rip (left to right) ahead of the strips' cross cuts.
+/// Puts a sheet's cuts in sawing order and numbers them 1, 2, 3… Supports switching in
+/// either direction without losing each strip's cut sequence.
 pub(crate) fn order_cuts(cuts: &mut [Cut], order: CutOrder) {
-    if order == CutOrder::RipsFirst {
-        // A stable sort keeps rips left to right and each strip's cuts in their order.
-        cuts.sort_by_key(|c| match c.stage {
-            0 => 0,
-            1 => 1,
-            _ => 2,
-        });
+    match order {
+        CutOrder::RipsFirst => {
+            cuts.sort_by_key(|c| {
+                (
+                    match c.stage {
+                        0 => 0u8,
+                        1 => 1,
+                        _ => 2,
+                    },
+                    c.strip,
+                )
+            });
+        }
+        CutOrder::StripByStrip => {
+            cuts.sort_by_key(|c| (c.strip, if c.stage <= 1 { 0u8 } else { 1 }));
+        }
     }
     for (i, c) in cuts.iter_mut().enumerate() {
         c.number = i as u32 + 1;

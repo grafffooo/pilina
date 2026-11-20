@@ -131,6 +131,7 @@ describe('linear materials and pricing', () => {
     expect(noExtras.extras).toEqual([]);
     expect(noExtras.stock).toEqual([
       { stockId: 'b1', material: 'KVH 45x95', perPiece: 16 },
+      { stockId: `mat:${kvh.id}`, material: 'KVH 45x95', perPiece: 16 },
       { stockId: 'oc-1', material: 'KVH 45x95' },
     ]);
 

@@ -31,7 +31,7 @@ export function usePricing() {
     }
     let stale = false;
     const offcutStock = job.stock.filter((s) => s.offcut);
-    const input = buildPriceInput(project, materials, edgeBands, settings, offcutStock);
+    const input = buildPriceInput(project, materials, edgeBands, settings, offcutStock, plan.preCuts);
     price(job, plan, input)
       .then((cost) => {
         if (stale) return;
@@ -56,7 +56,14 @@ export function usePricing() {
     }
     let stale = false;
     const offcutStock = linearJob.stock.filter((s) => s.offcut);
-    const input = buildLinearPriceInput(project, materials, settings, offcutStock, !hasSheetPlan);
+    const input = buildLinearPriceInput(
+      project,
+      materials,
+      settings,
+      offcutStock,
+      !hasSheetPlan,
+      linearPlan.preCuts,
+    );
     priceLinear(linearJob, linearPlan, input)
       .then((linearCost) => {
         if (stale) return;

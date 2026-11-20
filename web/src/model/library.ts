@@ -241,6 +241,7 @@ export function buildPriceInput(
   bands: EdgeBand[],
   settings: Settings,
   offcutStock: StockSpec[] = [],
+  preCuts: { material?: string | null; pieces: { stockId: string; length: number; width: number }[] }[] = [],
 ): PriceInput {
   const mat = new Map(materials.map((m) => [m.id, m]));
   const band = new Map(bands.map((b) => [b.id, b]));
@@ -255,6 +256,13 @@ export function buildPriceInput(
         .map((s) =>
           stockPrice(s.id, s.length!, s.width!, s.materialId ? mat.get(s.materialId) : undefined),
         ),
+      ...materials
+        .filter((m) => materialKind(m) === 'sheet' && m.sheetLength && m.sheetWidth)
+        .map((m) => stockPrice(`mat:${m.id}`, m.sheetLength!, m.sheetWidth!, m)),
+      ...preCuts.flatMap((pc) => {
+        const m = pc.material ? mat.get(pc.material) : undefined;
+        return pc.pieces.map((p) => stockPrice(p.stockId, p.length, p.width, m));
+      }),
       // Library offcuts are free (paid for earlier) but grouped under their material.
       ...offcutStock.map((s) => ({
         stockId: s.id,
@@ -358,6 +366,7 @@ export function buildLinearPriceInput(
   settings: Settings,
   offcutStock: LinearStockSpec[] = [],
   includeExtras = false,
+  preCuts: { sourceStockId: string; material?: string | null; pieceLengths: number[] }[] = [],
 ): LinearPriceInput {
   const mat = new Map(materials.map((m) => [m.id, m]));
   return {
@@ -371,6 +380,15 @@ export function buildLinearPriceInput(
         .map((s) =>
           linearStockPrice(s.id, s.length!, s.materialId ? mat.get(s.materialId) : undefined),
         ),
+      ...materials
+        .filter((m) => materialKind(m) === 'linear' && m.stockLength)
+        .map((m) => linearStockPrice(`mat:${m.id}`, m.stockLength!, m)),
+      ...preCuts.flatMap((pc) => {
+        const m = pc.material ? mat.get(pc.material) : undefined;
+        return pc.pieceLengths.map((len, i) =>
+          linearStockPrice(`precut:${pc.sourceStockId}:${i + 1}`, len, m),
+        );
+      }),
       // Library offcuts are free (paid for earlier) but grouped under their material.
       ...offcutStock.map((s) => ({
         stockId: s.id,

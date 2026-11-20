@@ -11,6 +11,7 @@ import { unplacedReason, usedPercent } from '../model/job';
 import type { Project } from '../model/project';
 import { updateSettings, useStore } from '../store/store';
 import { useMediaQuery } from '../ui/hooks';
+import { SegmentedControl } from '../ui/SegmentedControl';
 import { useView } from '../store/view';
 import { ProjectActions } from '../app/ProjectHeader';
 import {

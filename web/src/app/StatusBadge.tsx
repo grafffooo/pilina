@@ -1,6 +1,6 @@
 // A project's status (cutting / cut) as a small badge, for the sidebar and the header.
 import { useTranslation } from 'react-i18next';
-import { peekSession, saveSession } from '../cutting/session';
+import { peekLinearSession, peekSession, saveLinearSession, saveSession } from '../cutting/session';
 import { locale } from '../i18n';
 import type { Project } from '../model/project';
 import { projectStatus, type ProjectStatus } from '../model/status';
@@ -11,13 +11,14 @@ import styles from './StatusBadge.module.css';
 export function useProjectStatus(project: Pick<Project, 'id' | 'cutAt'>): ProjectStatus {
   // Read again when cut mode opens or closes; the session itself lives in localStorage.
   useStore((s) => s.cutting);
-  return projectStatus(project, peekSession(project.id));
+  return projectStatus(project, peekSession(project.id), peekLinearSession(project.id));
 }
 
 /** Marks the open project as cut, or back to a draft. A half-done cut mode session is
  *  dropped either way: the project is finished, or it's being planned again. */
 export function setProjectCut(project: Pick<Project, 'id'>, cut: boolean) {
   saveSession(project.id, null);
+  saveLinearSession(project.id, null);
   updateProject({ cutAt: cut ? Date.now() : null });
 }
 

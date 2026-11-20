@@ -23,6 +23,7 @@ import { MoreIcon, PlusIcon } from '../ui/icons';
 import { LengthInput, NumberInput } from '../ui/NumberInput';
 import { Menu } from '../ui/Popover';
 import { CardActions, CardField, CardFields, cardStyles, RowCard } from '../ui/RowCard';
+import { SortTh, useTableSort } from '../ui/tableSort';
 import ui from '../ui/ui.module.css';
 import styles from './Editor.module.css';
 import { MaterialSelect } from './MaterialSelect';
@@ -31,7 +32,29 @@ import { LinearSettingChips } from './ProjectSettingChips';
 
 export function LinearPartsTable({ project }: { project: Project }) {
   const { t } = useTranslation();
+  const materials = useStore((s) => s.materials);
   const parts = project.linearParts;
+  const { sortKey, sortDir, toggle, sortRows } = useTableSort<
+    'enabled' | 'length' | 'qty' | 'label' | 'material'
+  >();
+  const sortedParts = sortRows(
+    parts,
+    (p, key) => {
+      switch (key) {
+        case 'enabled':
+          return p.enabled;
+        case 'length':
+          return p.length;
+        case 'qty':
+          return p.qty;
+        case 'label':
+          return p.label;
+        case 'material':
+          return materials.find((m) => m.id === p.materialId)?.name ?? null;
+      }
+    },
+    isBlankLinearPart,
+  );
   const pieces = parts.reduce((n, p) => n + (p.enabled && p.length && p.qty ? p.qty : 0), 0);
   const rowsWithData = parts.filter((p) => !isBlankLinearPart(p)).length;
   const stockMaterials = new Set(project.linearStock.map((s) => s.materialId).filter(Boolean));
@@ -115,20 +138,30 @@ export function LinearPartsTable({ project }: { project: Project }) {
           <table id="linear-parts-table" className={`${styles.table} ${styles.linearPartsTable}`}>
             <thead>
               <tr>
-                <th className={styles.colCheck}>
+                <SortTh col="enabled" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.colCheck}>
                   <span className="sr-only">{t('Use')}</span>
-                </th>
-                <th className={styles.num}>{t('Length')}</th>
-                <th className={`${styles.num} ${styles.colQty}`}>{t('Qty')}</th>
-                <th>{t('Label')}</th>
-                {showMaterial && <th>{t('Material')}</th>}
+                </SortTh>
+                <SortTh col="length" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.num} numeric>
+                  {t('Length')}
+                </SortTh>
+                <SortTh col="qty" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={`${styles.num} ${styles.colQty}`} numeric>
+                  {t('Qty')}
+                </SortTh>
+                <SortTh col="label" sortKey={sortKey} sortDir={sortDir} onSort={toggle}>
+                  {t('Label')}
+                </SortTh>
+                {showMaterial && (
+                  <SortTh col="material" sortKey={sortKey} sortDir={sortDir} onSort={toggle}>
+                    {t('Material')}
+                  </SortTh>
+                )}
                 <th className={styles.colMore}>
                   <span className="sr-only">{t('More')}</span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {parts.map((p, i) => {
+              {sortedParts.map((p, i) => {
                 const missing = missingLinearPartFields(p);
                 const name = p.label || t('Part {{n}}', { n: i + 1 });
                 const cell = (col: 'length' | 'qty', label: string) => {

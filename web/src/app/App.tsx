@@ -50,6 +50,7 @@ import { Sidebar } from './Sidebar';
 import {
   AddBoardScreen,
   AddEdgeBandScreen,
+  AddLinearMaterialScreen,
   AddLinearPartScreen,
   AddOffcutScreen,
   AddPartScreen,
@@ -167,6 +168,7 @@ function PhoneApp({ project }: { project: Project }) {
       {view === 'add-part' && <AddPartScreen />}
       {view === 'add-linear-part' && <AddLinearPartScreen />}
       {view === 'add-board' && <AddBoardScreen />}
+      {view === 'add-linear-material' && <AddLinearMaterialScreen />}
       {view === 'add-band' && <AddEdgeBandScreen />}
       {view === 'add-offcut' && <AddOffcutScreen />}
       {(view === 'library' || view === 'offcuts' || view === 'labels' || view === 'stats') && (
@@ -315,6 +317,7 @@ function PhoneLayout({ project }: { project: Project }) {
               <>
                 <BarPager plan={linearPlan} />
                 <LinearCutOrder plan={linearPlan} title={false} fullHeight />
+                <StartCuttingButton large kind="linear" />
               </>
             ) : (
               <EmptyLinearResults running={linearStatus === 'running'} />

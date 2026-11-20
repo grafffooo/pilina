@@ -1,4 +1,5 @@
 // Boards and edge bands as cards on a phone (the library's tables scroll sideways).
+import type { TFunction } from 'i18next';
 import type { Grain } from '../engine/types';
 import { useTranslation } from 'react-i18next';
 import {
@@ -203,17 +204,150 @@ export function BoardCards({
               <button
                 type="button"
                 data-danger=""
-                onClick={async () => {
-                  const ok =
-                    used === 0 ||
-                    (await confirmDialog({
-                      title: t('Delete material?'),
-                      message: t('delete_material_in_use', { name: m.name, count: used }),
-                      confirmLabel: t('Delete'),
-                      danger: true,
-                    }));
-                  if (ok) removeMaterial(m.id);
-                }}
+                onClick={() => void confirmDeleteMaterial(m, used, t)}
+              >
+                {t('Delete')}
+              </button>
+            </CardActions>
+          </RowCard>
+        );
+      })}
+    </div>
+  );
+}
+
+export async function confirmDeleteMaterial(m: Material, used: number, t: TFunction) {
+  const ok =
+    used === 0 ||
+    (await confirmDialog({
+      title: t('Delete material?'),
+      message: t('delete_material_in_use', { name: m.name, count: used }),
+      confirmLabel: t('Delete'),
+      danger: true,
+    }));
+  if (ok) removeMaterial(m.id);
+}
+
+export function LinearMaterialCards({
+  materials,
+  usage,
+  openId,
+  setOpenId,
+}: {
+  materials: Material[];
+  usage: (id: string) => number;
+  openId: string | null;
+  setOpenId: (id: string | null) => void;
+}) {
+  const { t } = useTranslation();
+  const currency = useStore((s) => s.settings.currency);
+  if (materials.length === 0) {
+    return (
+      <p className={styles.empty}>
+        {t('No linear stock yet. Add timber, battens or profiles you buy, with their prices.')}
+      </p>
+    );
+  }
+  return (
+    <div className={cardStyles.list}>
+      {materials.map((m) => {
+        const used = usage(m.id);
+        const open = openId === m.id;
+        const perMetre = m.priceUnit === 'metre';
+        const shownPrice =
+          m.price === null ? null : perMetre ? exact(longPriceOut(m.price)) : m.price;
+        return (
+          <RowCard
+            key={m.id}
+            open={open}
+            onToggle={() => setOpenId(open ? null : m.id)}
+            label={m.name}
+            lead={
+              <span
+                className={styles.cardSwatch}
+                style={{ background: m.color }}
+                aria-hidden="true"
+              />
+            }
+            title={m.name}
+            lines={boardSummary(m, currency, t)}
+          >
+            <CardField label={t('Name')}>
+              <input
+                aria-label={t('Linear stock name')}
+                data-material={m.id}
+                value={m.name}
+                style={{ textAlign: 'start' }}
+                onChange={(e) => updateMaterial(m.id, { name: e.target.value })}
+              />
+            </CardField>
+            <CardFields>
+              <CardField label={`${t('Thickness')} (${unitLabel()})`}>
+                <LengthInput
+                  aria-label={t('Thickness of {{name}}', { name: m.name })}
+                  value={m.thickness}
+                  onCommit={(thickness) => updateMaterial(m.id, { thickness })}
+                />
+              </CardField>
+              <CardField label={`${t('Profile width')} (${unitLabel()})`}>
+                <LengthInput
+                  aria-label={t('Profile width of {{name}}', { name: m.name })}
+                  value={m.profileWidth ?? null}
+                  onCommit={(profileWidth) => updateMaterial(m.id, { profileWidth })}
+                />
+              </CardField>
+            </CardFields>
+            <CardField label={t('Price')}>
+              <NumberInput
+                aria-label={t('Price of {{name}}', { name: m.name })}
+                aria-invalid={m.price === null || undefined}
+                placeholder="—"
+                format={formatPrice}
+                value={shownPrice}
+                onCommit={(price) =>
+                  updateMaterial(m.id, {
+                    price: perMetre && price !== null ? longPriceIn(price) : price,
+                  })
+                }
+              />
+            </CardField>
+            <CardField label={t('Per')}>
+              <select
+                aria-label={t('Price unit of {{name}}', { name: m.name })}
+                value={perMetre ? 'metre' : 'piece'}
+                onChange={(e) =>
+                  updateMaterial(m.id, { priceUnit: e.target.value as 'piece' | 'metre' })
+                }
+              >
+                <option value="piece">{t('piece')}</option>
+                <option value="metre">{longUnit()}</option>
+              </select>
+            </CardField>
+            {!perMetre && (
+              <CardField label={`${t('For bar length')} (${unitLabel()})`}>
+                <LengthInput
+                  aria-label={t('Bar length for the price of {{name}}', { name: m.name })}
+                  placeholder={t('Length')}
+                  value={m.stockLength ?? null}
+                  onCommit={(stockLength) => updateMaterial(m.id, { stockLength })}
+                />
+              </CardField>
+            )}
+            <CardField label={t('Colour')}>
+              <input
+                type="color"
+                aria-label={t('Colour of {{name}}', { name: m.name })}
+                value={m.color}
+                style={{ textAlign: 'start' }}
+                onChange={(e) => updateMaterial(m.id, { color: e.target.value })}
+              />
+            </CardField>
+            {used > 0 && <p className={cardStyles.hint}>{t('in_n_projects', { count: used })}</p>}
+            <CardActions>
+              <button
+                type="button"
+                data-danger=""
+                onClick={() => void confirmDeleteMaterial(m, used, t)}
               >
                 {t('Delete')}
               </button>

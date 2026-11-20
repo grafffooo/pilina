@@ -9,6 +9,7 @@ import {
   labelOverflow,
   LABEL_FORMATS,
   layoutLabels,
+  offcutKind,
   stickerPosition,
   type LabelFormat,
   type Offcut,
@@ -370,10 +371,29 @@ function Label({
 }) {
   const pad = 3;
   const qr = Math.min(format.labelH - 2 * pad, 30);
+  const isLinear = offcutKind(offcut) === 'linear';
   const m = materials.find((x) => x.id === offcut.materialId);
+  const tVal = m?.thickness ?? offcut.profileThickness ?? null;
+  const wVal = m?.profileWidth ?? offcut.profileWidth ?? null;
+  const linearProfile =
+    isLinear && tVal && wVal
+      ? `${formatLength(tVal)} × ${formatLengthUnit(wVal)}`
+      : tVal
+        ? formatLengthUnit(tVal)
+        : null;
+  const showProfile =
+    linearProfile &&
+    !(m?.name && (wVal ? m.name.includes(String(wVal)) : m.name.includes(String(tVal))));
   const material = m
-    ? [m.name, m.thickness ? formatLengthUnit(m.thickness) : null].filter(Boolean).join(' · ')
-    : null;
+    ? [
+        m.name,
+        isLinear ? (showProfile ? linearProfile : null) : m.thickness ? formatLengthUnit(m.thickness) : null,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : isLinear
+      ? linearProfile
+      : null;
   const source = [offcut.sourceProjectName, dateFormat().format(offcut.createdAt)]
     .filter(Boolean)
     .join(' · ');
@@ -383,7 +403,9 @@ function Label({
       <div className={styles.labelText}>
         <span className={styles.labelCode}>{offcut.code}</span>
         <span className={styles.labelSize}>
-          {formatLength(offcut.length)} × {formatLength(offcut.width)}
+          {isLinear
+            ? formatLengthUnit(offcut.length)
+            : `${formatLength(offcut.length)} × ${formatLength(offcut.width)}`}
         </span>
         {settings.labelShow.material && material && (
           <span className={styles.labelLine}>{material}</span>

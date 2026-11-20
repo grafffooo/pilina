@@ -227,6 +227,19 @@ export function SettingsForm() {
             {unitLabel()}
           </span>
         </div>
+        <div className={styles.row}>
+          <span className={styles.label}>{t('Reusable bar leftover')}</span>
+          <span className={styles.inline}>
+            {t('at least')}
+            <LengthInput
+              className={`${ui.fieldInput} ${styles.short}`}
+              aria-label={t('Minimum bar leftover length')}
+              value={settings.linearOffcutMinLength ?? 300}
+              onCommit={(v) => updateSettings({ linearOffcutMinLength: Math.max(0, v ?? 0) })}
+            />
+            {unitLabel()}
+          </span>
+        </div>
       </section>
 
       <FolderSection />

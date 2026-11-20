@@ -30,7 +30,10 @@ export function ShareDialog({ project, onClose }: { project: Project; onClose: (
   });
   const plan = useStore((s) => s.result.plan);
   const job = useStore((s) => s.result.job);
-  const ready = useStore((s) => s.result.status === 'ready');
+  const status = useStore((s) => s.result.status);
+  const linearPlan = useStore((s) => s.linearResult.plan);
+  const linearJob = useStore((s) => s.linearResult.job);
+  const linearStatus = useStore((s) => s.linearResult.status);
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [link, setLink] = useState<string | null>(null);
@@ -77,14 +80,20 @@ export function ShareDialog({ project, onClose }: { project: Project; onClose: (
     }
   };
 
+  const hasSheets = status === 'ready' && !!plan && !!job && plan.sheets.length > 0;
+  const hasBars =
+    linearStatus === 'ready' && !!linearPlan && !!linearJob && linearPlan.bars.length > 0;
   const pdf = async () => {
     const { makePdf } = await import('../pdf/exportPdf');
-    const { cost, materials, settings } = useStore.getState();
+    const { cost, linearCost, materials, settings } = useStore.getState();
     return makePdf({
       project,
-      plan: plan!,
-      job: job!,
-      cost,
+      plan: hasSheets ? plan : null,
+      job: hasSheets ? job : null,
+      linearPlan: hasBars ? linearPlan : null,
+      linearJob: hasBars ? linearJob : null,
+      cost: hasSheets ? cost : null,
+      linearCost: hasBars ? linearCost : null,
       materials,
       currency: settings.currency,
       edgeAllowance: settings.edgeAllowance,
@@ -92,10 +101,11 @@ export function ShareDialog({ project, onClose }: { project: Project; onClose: (
         offcutMinLength: settings.offcutMinLength,
         offcutMinWidth: settings.offcutMinWidth,
       },
+      linearOffcutMinLength: settings.linearOffcutMinLength ?? 300,
       cutMeasure: settings.cutMeasure,
     });
   };
-  const pdfReady = ready && !!plan && !!job && plan.sheets.length > 0;
+  const pdfReady = (hasSheets || hasBars) && status !== 'running' && linearStatus !== 'running';
 
   const markdown = () => {
     const md = projectToOldMarkdown(project, useStore.getState().materials);

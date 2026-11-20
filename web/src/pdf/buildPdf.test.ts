@@ -1,8 +1,15 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { PDFDocument } from 'pdf-lib';
 import { describe, expect, it } from 'vitest';
-import type { CostBreakdown, Job, Plan } from '../engine/types';
-import { emptyPart, newProject } from '../model/project';
+import type {
+  CostBreakdown,
+  Job,
+  LinearCostBreakdown,
+  LinearJob,
+  LinearPlan,
+  Plan,
+} from '../engine/types';
+import { emptyLinearPart, emptyPart, newProject } from '../model/project';
 import { buildPdf } from './buildPdf';
 import { pdfFileName } from './exportPdf';
 
@@ -153,4 +160,126 @@ it('makes a plain file name', () => {
   expect(pdfFileName('Skrinky do dielne')).toBe('skrinky-do-dielne.pdf');
   expect(pdfFileName('Kuchynská linka – Žilina')).toBe('kuchynska-linka-zilina.pdf');
   expect(pdfFileName('  ')).toBe('cutting-plan.pdf');
+});
+
+function sampleLinear() {
+  const project = newProject('Pergola – Žilina');
+  project.linearEndTrim = 20;
+  project.linearParts = [
+    { ...emptyLinearPart(), id: 'la', length: 1200, qty: 2, label: 'Stĺpik čelný' },
+    { ...emptyLinearPart(), id: 'lb', length: 500, qty: 1, label: 'Rozpera – krátka' },
+  ];
+  const linearJob: LinearJob = {
+    kerf: 3,
+    endTrim: 20,
+    parts: [
+      { id: 'la', length: 1200, qty: 2, label: 'Stĺpik čelný' },
+      { id: 'lb', length: 500, qty: 1, label: 'Rozpera – krátka' },
+    ],
+    stock: [{ id: 'ls', length: 4000, label: 'KVH 60×120 Smrek' }],
+  };
+  const linearPlan: LinearPlan = {
+    bars: [
+      {
+        stockId: 'ls',
+        length: 4000,
+        qty: 1,
+        placements: [
+          { partId: 'la', instance: 0, x: 20, length: 1200 },
+          { partId: 'la', instance: 1, x: 1223, length: 1200 },
+          { partId: 'lb', instance: 0, x: 2426, length: 500 },
+        ],
+        cuts: [
+          { number: 1, stage: 0, pos: 18.5, fromLastEdge: 20 },
+          { number: 2, stage: 1, pos: 1221.5, fromLastEdge: 1200 },
+          { number: 3, stage: 1, pos: 2424.5, fromLastEdge: 1200 },
+          { number: 4, stage: 1, pos: 2927.5, fromLastEdge: 500 },
+        ],
+        waste: 1051,
+        offcutStart: 2929,
+      },
+    ],
+    unplaced: [],
+    totals: {
+      bars: 1,
+      offcutsUsed: 0,
+      stockLength: 4000,
+      usedLength: 2900,
+      wasteLength: 1051,
+      cuts: 4,
+    },
+  };
+  const linearCost: LinearCostBreakdown = {
+    materials: [
+      {
+        material: 'KVH 60×120 Smrek',
+        bars: 1,
+        stockLength: 4000,
+        usedLength: 2900,
+        creditLength: 0,
+        gross: 18.5,
+        credit: 0,
+        cost: 18.5,
+        priced: true,
+      },
+    ],
+    extras: 0,
+    total: 18.5,
+    complete: true,
+  };
+  return { project, linearJob, linearPlan, linearCost };
+}
+
+it('builds a linear-only cutting plan PDF with summary and bar pages', async () => {
+  const { project, linearJob, linearPlan, linearCost } = sampleLinear();
+  const bytes = await buildPdf(
+    {
+      project,
+      plan: null,
+      job: null,
+      linearPlan,
+      linearJob,
+      cost: null,
+      linearCost,
+      materials: [],
+      currency: 'EUR',
+      linearOffcutMinLength: 300,
+      date: new Date(2026, 10, 9),
+    },
+    {
+      regular: font('400Regular/Inter_400Regular'),
+      semibold: font('600SemiBold/Inter_600SemiBold'),
+    },
+  );
+  const doc = await PDFDocument.load(bytes);
+  expect(doc.getPageCount()).toBe(2);
+  expect(doc.getTitle()).toBe('Pergola – Žilina');
+});
+
+it('builds a mixed 2D sheet and 1D bar cutting plan PDF', async () => {
+  const { project, job, plan, cost } = sample();
+  const { project: linProj, linearJob, linearPlan, linearCost } = sampleLinear();
+  project.linearEndTrim = linProj.linearEndTrim;
+  project.linearParts = linProj.linearParts;
+  const bytes = await buildPdf(
+    {
+      project,
+      job,
+      plan,
+      linearJob,
+      linearPlan,
+      cost,
+      linearCost,
+      materials: [],
+      currency: 'EUR',
+      linearOffcutMinLength: 300,
+      date: new Date(2026, 10, 9),
+    },
+    {
+      regular: font('400Regular/Inter_400Regular'),
+      semibold: font('600SemiBold/Inter_600SemiBold'),
+    },
+  );
+  const doc = await PDFDocument.load(bytes);
+  expect(doc.getPageCount()).toBe(3);
 });

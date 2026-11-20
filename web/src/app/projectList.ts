@@ -1,7 +1,7 @@
 // What the sidebar (desktop) and the Projects screens (phone) share: searching the projects,
 // splitting them into open and cut ones, and the short date texts.
 import { useMemo } from 'react';
-import { peekSession } from '../cutting/session';
+import { peekLinearSession, peekSession } from '../cutting/session';
 import { locale, t as i18nT } from '../i18n';
 import type { Project } from '../model/project';
 import { projectStatus, type ProjectStatus } from '../model/status';
@@ -52,7 +52,9 @@ export function useProjectRows(query: string) {
     if (!q) return sorted;
     return sorted.filter(
       (p) =>
-        p.name.toLowerCase().includes(q) || p.parts.some((r) => r.label.toLowerCase().includes(q)),
+        p.name.toLowerCase().includes(q) ||
+        p.parts.some((r) => r.label.toLowerCase().includes(q)) ||
+        (p.linearParts ?? []).some((r) => r.label.toLowerCase().includes(q)),
     );
   }, [projects, query]);
 
@@ -61,7 +63,7 @@ export function useProjectRows(query: string) {
     void cutting;
     const rows: ProjectRowData[] = shown.map((project) => ({
       project,
-      status: projectStatus(project, peekSession(project.id)),
+      status: projectStatus(project, peekSession(project.id), peekLinearSession(project.id)),
       active: project.id === currentId && view === 'project',
     }));
     return [

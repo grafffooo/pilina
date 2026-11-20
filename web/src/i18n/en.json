@@ -109,5 +109,9 @@
   "{{count}} bar lengths_one": "1 bar length",
   "{{count}} bar lengths_other": "{{count}} bar lengths",
   "bar_drawing_label_one": "Bar {{n}}: 1 part on a {{length}} mm bar, {{pct}}% used",
-  "bar_drawing_label_other": "Bar {{n}}: {{count}} parts on a {{length}} mm bar, {{pct}}% used"
+  "bar_drawing_label_other": "Bar {{n}}: {{count}} parts on a {{length}} mm bar, {{pct}}% used",
+  "n_bars_cuts_done_one": "1 bar, {{cuts}} cuts done.",
+  "n_bars_cuts_done_other": "{{count}} bars, {{cuts}} cuts done.",
+  "The bar with {{count}} offcuts selected_one": "The bar with 1 offcut selected",
+  "The bar with {{count}} offcuts selected_other": "The bar with {{count}} offcuts selected"
 }

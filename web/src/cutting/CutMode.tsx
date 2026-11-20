@@ -16,10 +16,16 @@ import ui from '../ui/ui.module.css';
 import { cutSentence, loadSession, saveSession, steps, type CutSession } from './session';
 import { locale, t as i18nT } from '../i18n';
 import { promptDialog } from '../ui/dialogs';
+import { LinearCutMode } from './LinearCutMode';
 import styles from './CutMode.module.css';
 import { useTranslation } from 'react-i18next';
 
 export function CutMode() {
+  const cuttingKind = useStore((s) => s.cuttingKind);
+  return cuttingKind === 'linear' ? <LinearCutMode /> : <SheetCutMode />;
+}
+
+function SheetCutMode() {
   const { t } = useTranslation();
   const project = useCurrentProject()!;
   const result = useStore((s) => s.result);
@@ -156,7 +162,7 @@ export function CutMode() {
 
   if (finished) {
     return (
-      <Shell
+      <CutShell
         title={t('All sheets are cut')}
         subtitle={project.name || t('Untitled project')}
         onClose={close}
@@ -203,7 +209,7 @@ export function CutMode() {
             </button>
           )}
         </div>
-      </Shell>
+      </CutShell>
     );
   }
 
@@ -217,7 +223,7 @@ export function CutMode() {
 
   if (sheetDone) {
     return (
-      <Shell
+      <CutShell
         title={t('{{sheet}} is cut', { sheet: sheetTitle })}
         subtitle={`${t('{{done}} of {{total}} cuts', { done: cuts.length, total: cuts.length })} · ${project.name || t('Untitled project')}`}
         onClose={close}
@@ -228,7 +234,7 @@ export function CutMode() {
           onBack={cuts.length > 0 ? back : undefined}
           onDone={finishSheet}
         />
-      </Shell>
+      </CutShell>
     );
   }
 
@@ -249,7 +255,7 @@ export function CutMode() {
   };
 
   return (
-    <Shell
+    <CutShell
       title={t('Cut {{n}} of {{total}}', { n: session.cut + 1, total: cuts.length })}
       subtitle={`${sheetTitle} · ${sheetSub}`}
       onClose={close}
@@ -337,7 +343,7 @@ export function CutMode() {
           {following ? t('Done, next cut') : t('Done, sheet finished')}
         </button>
       </div>
-    </Shell>
+    </CutShell>
   );
 }
 
@@ -360,7 +366,7 @@ function pickUpText(p: Extract<CutPhase, { kind: 'strip' }>) {
   };
 }
 
-function Shell({
+export function CutShell({
   title,
   subtitle,
   progress,

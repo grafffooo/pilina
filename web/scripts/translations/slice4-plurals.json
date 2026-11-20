@@ -1,0 +1,488 @@
+{
+  "en": {
+    "n_bars_cuts_done_one": "1 bar, {{cuts}} cuts done.",
+    "n_bars_cuts_done_other": "{{count}} bars, {{cuts}} cuts done.",
+    "The bar with {{count}} offcuts selected_one": "The bar with 1 offcut selected",
+    "The bar with {{count}} offcuts selected_other": "The bar with {{count}} offcuts selected"
+  },
+  "locales": {
+    "sk": {
+      "n_bars_cuts_done": {
+        "one": "1 tyč, hotových rezov: {{cuts}}.",
+        "few": "{{count}} tyče, hotových rezov: {{cuts}}.",
+        "many": "{{count}} tyče, hotových rezov: {{cuts}}.",
+        "other": "{{count}} tyčí, hotových rezov: {{cuts}}."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Tyč s 1 vybraným zvyškom",
+        "few": "Tyč s {{count}} vybranými zvyškami",
+        "many": "Tyč s {{count}} vybranými zvyškami",
+        "other": "Tyč s {{count}} vybranými zvyškami"
+      }
+    },
+    "cs": {
+      "n_bars_cuts_done": {
+        "one": "1 tyč, hotových řezů: {{cuts}}.",
+        "few": "{{count}} tyče, hotových řezů: {{cuts}}.",
+        "many": "{{count}} tyče, hotových řezů: {{cuts}}.",
+        "other": "{{count}} tyčí, hotových řezů: {{cuts}}."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Tyč s 1 vybraným zbytkem",
+        "few": "Tyč se {{count}} vybranými zbytky",
+        "many": "Tyč s {{count}} vybranými zbytky",
+        "other": "Tyč s {{count}} vybranými zbytky"
+      }
+    },
+    "de": {
+      "n_bars_cuts_done": {
+        "one": "{{count}} Stab, {{cuts}} Schnitte erledigt.",
+        "other": "{{count}} Stäbe, {{cuts}} Schnitte erledigt."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Der Stab mit {{count}} ausgewählten Reststück",
+        "other": "Der Stab mit {{count}} ausgewählten Reststücken"
+      }
+    },
+    "fr": {
+      "n_bars_cuts_done": {
+        "one": "{{count}} barre, {{cuts}} coupes faites.",
+        "many": "{{count}} de barres, {{cuts}} coupes faites.",
+        "other": "{{count}} barres, {{cuts}} coupes faites."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "La barre avec {{count}} chute sélectionnée",
+        "many": "La barre avec {{count}} chutes sélectionnées",
+        "other": "La barre avec {{count}} chutes sélectionnées"
+      }
+    },
+    "it": {
+      "n_bars_cuts_done": {
+        "one": "1 barra, {{cuts}} tagli fatti.",
+        "many": "{{count}} barre, {{cuts}} tagli fatti.",
+        "other": "{{count}} barre, {{cuts}} tagli fatti."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "La barra con 1 scarto selezionato",
+        "many": "La barra con {{count}} scarti selezionati",
+        "other": "La barra con {{count}} scarti selezionati"
+      }
+    },
+    "es": {
+      "n_bars_cuts_done": {
+        "one": "1 barra, {{cuts}} cortes hechos.",
+        "many": "{{count}} barras, {{cuts}} cortes hechos.",
+        "other": "{{count}} barras, {{cuts}} cortes hechos."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "La barra con 1 retal seleccionado",
+        "many": "La barra con {{count}} retales seleccionados",
+        "other": "La barra con {{count}} retales seleccionados"
+      }
+    },
+    "pt": {
+      "n_bars_cuts_done": {
+        "one": "{{count}} barra, {{cuts}} cortes feitos.",
+        "many": "{{count}} barras, {{cuts}} cortes feitos.",
+        "other": "{{count}} barras, {{cuts}} cortes feitos."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "A barra com {{count}} retalho selecionado",
+        "many": "A barra com {{count}} retalhos selecionados",
+        "other": "A barra com {{count}} retalhos selecionados"
+      }
+    },
+    "nl": {
+      "n_bars_cuts_done": {
+        "one": "1 staf, {{cuts}} sneden klaar.",
+        "other": "{{count}} staven, {{cuts}} sneden klaar."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "De staf met 1 geselecteerd reststuk",
+        "other": "De staf met {{count}} geselecteerde reststukken"
+      }
+    },
+    "pl": {
+      "n_bars_cuts_done": {
+        "one": "1 listwa, wykonano cięć: {{cuts}}.",
+        "few": "{{count}} listwy, wykonano cięć: {{cuts}}.",
+        "many": "{{count}} listew, wykonano cięć: {{cuts}}.",
+        "other": "{{count}} listew, wykonano cięć: {{cuts}}."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Listwa z 1 wybraną resztką",
+        "few": "Listwa z {{count}} wybranymi resztkami",
+        "many": "Listwa z {{count}} wybranymi resztkami",
+        "other": "Listwa z {{count}} wybranymi resztkami"
+      }
+    },
+    "hu": {
+      "n_bars_cuts_done": {
+        "one": "1 szál, {{cuts}} vágás kész.",
+        "other": "{{count}} szál, {{cuts}} vágás kész."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "A szál 1 kijelölt maradékkal",
+        "other": "A szál {{count}} kijelölt maradékkal"
+      }
+    },
+    "ro": {
+      "n_bars_cuts_done": {
+        "one": "1 bară, {{cuts}} tăieturi făcute.",
+        "few": "{{count}} bare, {{cuts}} tăieturi făcute.",
+        "other": "{{count}} de bare, {{cuts}} tăieturi făcute."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Bara cu 1 rest selectat",
+        "few": "Bara cu {{count}} resturi selectate",
+        "other": "Bara cu {{count}} de resturi selectate"
+      }
+    },
+    "bg": {
+      "n_bars_cuts_done": {
+        "one": "1 греда, направени резове: {{cuts}}.",
+        "other": "{{count}} греди, направени резове: {{cuts}}."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Гредата с 1 избран остатък",
+        "other": "Гредата с {{count}} избрани остатъка"
+      }
+    },
+    "el": {
+      "n_bars_cuts_done": {
+        "one": "1 βέργα, {{cuts}} κοπές έγιναν.",
+        "other": "{{count}} βέργες, {{cuts}} κοπές έγιναν."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Η βέργα με 1 επιλεγμένο ρετάλι",
+        "other": "Η βέργα με {{count}} επιλεγμένα ρετάλια"
+      }
+    },
+    "sv": {
+      "n_bars_cuts_done": {
+        "one": "1 regel, {{cuts}} snitt klara.",
+        "other": "{{count}} reglar, {{cuts}} snitt klara."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Regeln med 1 vald restbit",
+        "other": "Regeln med {{count}} valda restbitar"
+      }
+    },
+    "da": {
+      "n_bars_cuts_done": {
+        "one": "1 lægte, {{cuts}} snit udført.",
+        "other": "{{count}} lægter, {{cuts}} snit udført."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Lægten med 1 valgt reststykke",
+        "other": "Lægten med {{count}} valgte reststykker"
+      }
+    },
+    "fi": {
+      "n_bars_cuts_done": {
+        "one": "1 tanko, {{cuts}} sahausta tehty.",
+        "other": "{{count}} tankoa, {{cuts}} sahausta tehty."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Tanko, jossa 1 valittu jäännöspala",
+        "other": "Tanko, jossa {{count}} valittua jäännöspalaa"
+      }
+    },
+    "no": {
+      "n_bars_cuts_done": {
+        "one": "1 lekt, {{cuts}} snitt ferdig.",
+        "other": "{{count}} lekter, {{cuts}} snitt ferdig."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Lekten med 1 valgt reststykke",
+        "other": "Lekten med {{count}} valgte reststykker"
+      }
+    },
+    "is": {
+      "n_bars_cuts_done": {
+        "one": "{{count}} stöng, {{cuts}} skurðir búnir.",
+        "other": "{{count}} stangir, {{cuts}} skurðir búnir."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Stöngin með {{count}} völdum afgangi",
+        "other": "Stöngin með {{count}} völdum afgöngum"
+      }
+    },
+    "et": {
+      "n_bars_cuts_done": {
+        "one": "1 latt, {{cuts}} lõiget tehtud.",
+        "other": "{{count}} latti, {{cuts}} lõiget tehtud."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Latt 1 valitud jäägiga",
+        "other": "Latt {{count}} valitud jäägiga"
+      }
+    },
+    "lv": {
+      "n_bars_cuts_done": {
+        "zero": "{{count}} latu, paveikti griezumi: {{cuts}}.",
+        "one": "{{count}} lata, paveikti griezumi: {{cuts}}.",
+        "other": "{{count}} latas, paveikti griezumi: {{cuts}}."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "zero": "Lata ar {{count}} atlasītiem atgriezumiem",
+        "one": "Lata ar {{count}} atlasītu atgriezumu",
+        "other": "Lata ar {{count}} atlasītiem atgriezumiem"
+      }
+    },
+    "lt": {
+      "n_bars_cuts_done": {
+        "one": "{{count}} tašas, atlikta pjūvių: {{cuts}}.",
+        "few": "{{count}} tašai, atlikta pjūvių: {{cuts}}.",
+        "many": "{{count}} tašo, atlikta pjūvių: {{cuts}}.",
+        "other": "{{count}} tašų, atlikta pjūvių: {{cuts}}."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Tašas su {{count}} pažymėta atraiža",
+        "few": "Tašas su {{count}} pažymėtomis atraižomis",
+        "many": "Tašas su {{count}} pažymėtos atraižos",
+        "other": "Tašas su {{count}} pažymėtų atraižų"
+      }
+    },
+    "hr": {
+      "n_bars_cuts_done": {
+        "one": "{{count}} letva, gotovih rezova: {{cuts}}.",
+        "few": "{{count}} letve, gotovih rezova: {{cuts}}.",
+        "other": "{{count}} letvi, gotovih rezova: {{cuts}}."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Letva s {{count}} odabranim ostatkom",
+        "few": "Letva s {{count}} odabrana ostatka",
+        "other": "Letva s {{count}} odabranih ostataka"
+      }
+    },
+    "sl": {
+      "n_bars_cuts_done": {
+        "one": "{{count}} letev, opravljenih rezov: {{cuts}}.",
+        "two": "{{count}} letvi, opravljenih rezov: {{cuts}}.",
+        "few": "{{count}} letve, opravljenih rezov: {{cuts}}.",
+        "other": "{{count}} letev, opravljenih rezov: {{cuts}}."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Letev z {{count}} izbranim ostankom",
+        "two": "Letev z {{count}} izbranima ostankoma",
+        "few": "Letev s {{count}} izbranimi ostanki",
+        "other": "Letev s {{count}} izbranimi ostanki"
+      }
+    },
+    "sr": {
+      "n_bars_cuts_done": {
+        "one": "{{count}} letva, gotovih rezova: {{cuts}}.",
+        "few": "{{count}} letve, gotovih rezova: {{cuts}}.",
+        "other": "{{count}} letvi, gotovih rezova: {{cuts}}."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Letva sa {{count}} izabranim ostatkom",
+        "few": "Letva sa {{count}} izabrana ostatka",
+        "other": "Letva sa {{count}} izabranih ostataka"
+      }
+    },
+    "bs": {
+      "n_bars_cuts_done": {
+        "one": "{{count}} letva, gotovih rezova: {{cuts}}.",
+        "few": "{{count}} letve, gotovih rezova: {{cuts}}.",
+        "other": "{{count}} letvi, gotovih rezova: {{cuts}}."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Letva s {{count}} odabranim ostatkom",
+        "few": "Letva s {{count}} odabrana ostatka",
+        "other": "Letva s {{count}} odabranih ostataka"
+      }
+    },
+    "sq": {
+      "n_bars_cuts_done": {
+        "one": "1 shufër, {{cuts}} prerje të bëra.",
+        "other": "{{count}} shufra, {{cuts}} prerje të bëra."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Shufra me 1 mbetje të zgjedhur",
+        "other": "Shufra me {{count}} mbetje të zgjedhura"
+      }
+    },
+    "uk": {
+      "n_bars_cuts_done": {
+        "one": "{{count}} брусок, виконано різів: {{cuts}}.",
+        "few": "{{count}} бруски, виконано різів: {{cuts}}.",
+        "many": "{{count}} брусків, виконано різів: {{cuts}}.",
+        "other": "{{count}} бруска, виконано різів: {{cuts}}."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Брусок з {{count}} вибраним обрізком",
+        "few": "Брусок з {{count}} вибраними обрізками",
+        "many": "Брусок з {{count}} вибраними обрізками",
+        "other": "Брусок з {{count}} вибраного обрізка"
+      }
+    },
+    "tr": {
+      "n_bars_cuts_done": {
+        "one": "1 çubuk, {{cuts}} kesim tamamlandı.",
+        "other": "{{count}} çubuk, {{cuts}} kesim tamamlandı."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "1 seçili artık parçalı çubuk",
+        "other": "{{count}} seçili artık parçalı çubuk"
+      }
+    },
+    "ga": {
+      "n_bars_cuts_done": {
+        "one": "Barraí: 1, gearrthacha déanta: {{cuts}}.",
+        "two": "Barraí: {{count}}, gearrthacha déanta: {{cuts}}.",
+        "few": "Barraí: {{count}}, gearrthacha déanta: {{cuts}}.",
+        "many": "Barraí: {{count}}, gearrthacha déanta: {{cuts}}.",
+        "other": "Barraí: {{count}}, gearrthacha déanta: {{cuts}}."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "An barra le fuíoll amháin roghnaithe",
+        "two": "An barra le fuíll roghnaithe: {{count}}",
+        "few": "An barra le fuíll roghnaithe: {{count}}",
+        "many": "An barra le fuíll roghnaithe: {{count}}",
+        "other": "An barra le fuíll roghnaithe: {{count}}"
+      }
+    },
+    "mt": {
+      "n_bars_cuts_done": {
+        "one": "Bar wieħed, qtugħ lest: {{cuts}}.",
+        "two": "Żewġ barijiet, qtugħ lest: {{cuts}}.",
+        "few": "Barijiet: {{count}}, qtugħ lest: {{cuts}}.",
+        "many": "Barijiet: {{count}}, qtugħ lest: {{cuts}}.",
+        "other": "Barijiet: {{count}}, qtugħ lest: {{cuts}}."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Il-bar b’fdal wieħed magħżul",
+        "two": "Il-bar b’żewġ fdalijiet magħżula",
+        "few": "Il-bar bil-fdal magħżul: {{count}}",
+        "many": "Il-bar bil-fdal magħżul: {{count}}",
+        "other": "Il-bar bil-fdal magħżul: {{count}}"
+      }
+    },
+    "eu": {
+      "n_bars_cuts_done": {
+        "one": "Barra 1, {{cuts}} ebaki eginda.",
+        "other": "{{count}} barra, {{cuts}} ebaki eginda."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Hautatutako soberakin 1 duen barra",
+        "other": "Hautatutako {{count}} soberakin dituen barra"
+      }
+    },
+    "zh-Hans": {
+      "n_bars_cuts_done": {
+        "other": "{{count}} 根条料，已完成 {{cuts}} 刀。"
+      },
+      "The bar with {{count}} offcuts selected": {
+        "other": "选中 {{count}} 块余料的条料"
+      }
+    },
+    "zh-Hant": {
+      "n_bars_cuts_done": {
+        "other": "{{count}} 根條料，已完成 {{cuts}} 刀。"
+      },
+      "The bar with {{count}} offcuts selected": {
+        "other": "選取 {{count}} 塊餘料的條料"
+      }
+    },
+    "ja": {
+      "n_bars_cuts_done": {
+        "other": "材 {{count}} 本、切断 {{cuts}} 回完了。"
+      },
+      "The bar with {{count}} offcuts selected": {
+        "other": "端材を {{count}} 個選んだ材"
+      }
+    },
+    "ko": {
+      "n_bars_cuts_done": {
+        "other": "각재 {{count}}개, 재단 {{cuts}}회 완료."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "other": "자투리 {{count}}개를 선택한 부재"
+      }
+    },
+    "vi": {
+      "n_bars_cuts_done": {
+        "other": "{{count}} thanh, đã xong {{cuts}} vết cắt."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "other": "Thanh có {{count}} phần dư được chọn"
+      }
+    },
+    "id": {
+      "n_bars_cuts_done": {
+        "other": "{{count}} batang, {{cuts}} potongan selesai."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "other": "Batang dengan {{count}} sisa potongan dipilih"
+      }
+    },
+    "fil": {
+      "n_bars_cuts_done": {
+        "one": "{{count}} bar, {{cuts}} hiwang tapos.",
+        "other": "{{count}} bar, {{cuts}} hiwang tapos."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "Ang bar na may {{count}} napiling retaso",
+        "other": "Ang bar na may {{count}} napiling retaso"
+      }
+    },
+    "th": {
+      "n_bars_cuts_done": {
+        "other": "{{count}} ท่อน ตัดเสร็จ {{cuts}} รอย"
+      },
+      "The bar with {{count}} offcuts selected": {
+        "other": "ท่อนที่เลือกเศษไม้ {{count}} ชิ้น"
+      }
+    },
+    "hi": {
+      "n_bars_cuts_done": {
+        "one": "{{count}} डंडा, {{cuts}} कट पूरे।",
+        "other": "{{count}} डंडे, {{cuts}} कट पूरे।"
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "{{count}} चुने बचे टुकड़े वाला डंडा",
+        "other": "{{count}} चुने बचे टुकड़ों वाला डंडा"
+      }
+    },
+    "bn": {
+      "n_bars_cuts_done": {
+        "one": "{{count}}টি বার, {{cuts}}টি কাট শেষ।",
+        "other": "{{count}}টি বার, {{cuts}}টি কাট শেষ।"
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "{{count}}টি বাছা বাড়তি টুকরোসহ বার",
+        "other": "{{count}}টি বাছা বাড়তি টুকরোসহ বার"
+      }
+    },
+    "ar": {
+      "n_bars_cuts_done": {
+        "zero": "لا قضبان، أُنجز {{cuts}} قطع.",
+        "one": "قضيب واحد، أُنجز {{cuts}} قطع.",
+        "two": "قضيبان، أُنجز {{cuts}} قطع.",
+        "few": "{{count}} قضبان، أُنجز {{cuts}} قطع.",
+        "many": "{{count}} قضيبًا، أُنجز {{cuts}} قطع.",
+        "other": "{{count}} قضيب، أُنجز {{cuts}} قطع."
+      },
+      "The bar with {{count}} offcuts selected": {
+        "zero": "القضيب بلا قطع متبقية محددة",
+        "one": "القضيب مع قطعة متبقية واحدة محددة",
+        "two": "القضيب مع قطعتين متبقيتين محددتين",
+        "few": "القضيب مع {{count}} قطع متبقية محددة",
+        "many": "القضيب مع {{count}} قطعة متبقية محددة",
+        "other": "القضيب مع {{count}} قطعة متبقية محددة"
+      }
+    },
+    "ur": {
+      "n_bars_cuts_done": {
+        "one": "1 سلاخ، {{cuts}} کٹ مکمل۔",
+        "other": "{{count}} سلاخیں، {{cuts}} کٹ مکمل۔"
+      },
+      "The bar with {{count}} offcuts selected": {
+        "one": "ایک منتخب بچے ٹکڑے والی سلاخ",
+        "other": "{{count}} منتخب بچے ٹکڑوں والی سلاخ"
+      }
+    }
+  }
+}

@@ -1,7 +1,14 @@
 // Drawing helpers shared by the PDF pages: A4 in points, with y measured down from the top
 // of the page like the screen.
 import { rgb, type PDFDocument, type PDFFont, type PDFPage, type RGB } from 'pdf-lib';
-import type { CostBreakdown, Job, Plan } from '../engine/types';
+import type {
+  CostBreakdown,
+  Job,
+  LinearCostBreakdown,
+  LinearJob,
+  LinearPlan,
+  Plan,
+} from '../engine/types';
 import type { MeasureFrom } from '../model/cutMeasure';
 import type { Material } from '../model/library';
 import type { OffcutRule } from '../model/offcut';
@@ -9,15 +16,20 @@ import type { Project } from '../model/project';
 
 export interface PdfInput {
   project: Project;
-  plan: Plan;
-  job: Job;
+  plan?: Plan | null;
+  job?: Job | null;
+  linearPlan?: LinearPlan | null;
+  linearJob?: LinearJob | null;
   cost: CostBreakdown | null;
+  linearCost?: LinearCostBreakdown | null;
   materials: Material[];
   currency: string;
   /** Extra band length per banded edge, mm (the workshop setting). */
   edgeAllowance?: number;
   /** Minimum reusable offcut size from workshop settings. */
   offcutRule?: OffcutRule;
+  /** Minimum reusable linear offcut length, mm. */
+  linearOffcutMinLength?: number;
   /** Cut positions from the last cut (default) or from the sheet edge. */
   cutMeasure?: MeasureFrom;
   /** For the header; injectable so tests are stable. */
@@ -30,6 +42,7 @@ export interface Ctx {
   bold: PDFFont;
   input: PdfInput;
   partIndex: Map<string, number>;
+  linearPartIndex: Map<string, number>;
 }
 
 // A4 portrait, points.

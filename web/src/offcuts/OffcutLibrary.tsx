@@ -1,7 +1,8 @@
 // Offcut library: every kept leftover with its ID, size, material, place and label state.
 import { useMemo, useState } from 'react';
-import { formatArea, formatLength, unitLabel } from '../lib/units';
-import type { Offcut, OffcutStatus } from '../model/offcut';
+import { formatArea, formatLength, formatLengthUnit, formatLong, unitLabel } from '../lib/units';
+import { materialKind } from '../model/library';
+import { offcutKind, type Offcut, type OffcutKind, type OffcutStatus } from '../model/offcut';
 import { useStore } from '../store/store';
 import { MenuIcon, MoreIcon, PlusIcon, ScanIcon, SearchIcon } from '../ui/icons';
 import { canScan, ScanDialog } from './ScanDialog';
@@ -19,11 +20,17 @@ import { BottomSheet } from '../ui/BottomSheet';
 import sheetStyles from '../ui/BottomSheet.module.css';
 import { CardActions, CardField, cardStyles, RowCard } from '../ui/RowCard';
 import { locale, t as i18nT } from '../i18n';
+import { SegmentedControl } from '../ui/SegmentedControl';
 import { SortTh, useTableSort } from '../ui/tableSort';
 import styles from './Offcuts.module.css';
 import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import type { Grain } from '../engine/types';
+
+const offcutSizeText = (o: Offcut) =>
+  offcutKind(o) === 'linear'
+    ? formatLengthUnit(o.length)
+    : `${formatLength(o.length)} × ${formatLength(o.width)}`;
 
 const statusText = (s: OffcutStatus) =>
   s === 'available' ? i18nT('Available') : s === 'reserved' ? i18nT('Reserved') : i18nT('Used');
@@ -40,6 +47,7 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
   const [query, setQuery] = useState('');
 
   const [scanning, setScanning] = useState(false);
+  const [kindFilter, setKindFilter] = useState<'all' | OffcutKind>('all');
   const [materialId, setMaterialId] = useState<string | null>(null);
   const [minL, setMinL] = useState<number | null>(null);
   const [minW, setMinW] = useState<number | null>(null);
@@ -56,17 +64,35 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
   const offcutSort = useTableSort<'code' | 'size' | 'material' | 'place' | 'added' | 'status' | 'label'>();
 
   const available = offcuts.filter((o) => o.status === 'available');
-  const area = available.reduce((a, o) => a + o.length * o.width, 0);
+  const hasLinearOffcuts = offcuts.some((o) => offcutKind(o) === 'linear');
+  const sheetArea = available
+    .filter((o) => offcutKind(o) === 'sheet')
+    .reduce((a, o) => a + o.length * o.width, 0);
+  const linearLength = available
+    .filter((o) => offcutKind(o) === 'linear')
+    .reduce((a, o) => a + o.length, 0);
   const materialCount = new Set(available.map((o) => o.materialId)).size;
   const queued = offcuts.filter((o) => o.label === 'queued' && o.status !== 'used');
+  const filterMaterials =
+    kindFilter === 'all'
+      ? materials
+      : materials.filter((m) => materialKind(m) === kindFilter);
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
     const need = [minL ?? 0, minW ?? 0].sort((a, b) => b - a) as [number, number];
+    const hasFits = (minL ?? 0) > 0 || (minW ?? 0) > 0;
     return [...offcuts]
+      .filter((o) => kindFilter === 'all' || offcutKind(o) === kindFilter)
       .filter((o) => showUsed || o.status !== 'used')
       .filter((o) => !materialId || o.materialId === materialId)
-      .filter((o) => o.length >= need[0] && o.width >= need[1])
+      .filter((o) => {
+        if (!hasFits) return true;
+        if (offcutKind(o) === 'linear') {
+          return (minW ?? 0) === 0 && o.length >= (minL ?? 0);
+        }
+        return o.length >= need[0] && o.width >= need[1];
+      })
       .filter(
         (o) =>
           !q ||
@@ -75,7 +101,7 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
           (materials.find((m) => m.id === o.materialId)?.name ?? '').toLowerCase().includes(q),
       )
       .sort((a, b) => b.createdAt - a.createdAt);
-  }, [offcuts, query, materialId, minL, minW, showUsed, materials]);
+  }, [offcuts, query, kindFilter, materialId, minL, minW, showUsed, materials]);
 
   // A scanned label (a hardware scanner types the code and Enter) jumps straight to the offcut.
   const exact = shown.find((o) => o.code.toLowerCase() === query.trim().toLowerCase());
@@ -90,6 +116,21 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
 
   const filterControls = (
     <>
+      {hasLinearOffcuts && (
+        <SegmentedControl
+          label={t('Stock type')}
+          value={kindFilter}
+          options={[
+            { value: 'all', label: t('All') },
+            { value: 'sheet', label: t('Sheets') },
+            { value: 'linear', label: t('Linear stock') },
+          ]}
+          onChange={(next) => {
+            setKindFilter(next);
+            setMaterialId(null);
+          }}
+        />
+      )}
       <select
         className={ui.fieldInput}
         aria-label={t('Material')}
@@ -97,7 +138,7 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
         onChange={(e) => setMaterialId(e.target.value || null)}
       >
         <option value="">{t('All materials')}</option>
-        {materials.map((m) => (
+        {filterMaterials.map((m) => (
           <option key={m.id} value={m.id}>
             {m.name}
           </option>
@@ -147,8 +188,14 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
             <BackButton />
           </div>
           <span className={styles.meta}>
-            {t('n_available', { count: available.length })} · {formatArea(area)} ·{' '}
-            {t('n_materials', { count: materialCount })}
+            {[
+              t('n_available', { count: available.length }),
+              sheetArea > 0 || linearLength === 0 ? formatArea(sheetArea) : null,
+              linearLength > 0 ? formatLong(linearLength) : null,
+              t('n_materials', { count: materialCount }),
+            ]
+              .filter(Boolean)
+              .join(' · ')}
           </span>
         </div>
         <AddOffcut />
@@ -326,7 +373,7 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
                       case 'code':
                         return o.code;
                       case 'size':
-                        return o.length * o.width;
+                        return offcutKind(o) === 'linear' ? o.length : o.length * o.width;
                       case 'material':
                         return matName(o.materialId);
                       case 'place':
@@ -358,9 +405,7 @@ export function OffcutLibrary({ onMenu }: { onMenu?: () => void }) {
                       <Shape offcut={o} color={matColor(o.materialId)} />
                     </td>
                     <td className={styles.code}>{o.code}</td>
-                    <td className={styles.size}>
-                      {formatLength(o.length)} × {formatLength(o.width)}
-                    </td>
+                    <td className={styles.size}>{offcutSizeText(o)}</td>
                     <td>
                       <span className={styles.material}>{matName(o.materialId)}</span>
                       <span className={styles.source}>
@@ -479,7 +524,7 @@ function OffcutCard({
 }) {
   const { t } = useTranslation();
   const { updateOffcuts, removeOffcut } = useStore.getState();
-  const size = `${formatLength(o.length)} × ${formatLength(o.width)}`;
+  const size = offcutSizeText(o);
   const labelText =
     o.label === 'queued' ? t('In print queue') : o.label === 'printed' ? t('Printed') : t('None');
   const source = o.usedInProjectName
@@ -564,7 +609,25 @@ function OffcutCard({
 }
 
 function Shape({ offcut, color }: { offcut: Offcut; color: string }) {
-  const s = Math.min(48 / offcut.length, 28 / offcut.width);
+  if (offcutKind(offcut) === 'linear') {
+    const w = Math.min(48, Math.max(12, Math.round((offcut.length / 3000) * 48)));
+    const h = 8;
+    return (
+      <svg width="52" height="32" aria-hidden="true">
+        <rect
+          x={(52 - w) / 2}
+          y={(32 - h) / 2}
+          width={w}
+          height={h}
+          rx={1}
+          fill={color}
+          stroke="var(--text-3)"
+          strokeWidth="1"
+        />
+      </svg>
+    );
+  }
+  const s = Math.min(48 / offcut.length, 28 / Math.max(1, offcut.width));
   const w = Math.max(4, offcut.length * s);
   const h = Math.max(3, offcut.width * s);
   return (
@@ -585,14 +648,17 @@ function Shape({ offcut, color }: { offcut: Offcut; color: string }) {
 /** "Add offcut" form for leftovers that didn't come from a cut in this app. */
 function AddOffcut() {
   const places = usePlaces();
+  const materials = useStore((s) => s.materials);
   const { t } = useTranslation();
   const phone = useMediaQuery('(max-width: 767px)');
+  const [kind, setKind] = useState<OffcutKind>('sheet');
   const [length, setLength] = useState<number | null>(null);
   const [width, setWidth] = useState<number | null>(null);
   const [materialId, setMaterialId] = useState<string | null>(null);
   const [location, setLocation] = useState('');
   const [grain, setGrain] = useState<Grain>('length');
-  const ok = !!length && !!width && length > 0 && width > 0;
+  const ok =
+    kind === 'linear' ? !!length && length > 0 : !!length && !!width && length > 0 && width > 0;
   if (phone) {
     return (
       <button
@@ -622,15 +688,43 @@ function AddOffcut() {
           onSubmit={(e) => {
             e.preventDefault();
             if (!ok) return;
-            useStore
-              .getState()
-              .addOffcuts([{ length: length!, width: width!, materialId, location, grain }]);
+            if (kind === 'linear') {
+              const mat = materials.find((m) => m.id === materialId);
+              useStore.getState().addOffcuts([
+                {
+                  kind: 'linear',
+                  length: length!,
+                  width: 0,
+                  materialId,
+                  profileThickness: mat?.thickness ?? null,
+                  profileWidth: mat?.profileWidth ?? null,
+                  location,
+                },
+              ]);
+            } else {
+              useStore
+                .getState()
+                .addOffcuts([{ length: length!, width: width!, materialId, location, grain }]);
+            }
             setLength(null);
             setWidth(null);
             close();
           }}
         >
           <span className={styles.addTitle}>{t('Add an offcut by hand')}</span>
+          <SegmentedControl
+            full
+            label={t('Stock type')}
+            value={kind}
+            options={[
+              { value: 'sheet', label: t('Sheets') },
+              { value: 'linear', label: t('Linear stock') },
+            ]}
+            onChange={(next) => {
+              setKind(next);
+              setMaterialId(null);
+            }}
+          />
           <div className={styles.addSize}>
             <LengthInput
               className={ui.fieldInput}
@@ -639,32 +733,39 @@ function AddOffcut() {
               value={length}
               onCommit={setLength}
             />
-            ×
-            <LengthInput
-              className={ui.fieldInput}
-              aria-label={t('Width')}
-              placeholder={t('Width')}
-              value={width}
-              onCommit={setWidth}
-            />
+            {kind === 'sheet' && (
+              <>
+                ×
+                <LengthInput
+                  className={ui.fieldInput}
+                  aria-label={t('Width')}
+                  placeholder={t('Width')}
+                  value={width}
+                  onCommit={setWidth}
+                />
+              </>
+            )}
             {unitLabel()}
           </div>
           <MaterialSelect
+            kind={kind}
             value={materialId}
             anyLabel={t('No material')}
             ariaLabel={t('Material')}
             onChange={setMaterialId}
           />
-          <select
-            className={ui.fieldInput}
-            aria-label={t('Grain')}
-            value={grain}
-            onChange={(e) => setGrain(e.target.value as Grain)}
-          >
-            <option value="length">{t('Grain along the length')}</option>
-            <option value="width">{t('Grain along the width')}</option>
-            <option value="none">{t('No grain')}</option>
-          </select>
+          {kind === 'sheet' && (
+            <select
+              className={ui.fieldInput}
+              aria-label={t('Grain')}
+              value={grain}
+              onChange={(e) => setGrain(e.target.value as Grain)}
+            >
+              <option value="length">{t('Grain along the length')}</option>
+              <option value="width">{t('Grain along the width')}</option>
+              <option value="none">{t('No grain')}</option>
+            </select>
+          )}
           <ComboInput
             className={ui.fieldInput}
             aria-label={t('Place')}

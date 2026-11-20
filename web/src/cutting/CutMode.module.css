@@ -166,6 +166,7 @@
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.05;
+  font-variant-numeric: tabular-nums;
 }
 
 .unit {
@@ -178,6 +179,10 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+
+.facts strong {
+  font-variant-numeric: tabular-nums;
 }
 
 .facts div {
@@ -294,6 +299,12 @@
   height: auto;
 }
 
+.miniBar {
+  flex: none;
+  width: 150px;
+  height: auto;
+}
+
 .keepList {
   flex: 1;
   list-style: none;
@@ -329,6 +340,7 @@
 .keepSize {
   font-size: 17px;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .tag,
@@ -437,6 +449,15 @@
 
   .drawing svg {
     max-height: 40dvh;
+  }
+
+  .keepPieces {
+    flex-direction: column;
+  }
+
+  .miniBar {
+    width: 100%;
+    max-width: 220px;
   }
 }
 

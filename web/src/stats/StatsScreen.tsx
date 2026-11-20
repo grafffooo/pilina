@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { db } from '../db/db';
 import { formatNumber } from '../lib/format';
-import { formatArea } from '../lib/units';
+import { formatArea, formatLong } from '../lib/units';
 import type { CutRecord } from '../model/cutRecord';
 import { formatMoney } from '../model/library';
 import { computeStats, type Range } from '../model/stats';
@@ -32,7 +32,7 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
   const { t, i18n } = useTranslation();
   const [records, setRecords] = useState<CutRecord[] | null>(null);
   const [range, setRange] = useState<Range>('12m');
-  const projectSort = useTableSort<'name' | 'sheets' | 'usedPct' | 'cost' | 'lastAt'>();
+  const projectSort = useTableSort<'name' | 'sheets' | 'bars' | 'usedPct' | 'cost' | 'lastAt'>();
   const offcuts = useStore((s) => s.offcuts);
   const materials = useStore((s) => s.materials);
   const currency = useStore((s) => s.settings.currency);
@@ -61,6 +61,15 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
       maximumFractionDigits: 1,
     }).format(n);
 
+  const linearMonthWaste = (m: {
+    stockLength: number;
+    usedLength: number;
+    keptLength: number;
+  }) =>
+    m.stockLength > 0
+      ? ((m.stockLength - m.usedLength - m.keptLength) / m.stockLength) * 100
+      : null;
+
   const months: { cost: Point[]; waste: Point[] } = useMemo(() => {
     const ms = stats?.months ?? [];
     return {
@@ -72,12 +81,31 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
       waste: ms.map((m) => ({
         label: monthShort().format(m.start),
         longLabel: monthLong().format(m.start),
-        value: m.wastePct,
+        value: m.wastePct ?? linearMonthWaste(m),
       })),
     };
     // Month names follow the interface language.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stats, i18n.language]);
+
+  const hasSheets = (stats?.sheets ?? 0) > 0;
+  const hasBars = (stats?.bars ?? 0) > 0;
+  const linearWastePct =
+    stats && stats.stockLength > 0
+      ? ((stats.stockLength - stats.usedLength - stats.keptLength) / stats.stockLength) * 100
+      : null;
+  const shownUsedPct = stats ? (!hasSheets && hasBars ? stats.linearUsedPct : stats.usedPct) : null;
+  const shownWastePct = stats ? (!hasSheets && hasBars ? linearWastePct : stats.wastePct) : null;
+  const countHead =
+    hasSheets && hasBars ? [t('Sheets'), t('Bars')] : hasBars ? [t('Bars')] : [t('Sheets')];
+  const countCells = (m: NonNullable<typeof stats>['months'][number]) =>
+    hasSheets && hasBars
+      ? [formatNumber(m.sheets), formatNumber(m.bars)]
+      : hasBars
+        ? [formatNumber(m.bars)]
+        : [formatNumber(m.sheets)];
+  const sheetMats = (stats?.materials ?? []).filter((m) => (m.kind ?? 'sheet') === 'sheet');
+  const linearMats = (stats?.materials ?? []).filter((m) => m.kind === 'linear');
 
   return (
     <div className={styles.screen}>
@@ -116,7 +144,7 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
 
       {!stats ? (
         <p className={styles.meta}>{t('Loading…')}</p>
-      ) : stats.sheets === 0 && stats.offcutsKept === 0 ? (
+      ) : stats.sheets === 0 && stats.bars === 0 && stats.offcutsKept === 0 ? (
         <div className={styles.empty}>
           <p className={styles.emptyTitle}>{t('Nothing cut in this period')}</p>
           <p>
@@ -128,11 +156,26 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
       ) : (
         <>
           <div className={styles.tiles}>
-            <Tile
-              label={t('Sheets cut')}
-              value={formatNumber(stats.sheets)}
-              note={formatArea(stats.sheetArea)}
-            />
+            {(hasSheets || !hasBars) && (
+              <Tile
+                label={t('Sheets cut')}
+                value={formatNumber(stats.sheets)}
+                note={formatArea(stats.sheetArea)}
+              />
+            )}
+            {hasBars && (
+              <Tile
+                label={t('Bars cut')}
+                value={formatNumber(stats.bars)}
+                note={
+                  hasSheets && stats.linearUsedPct !== null
+                    ? `${formatLong(stats.stockLength)} · ${t('{{pct}}% used', {
+                        pct: formatNumber(Math.round(stats.linearUsedPct)),
+                      })}`
+                    : formatLong(stats.stockLength)
+                }
+              />
+            )}
             <Tile
               label={t('Spent on board')}
               value={money(stats.cost)}
@@ -140,11 +183,11 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
             />
             <Tile
               label={t('Material used')}
-              value={stats.usedPct === null ? '—' : `${formatNumber(Math.round(stats.usedPct))}%`}
+              value={shownUsedPct === null ? '—' : `${formatNumber(Math.round(shownUsedPct))}%`}
               note={
-                stats.wastePct === null
+                shownWastePct === null
                   ? undefined
-                  : t('{{pct}}% wasted', { pct: formatNumber(Math.round(stats.wastePct)) })
+                  : t('{{pct}}% wasted', { pct: formatNumber(Math.round(shownWastePct)) })
               }
             />
             <Tile
@@ -171,10 +214,10 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
                   .toLowerCase()}`}
               />
               <TableView
-                head={[t('Month'), t('Sheets'), t('Spent')]}
+                head={[t('Month'), ...countHead, t('Spent')]}
                 rows={stats.months.map((m) => [
                   monthLong().format(m.start),
-                  formatNumber(m.sheets),
+                  ...countCells(m),
                   money(m.cost),
                 ])}
               />
@@ -188,30 +231,53 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
               <LineChart
                 points={months.waste}
                 format={(v) => `${formatNumber(Math.round(v))}%`}
-                max={Math.max(25, ...stats.months.map((m) => m.wastePct ?? 0))}
+                max={Math.max(
+                  25,
+                  ...stats.months.map((m) => m.wastePct ?? linearMonthWaste(m) ?? 0),
+                )}
                 label={t('Waste percentage per month')}
               />
               <TableView
-                head={[t('Month'), t('Sheets'), t('Waste')]}
-                rows={stats.months.map((m) => [
-                  monthLong().format(m.start),
-                  formatNumber(m.sheets),
-                  m.wastePct === null ? '—' : `${formatNumber(Math.round(m.wastePct))}%`,
-                ])}
+                head={[t('Month'), ...countHead, t('Waste')]}
+                rows={stats.months.map((m) => {
+                  const w = m.wastePct ?? linearMonthWaste(m);
+                  return [
+                    monthLong().format(m.start),
+                    ...countCells(m),
+                    w === null ? '—' : `${formatNumber(Math.round(w))}%`,
+                  ];
+                })}
               />
             </section>
 
             <section className={styles.card} aria-labelledby="mat-h">
               <h2 id="mat-h">{t('Most used materials')}</h2>
-              <p className={styles.cardNote}>{t('Board area cut')}</p>
-              <BarList
-                items={stats.materials.slice(0, 8).map((m) => ({
-                  name: m.name,
-                  value: m.sheetArea,
-                  note: t('n_sheets', { count: m.sheets }),
-                }))}
-                format={(v) => formatArea(v)}
-              />
+              {(sheetMats.length > 0 || linearMats.length === 0) && (
+                <>
+                  <p className={styles.cardNote}>{t('Board area cut')}</p>
+                  <BarList
+                    items={sheetMats.slice(0, 8).map((m) => ({
+                      name: m.name,
+                      value: m.sheetArea,
+                      note: t('n_sheets', { count: m.sheets }),
+                    }))}
+                    format={(v) => formatArea(v)}
+                  />
+                </>
+              )}
+              {linearMats.length > 0 && (
+                <>
+                  <p className={styles.cardNote}>{t('Bar length cut')}</p>
+                  <BarList
+                    items={linearMats.slice(0, 8).map((m) => ({
+                      name: m.name,
+                      value: m.stockLength,
+                      note: t('n_bars', { count: m.bars }),
+                    }))}
+                    format={(v) => formatLong(v)}
+                  />
+                </>
+              )}
             </section>
 
             <section className={styles.card} aria-labelledby="proj-h">
@@ -222,14 +288,21 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
                     <SortTh col="name" sortKey={projectSort.sortKey} sortDir={projectSort.sortDir} onSort={projectSort.toggle}>
                       {t('Project')}
                     </SortTh>
-                    <SortTh col="sheets" sortKey={projectSort.sortKey} sortDir={projectSort.sortDir} onSort={projectSort.toggle} className={styles.num} numeric>
-                      {t('Sheets')}
-                    </SortTh>
+                    {(hasSheets || !hasBars) && (
+                      <SortTh col="sheets" sortKey={projectSort.sortKey} sortDir={projectSort.sortDir} onSort={projectSort.toggle} className={styles.num} numeric>
+                        {t('Sheets')}
+                      </SortTh>
+                    )}
+                    {hasBars && (
+                      <SortTh col="bars" sortKey={projectSort.sortKey} sortDir={projectSort.sortDir} onSort={projectSort.toggle} className={styles.num} numeric>
+                        {t('Bars')}
+                      </SortTh>
+                    )}
                     <SortTh col="usedPct" sortKey={projectSort.sortKey} sortDir={projectSort.sortDir} onSort={projectSort.toggle} className={styles.num} numeric>
                       {t('Used')}
                     </SortTh>
                     <SortTh col="cost" sortKey={projectSort.sortKey} sortDir={projectSort.sortDir} onSort={projectSort.toggle} className={styles.num} numeric>
-                      {t('Board cost')}
+                      {!hasSheets && hasBars ? t('Cost') : t('Board cost')}
                     </SortTh>
                     <SortTh col="lastAt" sortKey={projectSort.sortKey} sortDir={projectSort.sortDir} onSort={projectSort.toggle} className={styles.num} numeric>
                       {t('Cut')}
@@ -244,6 +317,8 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
                           return p.name;
                         case 'sheets':
                           return p.sheets;
+                        case 'bars':
+                          return p.bars;
                         case 'usedPct':
                           return p.usedPct;
                         case 'cost':
@@ -255,7 +330,10 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
                     .map((p) => (
                     <tr key={p.projectId}>
                       <td>{p.name}</td>
-                      <td className={styles.num}>{formatNumber(p.sheets)}</td>
+                      {(hasSheets || !hasBars) && (
+                        <td className={styles.num}>{formatNumber(p.sheets)}</td>
+                      )}
+                      {hasBars && <td className={styles.num}>{formatNumber(p.bars)}</td>}
                       <td className={styles.num}>{formatNumber(Math.round(p.usedPct))}%</td>
                       <td className={styles.num}>
                         {money(p.cost)}
@@ -273,11 +351,14 @@ export function StatsScreen({ onMenu }: { onMenu?: () => void }) {
                     <strong>{p.name}</strong>
                     <span>
                       {[
-                        t('n_sheets', { count: p.sheets }),
+                        p.sheets > 0 ? t('n_sheets', { count: p.sheets }) : null,
+                        p.bars > 0 ? t('n_bars', { count: p.bars }) : null,
                         t('{{pct}}% used', { pct: formatNumber(Math.round(p.usedPct)) }),
                         money(p.cost) + (p.unpriced > 0 ? ' +?' : ''),
                         dayFormat().format(p.lastAt),
-                      ].join(' · ')}
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
                     </span>
                   </li>
                 ))}

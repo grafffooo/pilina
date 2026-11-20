@@ -17,6 +17,7 @@ import { MoreIcon, StarIcon } from '../ui/icons';
 import { LengthInput, NumberInput } from '../ui/NumberInput';
 import { Menu } from '../ui/Popover';
 import { CardActions, CardField, CardFields, cardStyles, RowCard } from '../ui/RowCard';
+import { SortTh, useTableSort } from '../ui/tableSort';
 import ui from '../ui/ui.module.css';
 import { AddLinearStockSheet } from './AddLinearStockSheet';
 import styles from './Editor.module.css';
@@ -26,6 +27,23 @@ export function LinearStockTable({ project }: { project: Project }) {
   const { t } = useTranslation();
   const materials = useStore((s) => s.materials);
   const nameOf = (id: string | null) => materials.find((m) => m.id === id)?.name;
+  const { sortKey, sortDir, toggle, sortRows } = useTableSort<
+    'enabled' | 'length' | 'qty' | 'material' | 'priority'
+  >();
+  const sortedStock = sortRows(project.linearStock, (s, key) => {
+    switch (key) {
+      case 'enabled':
+        return s.enabled;
+      case 'length':
+        return s.length;
+      case 'qty':
+        return s.qty;
+      case 'material':
+        return nameOf(s.materialId) ?? null;
+      case 'priority':
+        return s.priority;
+    }
+  });
   const phone = useMediaQuery('(max-width: 767px)');
   const [openId, setOpenId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
@@ -69,20 +87,28 @@ export function LinearStockTable({ project }: { project: Project }) {
           <table id="linear-stock-table" className={`${styles.table} ${styles.linearStockTable}`}>
             <thead>
               <tr>
-                <th className={styles.colCheck}>
+                <SortTh col="enabled" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.colCheck}>
                   <span className="sr-only">{t('Use')}</span>
-                </th>
-                <th className={styles.num}>{t('Length')}</th>
-                <th className={`${styles.num} ${styles.colQty}`}>{t('Qty')}</th>
-                <th>{t('Material')}</th>
-                <th className={styles.colStar}>{t('Priority')}</th>
+                </SortTh>
+                <SortTh col="length" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.num} numeric>
+                  {t('Length')}
+                </SortTh>
+                <SortTh col="qty" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={`${styles.num} ${styles.colQty}`} numeric>
+                  {t('Qty')}
+                </SortTh>
+                <SortTh col="material" sortKey={sortKey} sortDir={sortDir} onSort={toggle}>
+                  {t('Material')}
+                </SortTh>
+                <SortTh col="priority" sortKey={sortKey} sortDir={sortDir} onSort={toggle} className={styles.colStar}>
+                  {t('Priority')}
+                </SortTh>
                 <th className={styles.colMore}>
                   <span className="sr-only">{t('More')}</span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {project.linearStock.map((s, i) => {
+              {sortedStock.map((s, i) => {
                 const name = nameOf(s.materialId) || t('Bar {{n}}', { n: i + 1 });
                 const started = s.length !== null;
                 const bad = started && !linearStockIsComplete(s);

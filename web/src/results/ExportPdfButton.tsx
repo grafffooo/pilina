@@ -11,9 +11,16 @@ export function ExportPdfButton({ compact }: { compact?: boolean }) {
   const plan = useStore((s) => s.result.plan);
   const job = useStore((s) => s.result.job);
   const status = useStore((s) => s.result.status);
+  const linearPlan = useStore((s) => s.linearResult.plan);
+  const linearJob = useStore((s) => s.linearResult.job);
+  const linearStatus = useStore((s) => s.linearResult.status);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const ready = !!project && !!plan && !!job && plan.sheets.length > 0 && status === 'ready';
+  const hasSheets = !!plan && !!job && plan.sheets.length > 0 && status === 'ready';
+  const hasBars =
+    !!linearPlan && !!linearJob && linearPlan.bars.length > 0 && linearStatus === 'ready';
+  const ready =
+    !!project && (hasSheets || hasBars) && status !== 'running' && linearStatus !== 'running';
 
   const onClick = async () => {
     if (!ready) return;
@@ -21,12 +28,15 @@ export function ExportPdfButton({ compact }: { compact?: boolean }) {
     setError(null);
     try {
       const { exportPdf } = await import('../pdf/exportPdf');
-      const { cost, materials, settings } = useStore.getState();
+      const { cost, linearCost, materials, settings } = useStore.getState();
       await exportPdf({
         project,
-        plan,
-        job,
-        cost,
+        plan: hasSheets ? plan : null,
+        job: hasSheets ? job : null,
+        linearPlan: hasBars ? linearPlan : null,
+        linearJob: hasBars ? linearJob : null,
+        cost: hasSheets ? cost : null,
+        linearCost: hasBars ? linearCost : null,
         materials,
         currency: settings.currency,
         edgeAllowance: settings.edgeAllowance,
@@ -34,6 +44,7 @@ export function ExportPdfButton({ compact }: { compact?: boolean }) {
           offcutMinLength: settings.offcutMinLength,
           offcutMinWidth: settings.offcutMinWidth,
         },
+        linearOffcutMinLength: settings.linearOffcutMinLength ?? 300,
         cutMeasure: settings.cutMeasure,
       });
     } catch (e) {

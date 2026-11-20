@@ -3,6 +3,7 @@ import { setCurrentUnit } from '../lib/units';
 import { create } from 'zustand';
 import { t } from '../i18n';
 import * as storage from '../db/db';
+import type { ActiveKind } from './view';
 import type {
   CostBreakdown,
   Job,
@@ -73,6 +74,7 @@ export type MainView =
   | 'add-part'
   | 'add-linear-part'
   | 'add-board'
+  | 'add-linear-material'
   | 'add-band'
   | 'add-offcut';
 
@@ -90,6 +92,7 @@ const DRILL_DOWN: ReadonlySet<MainView> = new Set([
   'add-part',
   'add-linear-part',
   'add-board',
+  'add-linear-material',
   'add-band',
   'add-offcut',
 ]);
@@ -117,6 +120,7 @@ interface AppState {
   offcuts: Offcut[];
   /** Cut mode is open for the current plan. */
   cutting: boolean;
+  cuttingKind: ActiveKind;
   /** Cost of the current plan; `null` until priced. */
   cost: CostBreakdown | null;
   /** Cost of the current linear plan; `null` until priced. */
@@ -150,7 +154,7 @@ interface AppState {
   addOffcuts(items: (Partial<Offcut> & { length: number; width?: number })[]): Offcut[];
   updateOffcuts(ids: string[], patch: Partial<Offcut>): void;
   removeOffcut(id: string): void;
-  setCutting(on: boolean): void;
+  setCutting(on: boolean, kind?: ActiveKind): void;
   /** Adds imported projects (replacing ones with the same id) plus any new materials and bands. */
   importProjects(projects: Project[], materials: Material[], edgeBands: EdgeBand[]): void;
   /** Applies a sync with the linked folder quietly: nothing opens, change times stay. */
@@ -354,6 +358,7 @@ export const useStore = create<AppState>()((set, get) => {
       linearCost: null,
       view: 'project',
       cutting: false,
+    cuttingKind: 'sheets',
     });
     recordView('project', false);
   }
@@ -368,6 +373,7 @@ export const useStore = create<AppState>()((set, get) => {
     settings: DEFAULT_SETTINGS,
     offcuts: [],
     cutting: false,
+    cuttingKind: 'sheets',
     cost: null,
     linearCost: null,
     currentId: null,
@@ -618,8 +624,11 @@ export const useStore = create<AppState>()((set, get) => {
       scheduleOffcutSave();
     },
 
-    setCutting(cutting) {
-      set({ cutting });
+    setCutting(cutting, kind) {
+      set((s) => ({
+        cutting,
+        cuttingKind: kind ?? (cutting ? 'sheets' : s.cuttingKind),
+      }));
     },
 
     recordCut(rec) {

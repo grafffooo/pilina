@@ -13,11 +13,15 @@ import {
   areaPriceOut,
   areaUnit,
   formatLength,
+  formatLengthUnit,
   isImperial,
   longPriceIn,
+  longPriceOut,
+  longUnit,
   unitLabel,
 } from '../lib/units';
 import { formatMoney, materialKind } from '../model/library';
+import type { OffcutKind } from '../model/offcut';
 import {
   emptyLinearPart,
   emptyPart,
@@ -28,6 +32,7 @@ import {
 } from '../model/project';
 import {
   addEdgeBand,
+  addLinearMaterial,
   addMaterial,
   insertLinearParts,
   insertParts,
@@ -349,6 +354,129 @@ export function AddBoardScreen() {
   );
 }
 
+export function AddLinearMaterialScreen() {
+  const { t } = useTranslation();
+  const currency = useStore((s) => s.settings.currency);
+  const [name, setName] = useState('');
+  const [thickness, setThickness] = useState<number | null>(null);
+  const [profileWidth, setProfileWidth] = useState<number | null>(null);
+  const [price, setPrice] = useState<number | null>(null);
+  const [unit, setUnit] = useState<'piece' | 'metre'>('piece');
+  const [stockLength, setStockLength] = useState<number | null>(3000);
+  const [color, setColor] = useState(() => '#d9cbb2');
+  const ok = name.trim() !== '';
+
+  const lenM = stockLength && stockLength > 0 ? stockLength / 1000 : null;
+  const perMetre =
+    price === null ? null : unit === 'metre' ? longPriceIn(price) : lenM ? price / lenM : null;
+  const perPiece =
+    price === null ? null : unit === 'piece' ? price : lenM ? longPriceIn(price) * lenM : null;
+
+  const save = (again: boolean) => {
+    const m = addLinearMaterial(name.trim(), {
+      thickness: thickness ?? undefined,
+      profileWidth: profileWidth ?? undefined,
+      stockLength,
+    });
+    updateMaterial(m.id, {
+      color,
+      price: price === null ? null : unit === 'metre' ? longPriceIn(price) : price,
+      priceUnit: unit,
+    });
+    if (again) {
+      setName('');
+      setPrice(null);
+      setThickness(null);
+      setProfileWidth(null);
+    } else history.back();
+  };
+
+  return (
+    <TaskScreen
+      title={t('Add linear stock')}
+      actions={
+        <ActionButtons
+          ok={ok}
+          again={() => save(true)}
+          done={() => save(false)}
+          label={t('Add linear stock')}
+        />
+      }
+    >
+      <div className={styles.preview}>
+        <span className={styles.swatch} style={{ background: color }} aria-hidden="true" />
+        <div className={styles.previewText}>
+          <span className={styles.previewTitle}>{name || t('New linear stock')}</span>
+          <span>
+            {perPiece === null ? '—' : `${formatMoney(perPiece, currency)} / ${t('piece')}`}
+          </span>
+          <span>
+            {perMetre === null
+              ? ''
+              : `${formatMoney(exact(longPriceOut(perMetre)), currency)} / ${longUnit()}`}
+          </span>
+        </div>
+      </div>
+      <CardField label={t('Name')}>
+        <input
+          aria-label={t('Linear stock name')}
+          value={name}
+          style={{ textAlign: 'start' }}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </CardField>
+      <CardFields>
+        <CardField label={`${t('Thickness')} (${unitLabel()})`}>
+          <LengthInput aria-label={t('Thickness')} value={thickness} onCommit={setThickness} />
+        </CardField>
+        <CardField label={`${t('Profile width')} (${unitLabel()})`}>
+          <LengthInput
+            aria-label={t('Profile width')}
+            value={profileWidth}
+            onCommit={setProfileWidth}
+          />
+        </CardField>
+      </CardFields>
+      <CardFields>
+        <CardField label={t('Price')}>
+          <NumberInput
+            aria-label={t('Price')}
+            placeholder="—"
+            format={formatPrice}
+            value={price}
+            onCommit={setPrice}
+          />
+        </CardField>
+        <CardField label={`${t('For bar length')} (${unitLabel()})`}>
+          <LengthInput aria-label={t('Length')} value={stockLength} onCommit={setStockLength} />
+        </CardField>
+      </CardFields>
+      <div className={cardStyles.field}>
+        <span>{t('Per')}</span>
+        <SegmentedControl
+          full
+          label={t('Per')}
+          value={unit}
+          options={[
+            { value: 'piece', label: t('piece') },
+            { value: 'metre', label: longUnit() },
+          ]}
+          onChange={setUnit}
+        />
+      </div>
+      <CardField label={t('Colour')}>
+        <input
+          type="color"
+          aria-label={t('Colour')}
+          value={color}
+          style={{ textAlign: 'start' }}
+          onChange={(e) => setColor(e.target.value)}
+        />
+      </CardField>
+    </TaskScreen>
+  );
+}
+
 export function AddEdgeBandScreen() {
   const { t } = useTranslation();
   const currency = useStore((s) => s.settings.currency);
@@ -411,20 +539,45 @@ export function AddEdgeBandScreen() {
 export function AddOffcutScreen() {
   const { t } = useTranslation();
   const places = usePlaces();
+  const materials = useStore((s) => s.materials);
   const minL = useStore((s) => s.settings.offcutMinLength);
   const minW = useStore((s) => s.settings.offcutMinWidth);
+  const linearMinL = useStore((s) => s.settings.linearOffcutMinLength);
+  const [kind, setKind] = useState<OffcutKind>('sheet');
   const [length, setLength] = useState<number | null>(null);
   const [width, setWidth] = useState<number | null>(null);
   const [materialId, setMaterialId] = useState<string | null>(null);
   const [location, setLocation] = useState('');
   const [grain, setGrain] = useState<Grain>('length');
-  const ok = !!length && !!width && length > 0 && width > 0;
-  const big = ok && ((length! >= minL && width! >= minW) || (width! >= minL && length! >= minW));
+  const ok =
+    kind === 'linear'
+      ? !!length && length > 0
+      : !!length && !!width && length > 0 && width > 0;
+  const big =
+    ok &&
+    (kind === 'linear'
+      ? length! >= linearMinL
+      : (length! >= minL && width! >= minW) || (width! >= minL && length! >= minW));
 
   const save = (again: boolean) => {
-    useStore
-      .getState()
-      .addOffcuts([{ length: length!, width: width!, materialId, location, grain }]);
+    if (kind === 'linear') {
+      const mat = materials.find((m) => m.id === materialId);
+      useStore.getState().addOffcuts([
+        {
+          kind: 'linear',
+          length: length!,
+          width: 0,
+          materialId,
+          profileThickness: mat?.thickness ?? null,
+          profileWidth: mat?.profileWidth ?? null,
+          location,
+        },
+      ]);
+    } else {
+      useStore
+        .getState()
+        .addOffcuts([{ length: length!, width: width!, materialId, location, grain }]);
+    }
     if (again) {
       setLength(null);
       setWidth(null);
@@ -447,20 +600,41 @@ export function AddOffcutScreen() {
       <div className={styles.preview}>
         <div className={styles.previewText}>
           <span className={styles.previewTitle}>
-            {ok ? `${formatLength(length!)} × ${formatLength(width!)}` : '—'}
+            {ok
+              ? kind === 'linear'
+                ? formatLengthUnit(length!)
+                : `${formatLength(length!)} × ${formatLength(width!)}`
+              : '—'}
           </span>
           <span>{ok && !big ? t('Smaller than the reusable size') : ''}</span>
         </div>
       </div>
+      <div className={cardStyles.field}>
+        <span>{t('Stock type')}</span>
+        <SegmentedControl
+          full
+          label={t('Stock type')}
+          value={kind}
+          options={[
+            { value: 'sheet', label: t('Sheets') },
+            { value: 'linear', label: t('Linear stock') },
+          ]}
+          onChange={(next) => {
+            setKind(next);
+            setMaterialId(null);
+          }}
+        />
+      </div>
       <CardField label={t('Material')}>
         <MaterialSelect
+          kind={kind}
           value={materialId}
           anyLabel={t('No material')}
           ariaLabel={t('Material')}
           onChange={setMaterialId}
         />
       </CardField>
-      <CardFields>
+      {kind === 'linear' ? (
         <CardField label={t('Length')}>
           <LengthInput
             aria-label={t('Length')}
@@ -469,29 +643,42 @@ export function AddOffcutScreen() {
             onCommit={setLength}
           />
         </CardField>
-        <CardField label={t('Width')}>
-          <LengthInput
-            aria-label={t('Width')}
-            placeholder={t('Width')}
-            value={width}
-            onCommit={setWidth}
+      ) : (
+        <CardFields>
+          <CardField label={t('Length')}>
+            <LengthInput
+              aria-label={t('Length')}
+              placeholder={t('Length')}
+              value={length}
+              onCommit={setLength}
+            />
+          </CardField>
+          <CardField label={t('Width')}>
+            <LengthInput
+              aria-label={t('Width')}
+              placeholder={t('Width')}
+              value={width}
+              onCommit={setWidth}
+            />
+          </CardField>
+        </CardFields>
+      )}
+      {kind === 'sheet' && (
+        <div className={cardStyles.field}>
+          <span>{t('Grain')}</span>
+          <SegmentedControl
+            full
+            label={t('Grain')}
+            value={grain}
+            options={[
+              { value: 'length', label: t('Length') },
+              { value: 'width', label: t('Width') },
+              { value: 'none', label: t('No grain') },
+            ]}
+            onChange={setGrain}
           />
-        </CardField>
-      </CardFields>
-      <div className={cardStyles.field}>
-        <span>{t('Grain')}</span>
-        <SegmentedControl
-          full
-          label={t('Grain')}
-          value={grain}
-          options={[
-            { value: 'length', label: t('Length') },
-            { value: 'width', label: t('Width') },
-            { value: 'none', label: t('No grain') },
-          ]}
-          onChange={setGrain}
-        />
-      </div>
+        </div>
+      )}
       <CardField label={t('Place')}>
         <ComboInput
           aria-label={t('Place')}

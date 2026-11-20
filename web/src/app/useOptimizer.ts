@@ -2,7 +2,7 @@
 import { useEffect, useMemo } from 'react';
 import { CANCELLED, optimize, reorderPlan } from '../engine/client';
 import type { Job } from '../engine/types';
-import { jobKey, projectToJob } from '../model/job';
+import { jobKey, projectToJob, resolveTransportProfile } from '../model/job';
 import { matchingOffcuts, offcutStock } from '../model/offcut';
 import { useCurrentProject, useStore } from '../store/store';
 import { useView } from '../store/view';
@@ -17,10 +17,22 @@ export function useOptimizer() {
   const stock = project?.stock;
   const kerf = project?.kerf;
   const trim = project?.trim;
+  const transportId = project?.transportId;
+  const storeKerf = project?.storeKerf;
   const materials = useStore((s) => s.materials);
   const library = useStore((s) => s.offcuts);
   const useOffcuts = project?.useOffcuts;
   const cutOrder = useStore((s) => s.settings.cutOrder);
+  const settings = useStore((s) => s.settings);
+
+  const profile = project ? resolveTransportProfile(project, settings) : null;
+  const transport = profile
+    ? {
+        maxLength: profile.maxLength,
+        maxWidth: profile.maxWidth,
+        storeKerf: storeKerf ?? settings.storeKerf ?? 4.5,
+      }
+    : undefined;
 
   // Only the fields that change the layout; renaming a project or switching cut order doesn't re-run the search.
   const baseJob = useMemo(
@@ -30,10 +42,11 @@ export function useOptimizer() {
             project,
             materials,
             offcutStock(matchingOffcuts(project, library), materials),
+            { transport },
           )
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [id, parts, stock, kerf, trim, materials, library, useOffcuts],
+    [id, parts, stock, kerf, trim, transportId, storeKerf, materials, library, useOffcuts, settings.transportProfiles, settings.storeKerf],
   );
   const key = jobKey(baseJob);
 

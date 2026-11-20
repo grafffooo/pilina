@@ -74,6 +74,14 @@ impl Default for LinearOptions {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LinearTransportLimit {
+    pub max_length: f64,
+    #[serde(default)]
+    pub store_kerf: f64,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LinearJob {
@@ -86,6 +94,9 @@ pub struct LinearJob {
     pub end_trim: f64,
     #[serde(default)]
     pub options: LinearOptions,
+    /// Optional vehicle cargo limit for store breakdown pre-cuts.
+    #[serde(default)]
+    pub transport: Option<LinearTransportLimit>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -143,10 +154,25 @@ pub struct LinearTotals {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct PreCutBar {
+    pub source_stock_id: String,
+    pub label: String,
+    #[serde(default)]
+    pub material: Option<String>,
+    pub length: f64,
+    pub store_kerf: f64,
+    pub cut_positions: Vec<f64>,
+    pub piece_lengths: Vec<f64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct LinearPlan {
     pub bars: Vec<BarLayout>,
     pub unplaced: Vec<Unplaced>,
     pub totals: LinearTotals,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub pre_cuts: Vec<PreCutBar>,
 }
 
 struct Group<'a> {
@@ -804,6 +830,7 @@ fn finish_linear_plan(ctx: &Ctx<'_>, pass: Option<Pass>) -> LinearPlan {
         bars,
         unplaced,
         totals,
+        pre_cuts: Vec::new(),
     }
 }
 
@@ -840,6 +867,8 @@ pub fn optimize_linear(job: &LinearJob) -> LinearPlan {
 
 /// Optimizes a 1D linear cutting job with a host-supplied clock and progress hook.
 pub fn optimize_linear_with(job: &LinearJob, control: &mut dyn Control) -> LinearPlan {
+    let (effective_job, pre_cut_candidates) = crate::transport::apply_1d_transport(job);
+    let job = &effective_job;
     let kerf = if job.kerf.is_finite() {
         job.kerf.max(0.0)
     } else {
@@ -970,7 +999,9 @@ pub fn optimize_linear_with(job: &LinearJob, control: &mut dyn Control) -> Linea
         }
     }
 
-    finish_linear_plan(&ctx, search.best.map(|b| b.0))
+    let mut plan = finish_linear_plan(&ctx, search.best.map(|b| b.0));
+    crate::transport::filter_used_pre_cuts_1d(&mut plan, pre_cut_candidates);
+    plan
 }
 
 struct LinearSearch<'s, 'a> {
@@ -1056,6 +1087,7 @@ mod tests {
             kerf: 0.0,
             end_trim: 0.0,
             options: LinearOptions::default(),
+            transport: None,
         };
         let plan = optimize_linear(&job);
         assert!(plan.unplaced.is_empty());
@@ -1073,6 +1105,7 @@ mod tests {
             kerf: 4.0,
             end_trim: 0.0,
             options: LinearOptions::default(),
+            transport: None,
         };
         assert_eq!(optimize_linear(&job).totals.bars, 2);
         job.stock[0].length = 2004.0;
@@ -1098,6 +1131,7 @@ mod tests {
             kerf: 4.0,
             end_trim: 20.0,
             options: LinearOptions::default(),
+            transport: None,
         };
         let plan = optimize_linear(&job);
         assert!(plan.unplaced.is_empty());
@@ -1139,6 +1173,7 @@ mod tests {
             kerf: 4.0,
             end_trim: 0.0,
             options: LinearOptions::default(),
+            transport: None,
         };
         let plan = optimize_linear(&job);
         assert!(plan.unplaced.is_empty());
@@ -1165,6 +1200,7 @@ mod tests {
             kerf: 4.0,
             end_trim: 0.0,
             options: LinearOptions::default(),
+            transport: None,
         };
         let plan = optimize_linear(&job);
         let mut missing: Vec<_> = plan

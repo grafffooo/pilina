@@ -123,6 +123,15 @@ impl Default for Options {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TransportLimit {
+    pub max_length: f64,
+    pub max_width: f64,
+    #[serde(default)]
+    pub store_kerf: f64,
+}
+
 /// Everything the optimizer needs.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -136,6 +145,9 @@ pub struct Job {
     pub trim: f64,
     #[serde(default)]
     pub options: Options,
+    /// Optional vehicle cargo limits for store breakdown pre-cuts.
+    #[serde(default)]
+    pub transport: Option<TransportLimit>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -230,6 +242,41 @@ pub struct Totals {
     pub edge_band_length: f64,
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PreCutPiece {
+    pub stock_id: String,
+    pub length: f64,
+    pub width: f64,
+    pub x: f64,
+    pub y: f64,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PreCutCut {
+    pub axis: Axis,
+    pub pos: f64,
+    pub x1: f64,
+    pub y1: f64,
+    pub x2: f64,
+    pub y2: f64,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PreCutSheet {
+    pub source_stock_id: String,
+    pub label: String,
+    #[serde(default)]
+    pub material: Option<String>,
+    pub length: f64,
+    pub width: f64,
+    pub store_kerf: f64,
+    pub cuts: Vec<PreCutCut>,
+    pub pieces: Vec<PreCutPiece>,
+}
+
 /// The optimizer's answer.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -237,4 +284,6 @@ pub struct Plan {
     pub sheets: Vec<SheetLayout>,
     pub unplaced: Vec<Unplaced>,
     pub totals: Totals,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub pre_cuts: Vec<PreCutSheet>,
 }

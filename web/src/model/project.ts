@@ -94,6 +94,10 @@ export interface Project {
   defaultEdgeBandId: string | null;
   /** Use matching offcuts from the library before full sheets. */
   useOffcuts: boolean;
+  /** Saved transport profile id when "Fit in vehicle" is enabled; null/undefined = full sheets/bars. */
+  transportId?: string | null;
+  /** Per-project override for store panel-saw kerf (mm). */
+  storeKerf?: number | null;
   /** When the last sheet was marked as cut in cut mode. */
   cutAt: number | null;
   summary: ProjectSummary | null;

@@ -483,6 +483,7 @@ mod tests {
             }],
             unplaced: vec![],
             totals: Totals::default(),
+            pre_cuts: vec![],
         };
         (job, plan)
     }
@@ -587,6 +588,7 @@ mod tests {
             kerf: 0.0,
             end_trim: 0.0,
             options: LinearOptions::default(),
+            transport: None,
         };
         let plan = optimize_linear(&job);
 
@@ -642,6 +644,7 @@ mod tests {
                 kerf: 0.0,
                 end_trim: 0.0,
                 options: LinearOptions::default(),
+            transport: None,
             }
         }
     }

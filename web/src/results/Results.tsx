@@ -37,6 +37,7 @@ import {
   LinearUnplacedBanner,
 } from './LinearResults';
 import { StartCuttingButton } from '../cutting/StartCuttingButton';
+import { StoreSawCard, StoreSawPdfButton } from './StoreSawCard';
 import { usePartInfo, type PartInfo } from './partInfo';
 import { SheetDrawing } from './SheetDrawing';
 import styles from './Results.module.css';
@@ -58,9 +59,11 @@ export function Results({ project }: { project: Project }) {
       <div className={styles.resultsHeader}>
         <span className={styles.spacer} />
         <ProjectActions project={project} className={styles.desktopProjectActions} />
+        <StoreSawPdfButton project={project} />
         <ExportPdfButton />
         <StartCuttingButton />
       </div>
+      <StoreSawCard project={project} />
       {activeKind === 'linear' ? (
         !linearPlan || !linearJob ? (
           <EmptyLinearResults running={linearStatus === 'running'} />

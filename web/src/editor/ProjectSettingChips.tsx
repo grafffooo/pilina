@@ -2,9 +2,11 @@
 // Read-only once the project is cut.
 import { useTranslation } from 'react-i18next';
 import { useProjectStatus } from '../app/StatusBadge';
-import { formatLengthUnit, unitLabel } from '../lib/units';
+import { formatLength, formatLengthUnit, unitLabel } from '../lib/units';
+import { resolveTransportProfile } from '../model/job';
+import { DEFAULT_TRANSPORT_PROFILES } from '../model/library';
 import type { Project } from '../model/project';
-import { updateProject } from '../store/store';
+import { updateProject, useStore } from '../store/store';
 import { LengthInput } from '../ui/NumberInput';
 import { Popover } from '../ui/Popover';
 import ui from '../ui/ui.module.css';
@@ -15,6 +17,7 @@ export function ProjectSettingChips({ project }: { project: Project }) {
   const locked = useProjectStatus(project).kind === 'cut';
   return (
     <span className={styles.chips}>
+      <TransportChip project={project} disabled={locked} />
       <SettingChip
         disabled={locked}
         label={t('Kerf')}
@@ -38,6 +41,7 @@ export function LinearSettingChips({ project }: { project: Project }) {
   const locked = useProjectStatus(project).kind === 'cut';
   return (
     <span className={styles.chips}>
+      <TransportChip project={project} disabled={locked} />
       <SettingChip
         disabled={locked}
         label={t('Kerf')}
@@ -53,6 +57,74 @@ export function LinearSettingChips({ project }: { project: Project }) {
         onCommit={(linearEndTrim) => updateProject({ linearEndTrim }, 'linearEndTrim')}
       />
     </span>
+  );
+}
+
+function TransportChip({ project, disabled }: { project: Project; disabled?: boolean }) {
+  const { t } = useTranslation();
+  const settings = useStore((s) => s.settings);
+  const profiles = settings.transportProfiles ?? DEFAULT_TRANSPORT_PROFILES;
+  const active = resolveTransportProfile(project, settings);
+  const labelFor = (id: string, fallback: string) => {
+    if (id === 'car-trunk') return t('Car trunk');
+    if (id === 'car-passthrough') return t('Car + pass-through');
+    if (id === 'trailer') return t('Trailer');
+    return fallback;
+  };
+  const label = active ? labelFor(active.id, active.name) : t('Full sheets');
+
+  if (disabled) {
+    return (
+      <span className={`${styles.chip} ${styles.chipStatic}`}>
+        {t('Vehicle')}: <strong>{label}</strong>
+      </span>
+    );
+  }
+  return (
+    <Popover
+      title={t('Fit in vehicle')}
+      triggerClassName={styles.chip}
+      label={
+        <>
+          {t('Vehicle')}: <strong>{label}</strong>
+        </>
+      }
+    >
+      {(close) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 220 }}>
+          <button
+            type="button"
+            className={ui.button}
+            aria-pressed={!active}
+            style={{ justifyContent: 'space-between' }}
+            onClick={() => {
+              updateProject({ transportId: null });
+              close();
+            }}
+          >
+            <span>{t('Full sheets')}</span>
+          </button>
+          {profiles.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              className={ui.button}
+              aria-pressed={active?.id === p.id}
+              style={{ justifyContent: 'space-between', gap: 10 }}
+              onClick={() => {
+                updateProject({ transportId: p.id });
+                close();
+              }}
+            >
+              <span>{labelFor(p.id, p.name)}</span>
+              <span style={{ opacity: 0.7, fontSize: 12 }}>
+                {formatLength(p.maxLength)} × {formatLengthUnit(p.maxWidth)}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </Popover>
   );
 }
 

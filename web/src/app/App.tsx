@@ -27,6 +27,7 @@ import {
 } from '../results/LinearResults';
 import { CostCard } from '../results/CostCard';
 import { ExportPdfButton } from '../results/ExportPdfButton';
+import { StoreSawCard } from '../results/StoreSawCard';
 import { PricingCard } from '../editor/PricingCard';
 import { LibraryScreen } from '../library/LibraryScreen';
 import { CutMode } from '../cutting/CutMode';
@@ -252,6 +253,7 @@ function PhoneLayout({ project }: { project: Project }) {
             />
           </>
         )}
+        {tab === 'sheets' && <StoreSawCard project={project} />}
         {tab === 'sheets' &&
           (activeKind === 'linear' ? (
             linearPlan && linearJob ? (

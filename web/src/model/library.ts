@@ -61,6 +61,33 @@ export interface EdgeBand {
   pricePerMetre: number | null;
 }
 
+export type TransportKind = 'trunk' | 'passthrough' | 'trailer' | 'custom';
+
+export interface TransportProfile {
+  id: string;
+  name: string;
+  kind: TransportKind;
+  /** Maximum sheet/panel length (mm) that fits in this vehicle. */
+  maxLength: number;
+  /** Maximum sheet/panel width (mm) that fits in this vehicle. */
+  maxWidth: number;
+  /** Maximum 1D bar length (mm); defaults to maxLength when omitted. */
+  maxBarLength?: number | null;
+}
+
+export const DEFAULT_TRANSPORT_PROFILES: TransportProfile[] = [
+  { id: 'car-trunk', name: 'Car trunk', kind: 'trunk', maxLength: 1000, maxWidth: 900 },
+  {
+    id: 'car-passthrough',
+    name: 'Car + pass-through',
+    kind: 'passthrough',
+    maxLength: 2200,
+    maxWidth: 450,
+    maxBarLength: 2400,
+  },
+  { id: 'trailer', name: 'Trailer', kind: 'trailer', maxLength: 2500, maxWidth: 1250 },
+];
+
 export interface Settings {
   currency: string;
   /** Unit sizes are typed and shown in; data stays in millimetres. */
@@ -86,6 +113,10 @@ export interface Settings {
   /** First free sticker on the partly used label sheet (1-based). */
   labelStart: number;
   labelShow: { material: boolean; location: boolean; source: boolean };
+  /** Saved vehicle cargo limits for store pre-cuts. */
+  transportProfiles?: TransportProfile[];
+  /** Store panel-saw kerf (mm) used for transport breakdown cuts. */
+  storeKerf?: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -103,6 +134,8 @@ export const DEFAULT_SETTINGS: Settings = {
   customLabel: null,
   labelStart: 1,
   labelShow: { material: true, location: true, source: true },
+  transportProfiles: DEFAULT_TRANSPORT_PROFILES,
+  storeKerf: 4.5,
 };
 
 export const CURRENCIES = ['EUR', 'CZK', 'USD', 'GBP', 'PLN', 'HUF', 'CHF'];

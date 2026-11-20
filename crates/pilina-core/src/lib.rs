@@ -11,6 +11,7 @@ mod pack;
 mod prep;
 pub mod pricing;
 mod search;
+pub mod transport;
 
 pub use linear::*;
 pub use model::*;
@@ -18,6 +19,7 @@ pub use pricing::{
     CostBreakdown, LinearCostBreakdown, LinearMaterialCost, LinearPriceInput, LinearPricingMode,
     LinearStockPrice, PriceInput, price, price_linear,
 };
+pub use transport::*;
 
 use search::{Ctx, EVAL_MODES, EvalMode, Rng};
 
@@ -96,6 +98,8 @@ pub fn reorder_plan(plan: &mut Plan, order: CutOrder) {
 
 /// Optimizes a cutting job with a host-supplied clock and progress hook.
 pub fn optimize_with(job: &Job, control: &mut dyn Control) -> Plan {
+    let (effective_job, pre_cut_candidates) = transport::apply_2d_transport(job);
+    let job = &effective_job;
     let kerf = if job.kerf.is_finite() {
         job.kerf.max(0.0)
     } else {
@@ -167,7 +171,9 @@ pub fn optimize_with(job: &Job, control: &mut dyn Control) -> Plan {
     }
 
     let best = search.best.map(|b| b.0);
-    finish(&ctx, best, job.options.cut_order)
+    let mut plan = finish(&ctx, best, job.options.cut_order);
+    transport::filter_used_pre_cuts_2d(&mut plan, pre_cut_candidates);
+    plan
 }
 
 struct Search<'s, 'a> {
@@ -260,6 +266,7 @@ fn finish(ctx: &Ctx<'_>, pass: Option<search::Pass>, order: CutOrder) -> Plan {
         sheets,
         unplaced,
         totals,
+        pre_cuts: Vec::new(),
     }
 }
 
@@ -312,6 +319,7 @@ mod tests {
             kerf: 4.0,
             trim: 0.0,
             options: Options::default(),
+            transport: None,
         }
     }
 

@@ -92,6 +92,7 @@ fn job() -> impl Strategy<Value = Job> {
                 seed: 7,
                 ..Options::default()
             },
+            transport: None,
         })
 }
 
@@ -410,6 +411,7 @@ fn linear_job() -> impl Strategy<Value = LinearJob> {
                 time_budget_ms: 40,
                 seed: 7,
             },
+            transport: None,
         })
 }
 

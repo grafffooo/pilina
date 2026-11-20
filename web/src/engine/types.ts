@@ -47,12 +47,19 @@ export interface Options {
   cutOrder?: CutOrder;
 }
 
+export interface TransportLimit {
+  maxLength: number;
+  maxWidth: number;
+  storeKerf?: number;
+}
+
 export interface Job {
   parts: PartSpec[];
   stock: StockSpec[];
   kerf: number;
   trim?: number;
   options?: Options;
+  transport?: TransportLimit;
 }
 
 export interface Rect {
@@ -126,6 +133,7 @@ export interface Plan {
   sheets: SheetLayout[];
   unplaced: Unplaced[];
   totals: Totals;
+  preCuts?: PreCutSheet[];
 }
 
 // ---- Pricing (crates/pilina-core/src/pricing.rs) ----
@@ -228,6 +236,7 @@ export interface LinearJob {
   kerf: number;
   endTrim?: number;
   options?: LinearOptions;
+  transport?: LinearTransportLimit;
 }
 
 export interface LinearPlacement {
@@ -264,10 +273,54 @@ export interface LinearTotals {
   cuts: number;
 }
 
+export interface PreCutPiece {
+  stockId: string;
+  length: number;
+  width: number;
+  x: number;
+  y: number;
+}
+
+export interface PreCutCut {
+  axis: 'x' | 'y';
+  pos: number;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+export interface PreCutSheet {
+  sourceStockId: string;
+  label: string;
+  material?: string | null;
+  length: number;
+  width: number;
+  storeKerf: number;
+  cuts: PreCutCut[];
+  pieces: PreCutPiece[];
+}
+
+export interface LinearTransportLimit {
+  maxLength: number;
+  storeKerf?: number;
+}
+
+export interface PreCutBar {
+  sourceStockId: string;
+  label: string;
+  material?: string | null;
+  length: number;
+  storeKerf: number;
+  cutPositions: number[];
+  pieceLengths: number[];
+}
+
 export interface LinearPlan {
   bars: BarLayout[];
   unplaced: Unplaced[];
   totals: LinearTotals;
+  preCuts?: PreCutBar[];
 }
 
 export type LinearPricingMode = 'pieces' | 'length';

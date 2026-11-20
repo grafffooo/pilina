@@ -6,11 +6,19 @@ import type {
   LinearPartSpec,
   LinearPlan,
   LinearStockSpec,
+  LinearTransportLimit,
   PartSpec,
   Plan,
   StockSpec,
+  TransportLimit,
 } from '../engine/types';
-import { materialGrain, type Material } from './library';
+import {
+  DEFAULT_TRANSPORT_PROFILES,
+  materialGrain,
+  type Material,
+  type Settings,
+  type TransportProfile,
+} from './library';
 import type {
   LinearPartRow,
   LinearStockRow,
@@ -70,7 +78,8 @@ export function projectToJob(
   {
     timeBudgetMs = 600,
     cutOrder = 'ripsFirst',
-  }: { timeBudgetMs?: number; cutOrder?: CutOrder } = {},
+    transport,
+  }: { timeBudgetMs?: number; cutOrder?: CutOrder; transport?: TransportLimit } = {},
 ): Job | null {
   const names = new Map(materials.map((m) => [m.id, m.name]));
   const byId = new Map(materials.map((m) => [m.id, m]));
@@ -131,6 +140,7 @@ export function projectToJob(
     kerf: Math.max(0, project.kerf || 0),
     trim: Math.max(0, project.trim || 0),
     options: { timeBudgetMs, seed: 1234567, cutOrder },
+    ...(transport ? { transport } : {}),
   };
 }
 
@@ -170,7 +180,10 @@ export function projectToLinearJob(
   project: Project,
   materials: Material[] = [],
   offcuts: LinearStockSpec[] = [],
-  { timeBudgetMs = 600 }: { timeBudgetMs?: number } = {},
+  {
+    timeBudgetMs = 600,
+    transport,
+  }: { timeBudgetMs?: number; transport?: LinearTransportLimit } = {},
 ): LinearJob | null {
   const names = new Map(materials.map((m) => [m.id, m.name]));
   const byId = new Map(materials.map((m) => [m.id, m]));
@@ -224,7 +237,39 @@ export function projectToLinearJob(
     kerf: Math.max(0, project.linearKerf ?? 3),
     endTrim: Math.max(0, project.linearEndTrim ?? 0),
     options: { timeBudgetMs, seed: 1234567 },
+    ...(transport ? { transport } : {}),
   };
+}
+
+/** Resolves the project's active vehicle profile, or null when pre-cutting is off. */
+export function resolveTransportProfile(
+  project: Pick<Project, 'transportId'>,
+  settings: Pick<Settings, 'transportProfiles'>,
+): TransportProfile | null {
+  if (!project.transportId) return null;
+  const list = settings.transportProfiles ?? DEFAULT_TRANSPORT_PROFILES;
+  return list.find((p) => p.id === project.transportId) ?? null;
+}
+
+/** Returns any enabled complete parts (2D or 1D) that exceed the vehicle's cargo limits. */
+export function oversizedPartsForTransport(
+  project: Pick<Project, 'parts' | 'linearParts'>,
+  profile: TransportProfile | null,
+): { sheetParts: PartRow[]; linearParts: LinearPartRow[] } {
+  if (!profile) return { sheetParts: [], linearParts: [] };
+  const maxL = Math.max(profile.maxLength, profile.maxWidth);
+  const maxW = Math.min(profile.maxLength, profile.maxWidth);
+  const maxBar = profile.maxBarLength ?? profile.maxLength;
+  const sheetParts = project.parts.filter(
+    (p) =>
+      p.enabled &&
+      partIsComplete(p) &&
+      (Math.max(p.length!, p.width!) > maxL || Math.min(p.length!, p.width!) > maxW),
+  );
+  const linearParts = (project.linearParts ?? []).filter(
+    (p) => p.enabled && linearPartIsComplete(p) && p.length! > maxBar,
+  );
+  return { sheetParts, linearParts };
 }
 
 /** Stable identity of a linear job, to skip re-running identical work. */

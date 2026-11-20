@@ -1,7 +1,7 @@
 // Re-optimizes the open project's 1D linear stock shortly after any linear edit.
 import { useEffect, useMemo } from 'react';
 import { CANCELLED, optimizeLinear } from '../engine/client';
-import { linearJobKey, projectToLinearJob } from '../model/job';
+import { linearJobKey, projectToLinearJob, resolveTransportProfile } from '../model/job';
 import { linearOffcutStock, matchingLinearOffcuts } from '../model/offcut';
 import { useCurrentProject, useStore } from '../store/store';
 import { useView } from '../store/view';
@@ -16,9 +16,20 @@ export function useLinearOptimizer() {
   const linearStock = project?.linearStock;
   const linearKerf = project?.linearKerf;
   const linearEndTrim = project?.linearEndTrim;
+  const transportId = project?.transportId;
+  const storeKerf = project?.storeKerf;
   const useOffcuts = project?.useOffcuts;
   const materials = useStore((s) => s.materials);
   const library = useStore((s) => s.offcuts);
+  const settings = useStore((s) => s.settings);
+
+  const profile = project ? resolveTransportProfile(project, settings) : null;
+  const transport = profile
+    ? {
+        maxLength: profile.maxBarLength ?? profile.maxLength,
+        storeKerf: storeKerf ?? settings.storeKerf ?? 4.5,
+      }
+    : undefined;
 
   const baseJob = useMemo(
     () =>
@@ -27,10 +38,11 @@ export function useLinearOptimizer() {
             project,
             materials,
             linearOffcutStock(matchingLinearOffcuts(project, library), materials),
+            { transport },
           )
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [id, linearParts, linearStock, linearKerf, linearEndTrim, materials, library, useOffcuts],
+    [id, linearParts, linearStock, linearKerf, linearEndTrim, transportId, storeKerf, materials, library, useOffcuts, settings.transportProfiles, settings.storeKerf],
   );
   const key = linearJobKey(baseJob);
 
